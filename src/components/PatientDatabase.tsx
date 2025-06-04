@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -23,9 +22,9 @@ const PatientDatabase = () => {
   const [patients] = useState<Patient[]>([
     {
       id: "1",
-      name: "John Doe",
+      name: "Rajesh Kumar",
       phone: "+91 98765 43210",
-      email: "john.doe@email.com",
+      email: "rajesh.kumar@email.com",
       lastVisit: "2024-06-01",
       status: "active",
       totalVisits: 8,
@@ -34,9 +33,9 @@ const PatientDatabase = () => {
     },
     {
       id: "2",
-      name: "Sarah Smith",
+      name: "Priya Sharma",
       phone: "+91 87654 32109",
-      email: "sarah.smith@email.com",
+      email: "priya.sharma@email.com",
       lastVisit: "2024-05-28",
       status: "active",
       totalVisits: 3,
@@ -45,9 +44,9 @@ const PatientDatabase = () => {
     },
     {
       id: "3",
-      name: "Mike Johnson",
+      name: "Arjun Patel",
       phone: "+91 76543 21098",
-      email: "mike.johnson@email.com",
+      email: "arjun.patel@email.com",
       lastVisit: "2024-05-15",
       status: "inactive",
       totalVisits: 12,
@@ -56,9 +55,9 @@ const PatientDatabase = () => {
     },
     {
       id: "4",
-      name: "Emily Davis",
+      name: "Kavya Nair",
       phone: "+91 65432 10987",
-      email: "emily.davis@email.com",
+      email: "kavya.nair@email.com",
       lastVisit: "2024-06-03",
       status: "new",
       totalVisits: 1,
@@ -67,9 +66,9 @@ const PatientDatabase = () => {
     },
     {
       id: "5",
-      name: "Robert Wilson",
+      name: "Vikram Singh",
       phone: "+91 54321 09876",
-      email: "robert.wilson@email.com",
+      email: "vikram.singh@email.com",
       lastVisit: "2024-05-30",
       status: "active",
       totalVisits: 5,

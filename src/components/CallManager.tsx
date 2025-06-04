@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -21,7 +20,7 @@ const CallManager = () => {
   const [calls] = useState<CallRecord[]>([
     {
       id: "1",
-      patientName: "John Doe",
+      patientName: "Rajesh Kumar",
       phoneNumber: "+91 98765 43210",
       callType: "Rseva Testing",
       status: "pending",
@@ -30,7 +29,7 @@ const CallManager = () => {
     },
     {
       id: "2",
-      patientName: "Sarah Smith",
+      patientName: "Priya Sharma",
       phoneNumber: "+91 87654 32109",
       callType: "Ambulance Booking",
       status: "completed",
@@ -39,7 +38,7 @@ const CallManager = () => {
     },
     {
       id: "3",
-      patientName: "Mike Johnson",
+      patientName: "Arjun Patel",
       phoneNumber: "+91 76543 21098",
       callType: "JustDial Lead",
       status: "follow-up",
@@ -48,7 +47,7 @@ const CallManager = () => {
     },
     {
       id: "4",
-      patientName: "Emily Davis",
+      patientName: "Kavya Nair",
       phoneNumber: "+91 65432 10987",
       callType: "Google Ads Inquiry",
       status: "pending",
@@ -57,7 +56,7 @@ const CallManager = () => {
     },
     {
       id: "5",
-      patientName: "Robert Wilson",
+      patientName: "Vikram Singh",
       phoneNumber: "+91 54321 09876",
       callType: "Patient Call",
       status: "completed",
@@ -66,7 +65,7 @@ const CallManager = () => {
     },
     {
       id: "6",
-      patientName: "Lisa Brown",
+      patientName: "Sunita Agarwal",
       phoneNumber: "+91 43210 98765",
       callType: "Camp Registration",
       status: "pending",

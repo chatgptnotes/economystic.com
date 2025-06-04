@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,7 +20,7 @@ const WhatsAppResponses = () => {
   const [messages] = useState<WhatsAppMessage[]>([
     {
       id: "1",
-      patientName: "John Doe",
+      patientName: "Rajesh Kumar",
       phoneNumber: "+91 98765 43210",
       messageType: "Appointment Reminder",
       content: "Your appointment is scheduled for tomorrow at 10 AM",
@@ -31,7 +30,7 @@ const WhatsAppResponses = () => {
     },
     {
       id: "2",
-      patientName: "Sarah Smith",
+      patientName: "Priya Sharma",
       phoneNumber: "+91 87654 32109",
       messageType: "Test Results",
       content: "Your blood test results are ready for collection",
@@ -41,7 +40,7 @@ const WhatsAppResponses = () => {
     },
     {
       id: "3",
-      patientName: "Mike Johnson",
+      patientName: "Arjun Patel",
       phoneNumber: "+91 76543 21098",
       messageType: "Payment Reminder",
       content: "Gentle reminder: Your payment of ₹2,500 is pending",

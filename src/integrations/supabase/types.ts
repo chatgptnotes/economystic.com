@@ -190,6 +190,367 @@ export type Database = {
           },
         ]
       }
+      content_calendar: {
+        Row: {
+          business_id: string | null
+          campaign_id: string | null
+          content_template: string | null
+          content_type: string
+          created_at: string
+          id: string
+          platforms: string[] | null
+          reminder_sent: boolean | null
+          scheduled_date: string
+          status: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          campaign_id?: string | null
+          content_template?: string | null
+          content_type: string
+          created_at?: string
+          id?: string
+          platforms?: string[] | null
+          reminder_sent?: boolean | null
+          scheduled_date: string
+          status?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          campaign_id?: string | null
+          content_template?: string | null
+          content_type?: string
+          created_at?: string
+          id?: string
+          platforms?: string[] | null
+          reminder_sent?: boolean | null
+          scheduled_date?: string
+          status?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_calendar_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_calendar_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "content_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_campaigns: {
+        Row: {
+          business_id: string | null
+          campaign_type: string
+          created_at: string
+          department: string | null
+          description: string | null
+          doctor_name: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          start_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          campaign_type: string
+          created_at?: string
+          department?: string | null
+          description?: string | null
+          doctor_name?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          start_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          campaign_type?: string
+          created_at?: string
+          department?: string | null
+          description?: string | null
+          doctor_name?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          start_date?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_campaigns_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      monitoring_platforms: {
+        Row: {
+          base_url: string | null
+          created_at: string
+          icon_name: string | null
+          id: string
+          name: string
+          platform_type: string
+        }
+        Insert: {
+          base_url?: string | null
+          created_at?: string
+          icon_name?: string | null
+          id?: string
+          name: string
+          platform_type: string
+        }
+        Update: {
+          base_url?: string | null
+          created_at?: string
+          icon_name?: string | null
+          id?: string
+          name?: string
+          platform_type?: string
+        }
+        Relationships: []
+      }
+      monthly_analytics: {
+        Row: {
+          ad_spend: number | null
+          average_rating: number | null
+          business_id: string | null
+          conversions: number | null
+          created_at: string
+          id: string
+          month: string
+          platform_id: string | null
+          post_count: number | null
+          reach: number | null
+          review_count: number | null
+          total_engagement: number | null
+        }
+        Insert: {
+          ad_spend?: number | null
+          average_rating?: number | null
+          business_id?: string | null
+          conversions?: number | null
+          created_at?: string
+          id?: string
+          month: string
+          platform_id?: string | null
+          post_count?: number | null
+          reach?: number | null
+          review_count?: number | null
+          total_engagement?: number | null
+        }
+        Update: {
+          ad_spend?: number | null
+          average_rating?: number | null
+          business_id?: string | null
+          conversions?: number | null
+          created_at?: string
+          id?: string
+          month?: string
+          platform_id?: string | null
+          post_count?: number | null
+          reach?: number | null
+          review_count?: number | null
+          total_engagement?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monthly_analytics_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "monthly_analytics_platform_id_fkey"
+            columns: ["platform_id"]
+            isOneToOne: false
+            referencedRelation: "monitoring_platforms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_events: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          department: string | null
+          doctor_name: string | null
+          event_date: string
+          event_type: string
+          id: string
+          patient_name: string
+          phone_number: string | null
+          privacy_consent: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          department?: string | null
+          doctor_name?: string | null
+          event_date: string
+          event_type: string
+          id?: string
+          patient_name: string
+          phone_number?: string | null
+          privacy_consent?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          department?: string | null
+          doctor_name?: string | null
+          event_date?: string
+          event_type?: string
+          id?: string
+          patient_name?: string
+          phone_number?: string | null
+          privacy_consent?: boolean | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_events_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      platform_credentials: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          created_by: string | null
+          email: string
+          encrypted_password: string
+          id: string
+          phone_number: string | null
+          physical_address: string | null
+          platform_id: string | null
+          platform_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          email: string
+          encrypted_password: string
+          id?: string
+          phone_number?: string | null
+          physical_address?: string | null
+          platform_id?: string | null
+          platform_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          encrypted_password?: string
+          id?: string
+          phone_number?: string | null
+          physical_address?: string | null
+          platform_id?: string | null
+          platform_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_credentials_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "platform_credentials_platform_id_fkey"
+            columns: ["platform_id"]
+            isOneToOne: false
+            referencedRelation: "social_media_platforms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      platform_monitoring: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          current_rating: number | null
+          id: string
+          last_checked: string | null
+          platform_id: string | null
+          profile_url: string | null
+          total_followers: number | null
+          total_reviews: number | null
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          current_rating?: number | null
+          id?: string
+          last_checked?: string | null
+          platform_id?: string | null
+          profile_url?: string | null
+          total_followers?: number | null
+          total_reviews?: number | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          current_rating?: number | null
+          id?: string
+          last_checked?: string | null
+          platform_id?: string | null
+          profile_url?: string | null
+          total_followers?: number | null
+          total_reviews?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_monitoring_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "platform_monitoring_platform_id_fkey"
+            columns: ["platform_id"]
+            isOneToOne: false
+            referencedRelation: "monitoring_platforms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reports: {
         Row: {
           analysis_status: string | null
@@ -372,6 +733,44 @@ export type Database = {
             columns: ["platform_id"]
             isOneToOne: false
             referencedRelation: "social_media_platforms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_access_logs: {
+        Row: {
+          accessed_at: string
+          action: string
+          business_id: string | null
+          id: string
+          ip_address: string | null
+          resource_accessed: string | null
+          user_name: string
+        }
+        Insert: {
+          accessed_at?: string
+          action: string
+          business_id?: string | null
+          id?: string
+          ip_address?: string | null
+          resource_accessed?: string | null
+          user_name: string
+        }
+        Update: {
+          accessed_at?: string
+          action?: string
+          business_id?: string | null
+          id?: string
+          ip_address?: string | null
+          resource_accessed?: string | null
+          user_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_access_logs_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
             referencedColumns: ["id"]
           },
         ]

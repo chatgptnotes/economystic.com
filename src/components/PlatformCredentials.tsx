@@ -60,39 +60,44 @@ const PlatformCredentials = ({ businessId }: PlatformCredentialsProps) => {
 
   const fetchCredentials = async () => {
     try {
-      const { data, error } = await supabase
+      // First fetch credentials
+      const { data: credentialsData, error: credentialsError } = await supabase
         .from('platform_credentials')
-        .select(`
-          id,
-          email,
-          encrypted_password,
-          phone_number,
-          physical_address,
-          platform_url,
-          monitoring_platforms!platform_credentials_platform_id_fkey(
-            name,
-            platform_type,
-            icon_name
-          )
-        `)
+        .select('*')
         .eq('business_id', businessId);
 
-      if (error) throw error;
+      if (credentialsError) throw credentialsError;
+
+      // Then fetch platform details separately and combine
+      const transformedData: PlatformCredential[] = [];
       
-      // Transform the data to match our interface
-      const transformedData = data?.map(item => ({
-        id: item.id,
-        email: item.email,
-        encrypted_password: item.encrypted_password,
-        phone_number: item.phone_number || '',
-        physical_address: item.physical_address || '',
-        platform_url: item.platform_url || '',
-        platform: {
-          name: item.monitoring_platforms?.name || '',
-          platform_type: item.monitoring_platforms?.platform_type || '',
-          icon_name: item.monitoring_platforms?.icon_name || ''
+      for (const credential of credentialsData || []) {
+        // Fetch platform details for each credential
+        const { data: platformData, error: platformError } = await supabase
+          .from('monitoring_platforms')
+          .select('name, platform_type, icon_name')
+          .eq('id', credential.platform_id)
+          .single();
+
+        if (platformError) {
+          console.error('Error fetching platform details:', platformError);
+          continue;
         }
-      })) || [];
+
+        transformedData.push({
+          id: credential.id,
+          email: credential.email,
+          encrypted_password: credential.encrypted_password,
+          phone_number: credential.phone_number || '',
+          physical_address: credential.physical_address || '',
+          platform_url: credential.platform_url || '',
+          platform: {
+            name: platformData?.name || '',
+            platform_type: platformData?.platform_type || '',
+            icon_name: platformData?.icon_name || ''
+          }
+        });
+      }
 
       setCredentials(transformedData);
     } catch (error) {

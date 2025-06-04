@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -64,13 +63,38 @@ const PlatformCredentials = ({ businessId }: PlatformCredentialsProps) => {
       const { data, error } = await supabase
         .from('platform_credentials')
         .select(`
-          *,
-          platform:social_media_platforms(name, platform_type, icon_name)
+          id,
+          email,
+          encrypted_password,
+          phone_number,
+          physical_address,
+          platform_url,
+          monitoring_platforms!platform_credentials_platform_id_fkey(
+            name,
+            platform_type,
+            icon_name
+          )
         `)
         .eq('business_id', businessId);
 
       if (error) throw error;
-      setCredentials(data || []);
+      
+      // Transform the data to match our interface
+      const transformedData = data?.map(item => ({
+        id: item.id,
+        email: item.email,
+        encrypted_password: item.encrypted_password,
+        phone_number: item.phone_number || '',
+        physical_address: item.physical_address || '',
+        platform_url: item.platform_url || '',
+        platform: {
+          name: item.monitoring_platforms?.name || '',
+          platform_type: item.monitoring_platforms?.platform_type || '',
+          icon_name: item.monitoring_platforms?.icon_name || ''
+        }
+      })) || [];
+
+      setCredentials(transformedData);
     } catch (error) {
       console.error('Error fetching credentials:', error);
     }

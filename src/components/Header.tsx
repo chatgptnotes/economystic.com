@@ -19,7 +19,7 @@ const Header = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Activity className="h-8 w-8 text-blue-600" />
-            <h1 className="text-2xl font-bold text-gray-900">HealthCare Analytics</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Ayushman Polyclinic Analytics</h1>
           </div>
           
           <nav className="flex items-center space-x-4">

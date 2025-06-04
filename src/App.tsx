@@ -15,6 +15,7 @@ import FollowUpCalls from "./pages/FollowUpCalls";
 import ReportsPage from "./pages/ReportsPage";
 import DataTables from "./pages/DataTables";
 import SocialMediaManagement from "./pages/SocialMediaManagement";
+import DomainManagement from "./pages/DomainManagement";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,7 @@ const App = () => (
           <Route path="/whatsapp-responses" element={<WhatsAppResponses />} />
           <Route path="/follow-up-calls" element={<FollowUpCalls />} />
           <Route path="/social-media" element={<SocialMediaManagement />} />
+          <Route path="/domain-management" element={<DomainManagement />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -5,6 +5,7 @@ import DashboardStats from "@/components/DashboardStats";
 import CallManager from "@/components/CallManager";
 import WhatsAppTracker from "@/components/WhatsAppTracker";
 import PatientDatabase from "@/components/PatientDatabase";
+import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Phone, Users, MessageSquare, BarChart3 } from "lucide-react";
 
@@ -49,11 +50,7 @@ const Index = () => {
           </TabsContent>
           
           <TabsContent value="analytics">
-            <div className="text-center py-12">
-              <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Analytics Dashboard</h3>
-              <p className="text-gray-600">Detailed analytics and reporting coming soon...</p>
-            </div>
+            <AnalyticsDashboard />
           </TabsContent>
         </Tabs>
       </main>

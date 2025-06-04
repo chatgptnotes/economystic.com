@@ -241,7 +241,7 @@ const ReportUpload = () => {
               ))}
             </div>
           </CardContent>
-        </CardContent>
+        </Card>
       )}
     </div>
   );

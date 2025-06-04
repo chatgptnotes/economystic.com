@@ -1,7 +1,9 @@
 
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Phone, Users, Calendar, MessageSquare, Ambulance, User, Bell, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 interface StatCardProps {
   title: string;
@@ -42,7 +44,7 @@ const StatCard = ({ title, value, icon, change, trend = "neutral", link }: StatC
         <div className="text-2xl font-bold text-gray-900">{value}</div>
         {change && (
           <p className={`text-xs ${trendColor} mt-1`}>
-            {change} from yesterday
+            {change}
           </p>
         )}
       </CardContent>
@@ -51,68 +53,113 @@ const StatCard = ({ title, value, icon, change, trend = "neutral", link }: StatC
 };
 
 const DashboardStats = () => {
-  const stats = [
+  const [stats, setStats] = useState({
+    totalCalls: 0,
+    ambulanceBookings: 0,
+    whatsappMessages: 0,
+    completedReports: 0
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        // Fetch call records
+        const { data: callRecords } = await supabase
+          .from('call_records')
+          .select('id');
+        
+        // Fetch ambulance bookings
+        const { data: ambulanceBookings } = await supabase
+          .from('ambulance_bookings')
+          .select('id');
+        
+        // Fetch WhatsApp messages
+        const { data: whatsappMessages } = await supabase
+          .from('whatsapp_messages')
+          .select('id');
+        
+        // Fetch completed reports
+        const { data: reports } = await supabase
+          .from('reports')
+          .select('id')
+          .eq('analysis_status', 'completed');
+
+        setStats({
+          totalCalls: callRecords?.length || 0,
+          ambulanceBookings: ambulanceBookings?.length || 0,
+          whatsappMessages: whatsappMessages?.length || 0,
+          completedReports: reports?.length || 0
+        });
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  const dashboardStats = [
     {
-      title: "Total Calls Today",
-      value: 247,
+      title: "Total Calls",
+      value: stats.totalCalls,
       icon: <Phone className="h-4 w-4" />,
-      change: "+12%",
-      trend: "up" as const,
+      change: stats.totalCalls > 0 ? "From uploaded reports" : "No data yet",
+      trend: "neutral" as const,
       link: "/total-calls"
     },
     {
       title: "Ambulance Bookings",
-      value: 18,
+      value: stats.ambulanceBookings,
       icon: <Ambulance className="h-4 w-4" />,
-      change: "+3",
-      trend: "up" as const,
+      change: stats.ambulanceBookings > 0 ? "From uploaded reports" : "No data yet",
+      trend: "neutral" as const,
       link: "/ambulance-bookings"
     },
     {
+      title: "WhatsApp Messages",
+      value: stats.whatsappMessages,
+      icon: <MessageSquare className="h-4 w-4" />,
+      change: stats.whatsappMessages > 0 ? "From uploaded reports" : "No data yet",
+      trend: "neutral" as const,
+      link: "/whatsapp-responses"
+    },
+    {
+      title: "Completed Reports",
+      value: stats.completedReports,
+      icon: <FileText className="h-4 w-4" />,
+      change: stats.completedReports > 0 ? "Successfully analyzed" : "Upload reports to analyze",
+      trend: "neutral" as const,
+      link: "/reports"
+    },
+    {
       title: "New Patients",
-      value: 34,
+      value: "Coming Soon",
       icon: <Users className="h-4 w-4" />,
-      change: "+8%",
-      trend: "up" as const,
+      change: "Feature in development",
+      trend: "neutral" as const,
       link: "/new-patients"
     },
     {
       title: "Appointments Scheduled",
-      value: 89,
+      value: "Coming Soon",
       icon: <Calendar className="h-4 w-4" />,
-      change: "+15%",
-      trend: "up" as const,
+      change: "Feature in development",
+      trend: "neutral" as const,
       link: "/appointments-scheduled"
     },
     {
-      title: "WhatsApp Responses",
-      value: 156,
-      icon: <MessageSquare className="h-4 w-4" />,
-      change: "-2%",
-      trend: "down" as const,
-      link: "/whatsapp-responses"
-    },
-    {
       title: "Follow-up Calls",
-      value: 42,
+      value: "Coming Soon",
       icon: <Bell className="h-4 w-4" />,
-      change: "+5",
-      trend: "up" as const,
-      link: "/follow-up-calls"
-    },
-    {
-      title: "Report Analysis",
-      value: "AI Ready",
-      icon: <FileText className="h-4 w-4" />,
-      change: "Upload & Analyze",
+      change: "Feature in development",
       trend: "neutral" as const,
-      link: "/reports"
+      link: "/follow-up-calls"
     }
   ];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-      {stats.map((stat, index) => (
+      {dashboardStats.map((stat, index) => (
         <StatCard key={index} {...stat} />
       ))}
     </div>

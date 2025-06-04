@@ -109,6 +109,7 @@ export type Database = {
       reports: {
         Row: {
           analysis_status: string | null
+          context_data: Json | null
           file_path: string
           id: string
           name: string
@@ -118,6 +119,7 @@ export type Database = {
         }
         Insert: {
           analysis_status?: string | null
+          context_data?: Json | null
           file_path: string
           id?: string
           name: string
@@ -127,6 +129,7 @@ export type Database = {
         }
         Update: {
           analysis_status?: string | null
+          context_data?: Json | null
           file_path?: string
           id?: string
           name?: string

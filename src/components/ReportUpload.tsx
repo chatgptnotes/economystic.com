@@ -1,4 +1,5 @@
-import { useState, useRef } from "react";
+
+import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -157,17 +158,22 @@ const ReportUpload = () => {
   };
 
   const loadReports = async () => {
-    const { data, error } = await supabase
-      .from('reports')
-      .select('*')
-      .order('uploaded_at', { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from('reports')
+        .select('*')
+        .order('uploaded_at', { ascending: false });
 
-    if (error) {
-      console.error('Error loading reports:', error);
-      return;
+      if (error) {
+        console.error('Error loading reports:', error);
+        return;
+      }
+
+      console.log('Loaded reports:', data);
+      setReports(data || []);
+    } catch (error) {
+      console.error('Error in loadReports:', error);
     }
-
-    setReports(data || []);
   };
 
   const getStatusIcon = (status: string) => {
@@ -189,9 +195,9 @@ const ReportUpload = () => {
   };
 
   // Load reports on component mount
-  useState(() => {
+  useEffect(() => {
     loadReports();
-  });
+  }, []);
 
   return (
     <div className="space-y-6">

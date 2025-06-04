@@ -16,6 +16,7 @@ interface CallRecord {
   call_duration: number | null;
   call_status: string | null;
   call_time: string | null;
+  call_direction: string | null;
   notes: string | null;
   created_at: string;
 }
@@ -29,6 +30,7 @@ interface WhatsAppMessage {
   sent_time: string | null;
   delivery_status: string | null;
   read_status: string | null;
+  response: string | null;
   created_at: string;
 }
 
@@ -165,6 +167,7 @@ const DataTables = () => {
                           <TableHead>Call Type</TableHead>
                           <TableHead>Duration</TableHead>
                           <TableHead>Status</TableHead>
+                          <TableHead>Direction</TableHead>
                           <TableHead>Call Time</TableHead>
                           <TableHead>Notes</TableHead>
                         </TableRow>
@@ -187,6 +190,13 @@ const DataTables = () => {
                                 variant={record.call_status === 'completed' ? 'default' : 'secondary'}
                               >
                                 {record.call_status || 'Unknown'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Badge 
+                                variant={record.call_direction === 'inbound' ? 'default' : 'outline'}
+                              >
+                                {record.call_direction || 'N/A'}
                               </Badge>
                             </TableCell>
                             <TableCell>{formatDateTime(record.call_time)}</TableCell>
@@ -230,6 +240,7 @@ const DataTables = () => {
                           <TableHead>Sent Time</TableHead>
                           <TableHead>Delivery Status</TableHead>
                           <TableHead>Read Status</TableHead>
+                          <TableHead>Response</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -261,6 +272,9 @@ const DataTables = () => {
                               >
                                 {message.read_status || 'unread'}
                               </Badge>
+                            </TableCell>
+                            <TableCell className="max-w-xs truncate">
+                              {message.response || 'No response'}
                             </TableCell>
                           </TableRow>
                         ))}

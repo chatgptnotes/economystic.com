@@ -153,6 +153,7 @@ export type Database = {
           phone_number: string | null
           read_status: string | null
           report_id: string | null
+          response: string | null
           sent_time: string | null
         }
         Insert: {
@@ -165,6 +166,7 @@ export type Database = {
           phone_number?: string | null
           read_status?: string | null
           report_id?: string | null
+          response?: string | null
           sent_time?: string | null
         }
         Update: {
@@ -177,6 +179,7 @@ export type Database = {
           phone_number?: string | null
           read_status?: string | null
           report_id?: string | null
+          response?: string | null
           sent_time?: string | null
         }
         Relationships: [

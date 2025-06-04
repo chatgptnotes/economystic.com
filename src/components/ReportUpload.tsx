@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,9 @@ const ReportUpload = () => {
   const [uploading, setUploading] = useState<Record<string, boolean>>({});
   const [reports, setReports] = useState<Report[]>([]);
   const { toast } = useToast();
+  
+  // Create refs for each file input
+  const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const reportTypes = [
     {
@@ -164,6 +167,9 @@ const ReportUpload = () => {
                 <p className="text-sm text-gray-600 mb-4">{reportType.description}</p>
                 
                 <Input
+                  ref={(el) => {
+                    fileInputRefs.current[reportType.id] = el;
+                  }}
                   type="file"
                   accept=".csv,.xlsx,.xls,.txt,.jpg,.jpeg"
                   onChange={(e) => {
@@ -174,14 +180,14 @@ const ReportUpload = () => {
                   }}
                   disabled={uploading[reportType.id]}
                   className="mb-2"
+                  style={{ display: 'none' }}
                 />
                 
                 <Button
                   disabled={uploading[reportType.id]}
                   className="w-full"
                   onClick={() => {
-                    const input = document.querySelector(`input[type="file"]`) as HTMLInputElement;
-                    input?.click();
+                    fileInputRefs.current[reportType.id]?.click();
                   }}
                 >
                   {uploading[reportType.id] ? (
@@ -235,7 +241,7 @@ const ReportUpload = () => {
               ))}
             </div>
           </CardContent>
-        </Card>
+        </CardContent>
       )}
     </div>
   );

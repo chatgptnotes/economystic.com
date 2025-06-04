@@ -29,6 +29,7 @@ interface SocialPost {
   status: string;
   scheduled_at: string;
   published_at: string;
+  created_at: string;
   views_count: number;
   likes_count: number;
   shares_count: number;

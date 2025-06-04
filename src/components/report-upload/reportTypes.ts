@@ -29,5 +29,15 @@ export const reportTypes = [
       { label: 'Time Period', placeholder: 'e.g., Weekly report' },
       { label: 'Emergency Type', placeholder: 'e.g., Critical care' }
     ]
+  },
+  {
+    id: 'judicial_leads',
+    title: 'Judicial Leads Report',
+    description: 'Upload judicial leads and case reports',
+    fields: [
+      { label: 'Court Jurisdiction', placeholder: 'e.g., Mumbai High Court' },
+      { label: 'Case Type', placeholder: 'e.g., Civil, Criminal, Family' },
+      { label: 'Date Range', placeholder: 'e.g., 01/01/2024 - 31/01/2024' }
+    ]
   }
 ];

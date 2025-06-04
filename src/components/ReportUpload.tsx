@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Upload } from "lucide-react";
@@ -22,7 +21,8 @@ const ReportUpload = () => {
   const [formData, setFormData] = useState<Record<string, Record<string, string>>>({
     whatsapp_double_tick: { field1: '', field2: '', field3: '' },
     centro_call_center: { field1: '', field2: '', field3: '' },
-    raftaar_ambulance: { field1: '', field2: '', field3: '' }
+    raftaar_ambulance: { field1: '', field2: '', field3: '' },
+    judicial_leads: { field1: '', field2: '', field3: '' }
   });
   const { toast } = useToast();
 
@@ -154,7 +154,7 @@ const ReportUpload = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
             {reportTypes.map((reportType) => (
               <ReportTypeCard
                 key={reportType.id}

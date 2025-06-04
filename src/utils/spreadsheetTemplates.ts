@@ -1,4 +1,3 @@
-
 // Sample data templates for each report type
 const whatsappSampleData = [
   {
@@ -69,6 +68,35 @@ const ambulanceSampleData = [
   }
 ];
 
+const judicialLeadsSampleData = [
+  {
+    lead_name: "John Legal Case",
+    phone_number: "+1234567896",
+    email: "john.legal@example.com",
+    case_type: "Civil",
+    court_jurisdiction: "Mumbai High Court",
+    case_number: "CIV/2024/001",
+    case_description: "Property dispute regarding inheritance",
+    lead_source: "Court records",
+    date_generated: "2024-01-15T09:00:00Z",
+    priority: "High",
+    status: "New"
+  },
+  {
+    lead_name: "Jane Criminal Matter",
+    phone_number: "+1234567897",
+    email: "jane.criminal@example.com",
+    case_type: "Criminal",
+    court_jurisdiction: "Delhi District Court",
+    case_number: "CRIM/2024/002",
+    case_description: "White collar crime investigation",
+    lead_source: "Public records",
+    date_generated: "2024-01-15T10:30:00Z",
+    priority: "Medium",
+    status: "Under Review"
+  }
+];
+
 // Convert data to CSV format
 const convertToCSV = (data: any[]): string => {
   if (data.length === 0) return '';
@@ -123,6 +151,10 @@ export const downloadSpreadsheetTemplate = (reportType: string) => {
     case 'raftaar_ambulance':
       sampleData = ambulanceSampleData;
       filename = 'ambulance_bookings_template.csv';
+      break;
+    case 'judicial_leads':
+      sampleData = judicialLeadsSampleData;
+      filename = 'judicial_leads_template.csv';
       break;
     default:
       console.error('Unknown report type:', reportType);

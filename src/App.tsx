@@ -16,6 +16,7 @@ import ReportsPage from "./pages/ReportsPage";
 import DataTables from "./pages/DataTables";
 import SocialMediaManagement from "./pages/SocialMediaManagement";
 import DomainManagement from "./pages/DomainManagement";
+import ProjectManagement from "./pages/ProjectManagement";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
           <Route path="/follow-up-calls" element={<FollowUpCalls />} />
           <Route path="/social-media" element={<SocialMediaManagement />} />
           <Route path="/domain-management" element={<DomainManagement />} />
+          <Route path="/project-management" element={<ProjectManagement />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

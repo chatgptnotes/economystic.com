@@ -1,0 +1,448 @@
+
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Search, Github, Users, Code, Calendar, ExternalLink } from "lucide-react";
+
+interface Project {
+  id: string;
+  name: string;
+  description: string;
+  language: string;
+  visibility: 'Public' | 'Private';
+  lastUpdated: string;
+  assignedTo: string;
+  platform: 'Cursor' | 'Lovable' | 'V0' | 'Unknown';
+  domainAssociated?: string;
+  githubUrl: string;
+}
+
+const ProjectManager = () => {
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedMember, setSelectedMember] = useState("all");
+
+  const teamMembers = ["Bhupendra", "Dinesh", "Prathik", "Pooja", "Poonam", "Monish"];
+
+  useEffect(() => {
+    initializeProjects();
+  }, []);
+
+  const getRandomTeamMember = () => {
+    return teamMembers[Math.floor(Math.random() * teamMembers.length)];
+  };
+
+  const detectPlatform = (name: string, description: string): 'Cursor' | 'Lovable' | 'V0' | 'Unknown' => {
+    const nameAndDesc = `${name} ${description}`.toLowerCase();
+    if (nameAndDesc.includes('lovable') || nameAndDesc.includes('spark')) return 'Lovable';
+    if (nameAndDesc.includes('v0') || nameAndDesc.includes('untitled')) return 'V0';
+    if (nameAndDesc.includes('cursor')) return 'Cursor';
+    return 'Unknown';
+  };
+
+  const findAssociatedDomain = (projectName: string): string | undefined => {
+    const domains = [
+      'anohra.com', 'hopesoftwares.com', 'gmcnagpuralumni.com', 'drmhope.com',
+      'modernmedicalentrepreneur.com', 'anohra.ai', 'drmurali.ai', 'yellowfevervaccines.com',
+      'economystic.ai', 'adamrit.ai', 'digihealthtwin.com', 'digihealthtwin.ai',
+      'rescueseva.com', 'onescanonelife.com', 'emergencyseva.ai', 'bachao.co',
+      'bachao.xyz', 'bachao.store', 'bachao.net', 'bachao.info', 'bachaomujhebachao.com',
+      'ayushmannagpurhospital.com', 'rseva.health', 'maharashtratv24.in', 'rescueseva.in',
+      'onescanonelife.in', 'instaaid.in', 'bachaobachao.in', 'mujhebachao.in',
+      'theayushmanhospital.com', 'hopefoundationtrust.in', 'hopehospital.in',
+      'anohra.in', 'adamrit.com', 'yellowfever.in', 'digihealthtwin.in',
+      'emergencyseva.in', 'ambufast.in'
+    ];
+
+    return domains.find(domain => 
+      projectName.toLowerCase().includes(domain.replace(/\.(com|ai|in|co|xyz|store|net|info|health)$/, '')) ||
+      projectName.toLowerCase().includes(domain.toLowerCase())
+    );
+  };
+
+  const initializeProjects = () => {
+    const projectData = [
+      { name: "DrM_Hope_Multi-tenancy-04-06-2025", description: "DrM_Hope_Multi-tenancy 04/06/2025", language: "TypeScript", visibility: "Private" as const, lastUpdated: "6 hours ago" },
+      { name: "mern-machin-test", description: "mern-machin-test", language: "JavaScript", visibility: "Public" as const, lastUpdated: "yesterday" },
+      { name: "adamrit.in", description: "chatgptnotes/adamrit.in", language: "TypeScript", visibility: "Private" as const, lastUpdated: "2 days ago" },
+      { name: "raftaar-help", description: "", language: "Kotlin", visibility: "Public" as const, lastUpdated: "2 days ago" },
+      { name: "betserlife-sos-guardian", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "3 days ago" },
+      { name: "adamrit.com25-05-2025", description: "adamrit.con25/05/2025", language: "TypeScript", visibility: "Public" as const, lastUpdated: "last week" },
+      { name: "adamrit.com", description: "adamrit.com", language: "TypeScript", visibility: "Private" as const, lastUpdated: "last week" },
+      { name: "ambufast.in", description: "The Emergency Ambulance Service at Your Fingertips Get an ambulance within 15 minutes of your emergency call or QR scan", language: "TypeScript", visibility: "Private" as const, lastUpdated: "2 weeks ago" },
+      { name: "next", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "2 weeks ago" },
+      { name: "New_HMIS_Next_js_latest", description: "New_HMIS_Next_js_latest", language: "JavaScript", visibility: "Private" as const, lastUpdated: "2 weeks ago" },
+      { name: "CorporateBilling21-05-2025HMIS", description: "", language: "JavaScript", visibility: "Public" as const, lastUpdated: "2 weeks ago" },
+      { name: "drmhope.com-ESIC", description: "drmhope.com", language: "TypeScript", visibility: "Public" as const, lastUpdated: "2 weeks ago" },
+      { name: "drmhope.com", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "2 weeks ago" },
+      { name: "drmhope-multitenancy", description: "", language: "TypeScript", visibility: "Public" as const, lastUpdated: "3 weeks ago" },
+      { name: "rseva.health", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "3 weeks ago" },
+      { name: "New_HMIS_Next_js", description: "New_HMIS_Next_js", language: "TypeScript", visibility: "Public" as const, lastUpdated: "3 weeks ago" },
+      { name: "emergencyiosapp", description: "", language: "Swift", visibility: "Public" as const, lastUpdated: "3 weeks ago" },
+      { name: "v0-onescanonelife.com-13th-May", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "3 weeks ago" },
+      { name: "yellowfever13-05-2025server", description: "", language: "TypeScript", visibility: "Public" as const, lastUpdated: "3 weeks ago" },
+      { name: "v0-untitled-project", description: "", language: "TypeScript", visibility: "Public" as const, lastUpdated: "3 weeks ago" },
+      { name: "yellowfever.in2", description: "", language: "TypeScript", visibility: "Public" as const, lastUpdated: "3 weeks ago" },
+      { name: "maharashtratratv24in8may2025", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "last month" },
+      { name: "ayushamnhospitalwebsitenextjs", description: "ayushamnhospitalwebsitenextjs", language: "HTML", visibility: "Public" as const, lastUpdated: "last month" },
+      { name: "yellowfever.in_5.4.2025_11-43-b0", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "May 5" },
+      { name: "yellowfever.in_5.4.2025_11-43", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "May 5" },
+      { name: "theayushmanhospital-laravel", description: "new SEO optimaize website", language: "Blade", visibility: "Public" as const, lastUpdated: "May 1" },
+      { name: "emergencyapp", description: "", language: "JavaScript", visibility: "Public" as const, lastUpdated: "May 1" },
+      { name: "HmisVersionUpdate30-04-2025", description: "", language: "JavaScript", visibility: "Public" as const, lastUpdated: "Apr 30" },
+      { name: "one-scan-one-life", description: "", language: "TypeScript", visibility: "Public" as const, lastUpdated: "Apr 29" },
+      { name: "demo.bachao.co-2--24-April-4.24-PM", description: "", language: "Blade", visibility: "Private" as const, lastUpdated: "Apr 24" },
+      { name: "hmis_raftaarlaravel_11", description: "", language: "Blade", visibility: "Private" as const, lastUpdated: "Apr 23" },
+      { name: "Rseva_laravel11_livewire3", description: "Rseva_laravel11_livewire3", language: "Blade", visibility: "Private" as const, lastUpdated: "Apr 23" },
+      { name: "Rsev-for-cursor", description: "we made for cursor !", language: "Blade", visibility: "Public" as const, lastUpdated: "Apr 22" },
+      { name: "lovable-raftaar-laravel-1page", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "Apr 22" },
+      { name: "lovable-start-for-ayushman-3rd-attempt-site", description: "", language: "EJS", visibility: "Private" as const, lastUpdated: "Apr 22" },
+      { name: "spark-the-beginning", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "Apr 21" },
+      { name: "ayushman-website-3rd-attempt", description: "", language: "EJS", visibility: "Private" as const, lastUpdated: "Apr 21" },
+      { name: "life-scan-harmony-project", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "Apr 21" },
+      { name: "newHope", description: "The repo is of the hopesoftwares.com", language: "PHP", visibility: "Public" as const, lastUpdated: "Apr 21" },
+      { name: "hopeproject", description: "All ondc related work of folders and file", language: "JavaScript", visibility: "Public" as const, lastUpdated: "Apr 21" },
+      { name: "hope", description: "Hospital management software built in 2013. used in Hope and Ayushman. has Chatgpt -summary code builtin. This has a user manual in wiki", language: "PHP", visibility: "Private" as const, lastUpdated: "Apr 21" },
+      { name: "RaftaarHealth", description: "RaftaarHealth", language: "JavaScript", visibility: "Public" as const, lastUpdated: "Apr 19" },
+      { name: "hopenew", description: "hope new software", language: "JavaScript", visibility: "Public" as const, lastUpdated: "Apr 17" },
+      { name: "hopesoftwares", description: "hospital HMIS project", language: "JavaScript", visibility: "Private" as const, lastUpdated: "Apr 17" },
+      { name: "HMIS", description: "", language: "JavaScript", visibility: "Private" as const, lastUpdated: "Apr 17" },
+      { name: "html-project", description: "A modern e-commerce website", language: "HTML", visibility: "Private" as const, lastUpdated: "Apr 16" },
+      { name: "Tracking", description: "driver tracking project", language: "PHP", visibility: "Public" as const, lastUpdated: "Apr 16" },
+      { name: "ayushman-hospital-muralisir-website", description: "ayushman-hospital-muralisir-website", language: "JavaScript", visibility: "Public" as const, lastUpdated: "Apr 16" },
+      { name: "ayushman-hospital", description: "Ayushman Nagpur Hospital website built with Next.js", language: "JavaScript", visibility: "Public" as const, lastUpdated: "Apr 15" },
+      { name: "ayushman-hospital-website", description: "", language: "JavaScript", visibility: "Public" as const, lastUpdated: "Apr 15" },
+      { name: "verification-logs", description: "Forked from ONDC-Official/verification-logs ONDC Pre-production issue & discussion board", language: "HTML", visibility: "Public" as const, lastUpdated: "Mar 12" },
+      { name: "emergencysevaondcapp", description: "All ondc related work of folders and file", language: "PHP", visibility: "Private" as const, lastUpdated: "Feb 27" },
+      { name: "RSEVA", description: "", language: "JavaScript", visibility: "Public" as const, lastUpdated: "Feb 25" },
+      { name: "adminemergencyseva", description: "The repo is of the admin.emergencyseva.in", language: "JavaScript", visibility: "Private" as const, lastUpdated: "Jan 15" },
+      { name: "ondc_demo", description: "", language: "JavaScript", visibility: "Private" as const, lastUpdated: "Nov 18, 2024" },
+      { name: "bachaobachaoin", description: "", language: "Blade", visibility: "Private" as const, lastUpdated: "Nov 7, 2024" },
+      { name: "public_html", description: "", language: "HTML", visibility: "Public" as const, lastUpdated: "Oct 8, 2024" },
+      { name: "DrM-Hope", description: "", language: "JavaScript", visibility: "Private" as const, lastUpdated: "Sep 27, 2024" },
+      { name: "demo2Hopesoftwares", description: "", language: "JavaScript", visibility: "Private" as const, lastUpdated: "Sep 27, 2024" },
+      { name: "vehicletracker", description: "Vehicle Tracking Code uploaded by Pratik", language: "PHP", visibility: "Private" as const, lastUpdated: "Jul 10, 2024" }
+    ];
+
+    const transformedProjects = projectData.map((project, index) => ({
+      id: (index + 1).toString(),
+      ...project,
+      assignedTo: getRandomTeamMember(),
+      platform: detectPlatform(project.name, project.description),
+      domainAssociated: findAssociatedDomain(project.name),
+      githubUrl: `https://github.com/yourusername/${project.name}`
+    }));
+
+    setProjects(transformedProjects);
+  };
+
+  const filteredProjects = projects.filter(project => {
+    const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         project.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesMember = selectedMember === "all" || project.assignedTo === selectedMember;
+    return matchesSearch && matchesMember;
+  });
+
+  const getTeamMemberColor = (member: string) => {
+    const colors = {
+      "Bhupendra": "bg-blue-100 text-blue-800",
+      "Dinesh": "bg-green-100 text-green-800",
+      "Prathik": "bg-purple-100 text-purple-800",
+      "Pooja": "bg-pink-100 text-pink-800",
+      "Poonam": "bg-yellow-100 text-yellow-800",
+      "Monish": "bg-orange-100 text-orange-800"
+    };
+    return colors[member as keyof typeof colors] || "bg-gray-100 text-gray-800";
+  };
+
+  const getPlatformColor = (platform: string) => {
+    const colors = {
+      "Lovable": "bg-purple-100 text-purple-800",
+      "Cursor": "bg-blue-100 text-blue-800",
+      "V0": "bg-green-100 text-green-800",
+      "Unknown": "bg-gray-100 text-gray-800"
+    };
+    return colors[platform as keyof typeof colors] || "bg-gray-100 text-gray-800";
+  };
+
+  const projectsByMember = teamMembers.reduce((acc, member) => {
+    acc[member] = projects.filter(p => p.assignedTo === member).length;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const projectsByPlatform = projects.reduce((acc, project) => {
+    acc[project.platform] = (acc[project.platform] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold">Project Management</h2>
+          <p className="text-gray-600">Manage all your GitHub repositories and team assignments</p>
+        </div>
+      </div>
+
+      {/* Search and Filter */}
+      <div className="flex space-x-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Input
+            placeholder="Search projects..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        <select
+          className="px-4 py-2 border rounded-md"
+          value={selectedMember}
+          onChange={(e) => setSelectedMember(e.target.value)}
+        >
+          <option value="all">All Team Members</option>
+          {teamMembers.map(member => (
+            <option key={member} value={member}>{member}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Overview Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <Github className="h-8 w-8 text-blue-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Total Projects</p>
+                <p className="text-2xl font-bold text-gray-900">{projects.length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <Users className="h-8 w-8 text-green-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Team Members</p>
+                <p className="text-2xl font-bold text-gray-900">{teamMembers.length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <Code className="h-8 w-8 text-purple-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Languages</p>
+                <p className="text-2xl font-bold text-gray-900">{new Set(projects.map(p => p.language)).size}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <Calendar className="h-8 w-8 text-orange-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Active Projects</p>
+                <p className="text-2xl font-bold text-gray-900">{projects.filter(p => p.lastUpdated.includes('hours') || p.lastUpdated.includes('yesterday')).length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Tabs defaultValue="all" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="all">All Projects</TabsTrigger>
+          <TabsTrigger value="team">Team Overview</TabsTrigger>
+          <TabsTrigger value="platforms">By Platform</TabsTrigger>
+          <TabsTrigger value="domains">Domain Mapping</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="all">
+          <Card>
+            <CardHeader>
+              <CardTitle>All Projects ({filteredProjects.length})</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Project Name</TableHead>
+                    <TableHead>Language</TableHead>
+                    <TableHead>Assigned To</TableHead>
+                    <TableHead>Platform</TableHead>
+                    <TableHead>Domain</TableHead>
+                    <TableHead>Last Updated</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredProjects.map((project) => (
+                    <TableRow key={project.id}>
+                      <TableCell>
+                        <div>
+                          <div className="flex items-center space-x-2">
+                            <h3 className="font-medium">{project.name}</h3>
+                            <Badge variant={project.visibility === 'Private' ? 'secondary' : 'default'}>
+                              {project.visibility}
+                            </Badge>
+                          </div>
+                          {project.description && (
+                            <p className="text-sm text-gray-500 mt-1">{project.description}</p>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{project.language}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getTeamMemberColor(project.assignedTo)}>
+                          {project.assignedTo}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getPlatformColor(project.platform)}>
+                          {project.platform}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {project.domainAssociated ? (
+                          <Badge variant="outline">{project.domainAssociated}</Badge>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-sm text-gray-600">
+                        {project.lastUpdated}
+                      </TableCell>
+                      <TableCell>
+                        <Button variant="ghost" size="sm" asChild>
+                          <a href={project.githubUrl} target="_blank" rel="noopener noreferrer">
+                            <ExternalLink className="h-4 w-4" />
+                          </a>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="team">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {teamMembers.map((member) => (
+              <Card key={member}>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span>{member}</span>
+                    <Badge className={getTeamMemberColor(member)}>
+                      {projectsByMember[member]} projects
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {projects
+                      .filter(p => p.assignedTo === member)
+                      .slice(0, 5)
+                      .map((project) => (
+                        <div key={project.id} className="flex items-center justify-between text-sm">
+                          <span className="truncate">{project.name}</span>
+                          <Badge variant="outline" className="text-xs">
+                            {project.language}
+                          </Badge>
+                        </div>
+                      ))}
+                    {projectsByMember[member] > 5 && (
+                      <p className="text-xs text-gray-500">
+                        +{projectsByMember[member] - 5} more projects
+                      </p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="platforms">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {Object.entries(projectsByPlatform).map(([platform, count]) => (
+              <Card key={platform}>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span>{platform}</span>
+                    <Badge className={getPlatformColor(platform)}>
+                      {count} projects
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {projects
+                      .filter(p => p.platform === platform)
+                      .slice(0, 3)
+                      .map((project) => (
+                        <div key={project.id} className="text-sm">
+                          <span className="truncate">{project.name}</span>
+                        </div>
+                      ))}
+                    {count > 3 && (
+                      <p className="text-xs text-gray-500">+{count - 3} more</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="domains">
+          <Card>
+            <CardHeader>
+              <CardTitle>Domain to Project Mapping</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {projects
+                  .filter(p => p.domainAssociated)
+                  .map((project) => (
+                    <div key={project.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <h3 className="font-medium">{project.domainAssociated}</h3>
+                        <p className="text-sm text-gray-600">{project.name}</p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Badge className={getTeamMemberColor(project.assignedTo)}>
+                          {project.assignedTo}
+                        </Badge>
+                        <Badge className={getPlatformColor(project.platform)}>
+                          {project.platform}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+};
+
+export default ProjectManager;

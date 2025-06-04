@@ -8,8 +8,9 @@ import PatientDatabase from "@/components/PatientDatabase";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import SocialMediaDashboard from "@/components/SocialMediaDashboard";
 import DomainManager from "@/components/DomainManager";
+import ProjectManager from "@/components/ProjectManager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Phone, Users, MessageSquare, BarChart3, Share2, Globe } from "lucide-react";
+import { Phone, Users, MessageSquare, BarChart3, Share2, Globe, FolderGit2 } from "lucide-react";
 
 const Index = () => {
   return (
@@ -20,7 +21,7 @@ const Index = () => {
         <DashboardStats />
         
         <Tabs defaultValue="calls" className="w-full">
-          <TabsList className="grid w-full grid-cols-6 mb-6">
+          <TabsList className="grid w-full grid-cols-7 mb-6">
             <TabsTrigger value="calls" className="flex items-center space-x-2">
               <Phone className="h-4 w-4" />
               <span>Call Management</span>
@@ -40,6 +41,10 @@ const Index = () => {
             <TabsTrigger value="domains" className="flex items-center space-x-2">
               <Globe className="h-4 w-4" />
               <span>Domain Manager</span>
+            </TabsTrigger>
+            <TabsTrigger value="projects" className="flex items-center space-x-2">
+              <FolderGit2 className="h-4 w-4" />
+              <span>Project Manager</span>
             </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center space-x-2">
               <BarChart3 className="h-4 w-4" />
@@ -65,6 +70,10 @@ const Index = () => {
           
           <TabsContent value="domains">
             <DomainManager />
+          </TabsContent>
+          
+          <TabsContent value="projects">
+            <ProjectManager />
           </TabsContent>
           
           <TabsContent value="analytics">

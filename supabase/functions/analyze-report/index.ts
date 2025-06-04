@@ -11,6 +11,7 @@ interface ReportAnalysisRequest {
   reportId: string;
   filePath: string;
   reportType: string;
+  contextData?: Record<string, string>;
 }
 
 serve(async (req) => {
@@ -20,16 +21,17 @@ serve(async (req) => {
   }
 
   let requestBody: ReportAnalysisRequest;
+  let supabaseClient: any;
 
   try {
-    const supabaseClient = createClient(
+    supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
     // Parse request body once and store it
     requestBody = await req.json();
-    const { reportId, filePath, reportType } = requestBody;
+    const { reportId, filePath, reportType, contextData } = requestBody;
 
     console.log(`Starting analysis for report ${reportId} of type ${reportType}`);
 
@@ -39,10 +41,19 @@ serve(async (req) => {
       .update({ analysis_status: 'processing' })
       .eq('id', reportId);
 
-    // Download the file from storage
-    const { data: fileData, error: downloadError } = await supabaseClient.storage
+    // Download the file from storage with timeout
+    const downloadPromise = supabaseClient.storage
       .from('reports')
       .download(filePath);
+
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('File download timeout')), 30000)
+    );
+
+    const { data: fileData, error: downloadError } = await Promise.race([
+      downloadPromise,
+      timeoutPromise
+    ]);
 
     if (downloadError) {
       throw new Error(`Failed to download file: ${downloadError.message}`);
@@ -52,14 +63,19 @@ serve(async (req) => {
     const fileText = await fileData.text();
     console.log('File content length:', fileText.length);
 
+    // Check if file is too large
+    if (fileText.length > 100000) {
+      throw new Error('File too large for processing');
+    }
+
     // Check if OpenAI API key is available
     const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
     if (!openaiApiKey) {
       throw new Error('OpenAI API key not configured');
     }
 
-    // Analyze with OpenAI - using gpt-4o-mini as per guidelines
-    const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+    // Analyze with OpenAI with timeout
+    const openaiPromise = fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${openaiApiKey}`,
@@ -70,11 +86,11 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are an AI assistant that analyzes healthcare reports. Extract structured data from the provided ${reportType} report and return it as JSON. Focus on extracting relevant patient data, timestamps, and key metrics. Always return valid JSON format.`
+            content: `You are an AI assistant that analyzes healthcare reports. Extract structured data from the provided ${reportType} report and return it as JSON. Focus on extracting relevant patient data, timestamps, and key metrics. Always return valid JSON format. If you cannot parse the data, return {"error": "Unable to parse file", "message": "File format not supported or corrupted"}.`
           },
           {
             role: 'user',
-            content: `Please analyze this ${reportType} report and extract structured data. Return the result as JSON with appropriate fields for the data type. If the file appears to be an image or non-text format, return a JSON object with a message indicating the file type:\n\n${fileText.substring(0, 4000)}`
+            content: `Please analyze this ${reportType} report and extract structured data. Context: ${JSON.stringify(contextData || {})}. Return the result as JSON with appropriate fields for the data type:\n\n${fileText.substring(0, 4000)}`
           }
         ],
         temperature: 0.1,
@@ -82,14 +98,24 @@ serve(async (req) => {
       }),
     });
 
+    const aiTimeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('OpenAI API timeout')), 60000)
+    );
+
+    const openaiResponse = await Promise.race([openaiPromise, aiTimeoutPromise]);
+
     if (!openaiResponse.ok) {
       const errorText = await openaiResponse.text();
       console.error('OpenAI API error:', openaiResponse.status, errorText);
-      throw new Error(`OpenAI API error: ${openaiResponse.status} - ${errorText}`);
+      throw new Error(`OpenAI API error: ${openaiResponse.status}`);
     }
 
     const openaiResult = await openaiResponse.json();
     const analysisResult = openaiResult.choices[0]?.message?.content;
+
+    if (!analysisResult) {
+      throw new Error('No analysis result from OpenAI');
+    }
 
     console.log('AI Analysis completed');
 
@@ -97,14 +123,14 @@ serve(async (req) => {
     let parsedData;
     try {
       parsedData = JSON.parse(analysisResult);
+      
+      // Check if AI returned an error
+      if (parsedData.error) {
+        throw new Error(parsedData.message || 'AI analysis failed');
+      }
     } catch (parseError) {
       console.error('Failed to parse AI response as JSON:', analysisResult);
-      // Create a fallback structure if parsing fails
-      parsedData = {
-        error: 'Failed to parse AI response',
-        raw_response: analysisResult,
-        extracted_data: []
-      };
+      throw new Error('Invalid AI response format');
     }
 
     // Store the analyzed data based on report type
@@ -118,7 +144,7 @@ serve(async (req) => {
       }
     } catch (dataProcessError) {
       console.error('Error processing data:', dataProcessError);
-      // Continue to mark as completed even if data processing fails
+      // Don't fail the entire process if data insertion fails
     }
 
     // Update report status to completed
@@ -140,17 +166,15 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in analyze-report function:', error);
 
-    // Update report status to failed
-    if (requestBody?.reportId) {
+    // Update report status to failed with error message
+    if (requestBody?.reportId && supabaseClient) {
       try {
-        const supabaseClient = createClient(
-          Deno.env.get('SUPABASE_URL') ?? '',
-          Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-        );
-        
         await supabaseClient
           .from('reports')
-          .update({ analysis_status: 'failed' })
+          .update({ 
+            analysis_status: 'failed',
+            processed: false
+          })
           .eq('id', requestBody.reportId);
       } catch (updateError) {
         console.error('Failed to update report status:', updateError);
@@ -158,7 +182,10 @@ serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        reportId: requestBody?.reportId 
+      }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 

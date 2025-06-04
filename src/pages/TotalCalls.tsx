@@ -20,7 +20,7 @@ const TotalCalls = () => {
   const [calls] = useState<CallRecord[]>([
     {
       id: "1",
-      patientName: "John Doe",
+      patientName: "Rajesh Kumar",
       phoneNumber: "+91 98765 43210",
       callType: "Rseva Testing",
       duration: "5:23",
@@ -29,7 +29,7 @@ const TotalCalls = () => {
     },
     {
       id: "2",
-      patientName: "Sarah Smith",
+      patientName: "Priya Sharma",
       phoneNumber: "+91 87654 32109",
       callType: "Ambulance Booking",
       duration: "12:45",
@@ -38,7 +38,7 @@ const TotalCalls = () => {
     },
     {
       id: "3",
-      patientName: "Mike Johnson",
+      patientName: "Arjun Patel",
       phoneNumber: "+91 76543 21098",
       callType: "Patient Inquiry",
       duration: "3:12",
@@ -47,7 +47,7 @@ const TotalCalls = () => {
     },
     {
       id: "4",
-      patientName: "Emily Davis",
+      patientName: "Kavya Nair",
       phoneNumber: "+91 65432 10987",
       callType: "Follow-up",
       duration: "0:00",

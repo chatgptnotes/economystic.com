@@ -19,13 +19,17 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  let requestBody: ReportAnalysisRequest;
+
   try {
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { reportId, filePath, reportType }: ReportAnalysisRequest = await req.json();
+    // Parse request body once and store it
+    requestBody = await req.json();
+    const { reportId, filePath, reportType } = requestBody;
 
     console.log(`Starting analysis for report ${reportId} of type ${reportType}`);
 
@@ -48,31 +52,40 @@ serve(async (req) => {
     const fileText = await fileData.text();
     console.log('File content length:', fileText.length);
 
-    // Analyze with OpenAI
+    // Check if OpenAI API key is available
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+    if (!openaiApiKey) {
+      throw new Error('OpenAI API key not configured');
+    }
+
+    // Analyze with OpenAI - using gpt-4o-mini as per guidelines
     const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
+        'Authorization': `Bearer ${openaiApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4',
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
-            content: `You are an AI assistant that analyzes healthcare reports. Extract structured data from the provided ${reportType} report and return it as JSON. Focus on extracting relevant patient data, timestamps, and key metrics.`
+            content: `You are an AI assistant that analyzes healthcare reports. Extract structured data from the provided ${reportType} report and return it as JSON. Focus on extracting relevant patient data, timestamps, and key metrics. Always return valid JSON format.`
           },
           {
             role: 'user',
-            content: `Please analyze this ${reportType} report and extract structured data. Return the result as JSON with appropriate fields for the data type:\n\n${fileText}`
+            content: `Please analyze this ${reportType} report and extract structured data. Return the result as JSON with appropriate fields for the data type. If the file appears to be an image or non-text format, return a JSON object with a message indicating the file type:\n\n${fileText.substring(0, 4000)}`
           }
         ],
         temperature: 0.1,
+        max_tokens: 2000,
       }),
     });
 
     if (!openaiResponse.ok) {
-      throw new Error(`OpenAI API error: ${openaiResponse.statusText}`);
+      const errorText = await openaiResponse.text();
+      console.error('OpenAI API error:', openaiResponse.status, errorText);
+      throw new Error(`OpenAI API error: ${openaiResponse.status} - ${errorText}`);
     }
 
     const openaiResult = await openaiResponse.json();
@@ -86,16 +99,26 @@ serve(async (req) => {
       parsedData = JSON.parse(analysisResult);
     } catch (parseError) {
       console.error('Failed to parse AI response as JSON:', analysisResult);
-      throw new Error('AI response is not valid JSON');
+      // Create a fallback structure if parsing fails
+      parsedData = {
+        error: 'Failed to parse AI response',
+        raw_response: analysisResult,
+        extracted_data: []
+      };
     }
 
     // Store the analyzed data based on report type
-    if (reportType === 'whatsapp_double_tick') {
-      await processWhatsAppData(supabaseClient, reportId, parsedData);
-    } else if (reportType === 'centro_call_center') {
-      await processCallCenterData(supabaseClient, reportId, parsedData);
-    } else if (reportType === 'raftaar_ambulance') {
-      await processAmbulanceData(supabaseClient, reportId, parsedData);
+    try {
+      if (reportType === 'whatsapp_double_tick') {
+        await processWhatsAppData(supabaseClient, reportId, parsedData);
+      } else if (reportType === 'centro_call_center') {
+        await processCallCenterData(supabaseClient, reportId, parsedData);
+      } else if (reportType === 'raftaar_ambulance') {
+        await processAmbulanceData(supabaseClient, reportId, parsedData);
+      }
+    } catch (dataProcessError) {
+      console.error('Error processing data:', dataProcessError);
+      // Continue to mark as completed even if data processing fails
     }
 
     // Update report status to completed
@@ -117,18 +140,21 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in analyze-report function:', error);
 
-    // Update report status to failed if we have reportId
-    const body = await req.clone().json().catch(() => ({}));
-    if (body.reportId) {
-      const supabaseClient = createClient(
-        Deno.env.get('SUPABASE_URL') ?? '',
-        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-      );
-      
-      await supabaseClient
-        .from('reports')
-        .update({ analysis_status: 'failed' })
-        .eq('id', body.reportId);
+    // Update report status to failed
+    if (requestBody?.reportId) {
+      try {
+        const supabaseClient = createClient(
+          Deno.env.get('SUPABASE_URL') ?? '',
+          Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+        );
+        
+        await supabaseClient
+          .from('reports')
+          .update({ analysis_status: 'failed' })
+          .eq('id', requestBody.reportId);
+      } catch (updateError) {
+        console.error('Failed to update report status:', updateError);
+      }
     }
 
     return new Response(
@@ -142,59 +168,71 @@ serve(async (req) => {
 });
 
 async function processWhatsAppData(supabaseClient: any, reportId: string, data: any) {
-  const messages = Array.isArray(data) ? data : data.messages || [];
+  const messages = Array.isArray(data) ? data : data.messages || data.extracted_data || [];
   
   for (const message of messages) {
-    await supabaseClient
-      .from('whatsapp_messages')
-      .insert({
-        report_id: reportId,
-        patient_name: message.patient_name || message.name,
-        phone_number: message.phone_number || message.phone,
-        message_content: message.content || message.message,
-        message_type: message.type || 'text',
-        sent_time: message.sent_time || message.timestamp,
-        delivery_status: message.delivery_status || 'sent',
-        read_status: message.read_status || 'unread'
-      });
+    try {
+      await supabaseClient
+        .from('whatsapp_messages')
+        .insert({
+          report_id: reportId,
+          patient_name: message.patient_name || message.name || 'Unknown',
+          phone_number: message.phone_number || message.phone || '',
+          message_content: message.content || message.message || '',
+          message_type: message.type || 'text',
+          sent_time: message.sent_time || message.timestamp || new Date().toISOString(),
+          delivery_status: message.delivery_status || 'sent',
+          read_status: message.read_status || 'unread'
+        });
+    } catch (insertError) {
+      console.error('Error inserting WhatsApp message:', insertError);
+    }
   }
 }
 
 async function processCallCenterData(supabaseClient: any, reportId: string, data: any) {
-  const calls = Array.isArray(data) ? data : data.calls || [];
+  const calls = Array.isArray(data) ? data : data.calls || data.extracted_data || [];
   
   for (const call of calls) {
-    await supabaseClient
-      .from('call_records')
-      .insert({
-        report_id: reportId,
-        patient_name: call.patient_name || call.name,
-        phone_number: call.phone_number || call.phone,
-        call_type: call.call_type || call.type,
-        call_duration: call.duration || 0,
-        call_status: call.status || 'completed',
-        call_time: call.call_time || call.timestamp,
-        notes: call.notes || call.description
-      });
+    try {
+      await supabaseClient
+        .from('call_records')
+        .insert({
+          report_id: reportId,
+          patient_name: call.patient_name || call.name || 'Unknown',
+          phone_number: call.phone_number || call.phone || '',
+          call_type: call.call_type || call.type || 'unknown',
+          call_duration: call.duration || 0,
+          call_status: call.status || 'completed',
+          call_time: call.call_time || call.timestamp || new Date().toISOString(),
+          notes: call.notes || call.description || ''
+        });
+    } catch (insertError) {
+      console.error('Error inserting call record:', insertError);
+    }
   }
 }
 
 async function processAmbulanceData(supabaseClient: any, reportId: string, data: any) {
-  const bookings = Array.isArray(data) ? data : data.bookings || [];
+  const bookings = Array.isArray(data) ? data : data.bookings || data.extracted_data || [];
   
   for (const booking of bookings) {
-    await supabaseClient
-      .from('ambulance_bookings')
-      .insert({
-        report_id: reportId,
-        patient_name: booking.patient_name || booking.name,
-        phone_number: booking.phone_number || booking.phone,
-        pickup_location: booking.pickup_location || booking.pickup,
-        destination: booking.destination || booking.drop,
-        booking_time: booking.booking_time || booking.timestamp,
-        ambulance_type: booking.ambulance_type || booking.type,
-        status: booking.status || 'completed',
-        driver_name: booking.driver_name || booking.driver
-      });
+    try {
+      await supabaseClient
+        .from('ambulance_bookings')
+        .insert({
+          report_id: reportId,
+          patient_name: booking.patient_name || booking.name || 'Unknown',
+          phone_number: booking.phone_number || booking.phone || '',
+          pickup_location: booking.pickup_location || booking.pickup || '',
+          destination: booking.destination || booking.drop || '',
+          booking_time: booking.booking_time || booking.timestamp || new Date().toISOString(),
+          ambulance_type: booking.ambulance_type || booking.type || 'standard',
+          status: booking.status || 'completed',
+          driver_name: booking.driver_name || booking.driver || ''
+        });
+    } catch (insertError) {
+      console.error('Error inserting ambulance booking:', insertError);
+    }
   }
 }

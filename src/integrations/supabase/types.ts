@@ -61,6 +61,7 @@ export type Database = {
       }
       call_records: {
         Row: {
+          call_direction: string | null
           call_duration: number | null
           call_status: string | null
           call_time: string | null
@@ -73,6 +74,7 @@ export type Database = {
           report_id: string | null
         }
         Insert: {
+          call_direction?: string | null
           call_duration?: number | null
           call_status?: string | null
           call_time?: string | null
@@ -85,6 +87,7 @@ export type Database = {
           report_id?: string | null
         }
         Update: {
+          call_direction?: string | null
           call_duration?: number | null
           call_status?: string | null
           call_time?: string | null

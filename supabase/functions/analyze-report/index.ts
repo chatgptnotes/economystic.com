@@ -209,11 +209,12 @@ async function processWhatsAppData(supabaseClient: any, reportId: string, data: 
           report_id: reportId,
           patient_name: message.patient_name || message.name || 'Unknown',
           phone_number: message.phone_number || message.phone || '',
-          message_content: message.content || message.message || '',
-          message_type: message.type || 'text',
+          message_content: message.content || message.message || message.message_content || '',
+          message_type: message.type || message.message_type || 'text',
           sent_time: message.sent_time || message.timestamp || new Date().toISOString(),
           delivery_status: message.delivery_status || 'sent',
-          read_status: message.read_status || 'unread'
+          read_status: message.read_status || 'unread',
+          response: message.response || ''
         });
     } catch (insertError) {
       console.error('Error inserting WhatsApp message:', insertError);
@@ -233,9 +234,10 @@ async function processCallCenterData(supabaseClient: any, reportId: string, data
           patient_name: call.patient_name || call.name || 'Unknown',
           phone_number: call.phone_number || call.phone || '',
           call_type: call.call_type || call.type || 'unknown',
-          call_duration: call.duration || 0,
-          call_status: call.status || 'completed',
+          call_duration: call.duration || call.call_duration || 0,
+          call_status: call.status || call.call_status || 'completed',
           call_time: call.call_time || call.timestamp || new Date().toISOString(),
+          call_direction: call.call_direction || call.direction || 'inbound',
           notes: call.notes || call.description || ''
         });
     } catch (insertError) {

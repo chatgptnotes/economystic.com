@@ -8,7 +8,8 @@ const whatsappSampleData = [
     message_type: "text",
     sent_time: "2024-01-15T10:30:00Z",
     delivery_status: "delivered",
-    read_status: "read"
+    read_status: "read",
+    response: "Thank you for confirming"
   },
   {
     patient_name: "Jane Smith",
@@ -17,7 +18,8 @@ const whatsappSampleData = [
     message_type: "text",
     sent_time: "2024-01-15T11:00:00Z",
     delivery_status: "sent",
-    read_status: "unread"
+    read_status: "unread",
+    response: ""
   }
 ];
 
@@ -29,6 +31,7 @@ const callCenterSampleData = [
     call_duration: 180,
     call_status: "completed",
     call_time: "2024-01-15T09:15:00Z",
+    call_direction: "inbound",
     notes: "Booked appointment for next Tuesday"
   },
   {
@@ -36,8 +39,9 @@ const callCenterSampleData = [
     phone_number: "+1234567893",
     call_type: "follow_up",
     call_duration: 120,
-    call_status: "completed",
+    call_status: "missed",
     call_time: "2024-01-15T14:30:00Z",
+    call_direction: "outbound",
     notes: "Patient feeling better after treatment"
   }
 ];

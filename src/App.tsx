@@ -13,6 +13,7 @@ import AppointmentsScheduled from "./pages/AppointmentsScheduled";
 import WhatsAppResponses from "./pages/WhatsAppResponses";
 import FollowUpCalls from "./pages/FollowUpCalls";
 import ReportsPage from "./pages/ReportsPage";
+import DataTables from "./pages/DataTables";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/data-tables" element={<DataTables />} />
           <Route path="/total-calls" element={<TotalCalls />} />
           <Route path="/ambulance-bookings" element={<AmbulanceBookings />} />
           <Route path="/new-patients" element={<NewPatients />} />

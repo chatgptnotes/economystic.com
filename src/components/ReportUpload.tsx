@@ -165,7 +165,7 @@ const ReportUpload = () => {
                 
                 <Input
                   type="file"
-                  accept=".csv,.xlsx,.xls,.txt"
+                  accept=".csv,.xlsx,.xls,.txt,.jpg,.jpeg"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (file) {

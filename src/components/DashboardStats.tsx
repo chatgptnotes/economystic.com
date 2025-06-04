@@ -1,6 +1,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Phone, Users, Calendar, MessageSquare, Ambulance, User, Bell } from "lucide-react";
+import { Phone, Users, Calendar, MessageSquare, Ambulance, User, Bell, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
 
 interface StatCardProps {
@@ -99,11 +99,19 @@ const DashboardStats = () => {
       change: "+5",
       trend: "up" as const,
       link: "/follow-up-calls"
+    },
+    {
+      title: "Report Analysis",
+      value: "AI Ready",
+      icon: <FileText className="h-4 w-4" />,
+      change: "Upload & Analyze",
+      trend: "neutral" as const,
+      link: "/reports"
     }
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
       {stats.map((stat, index) => (
         <StatCard key={index} {...stat} />
       ))}

@@ -12,6 +12,7 @@ import NewPatients from "./pages/NewPatients";
 import AppointmentsScheduled from "./pages/AppointmentsScheduled";
 import WhatsAppResponses from "./pages/WhatsAppResponses";
 import FollowUpCalls from "./pages/FollowUpCalls";
+import ReportsPage from "./pages/ReportsPage";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/reports" element={<ReportsPage />} />
           <Route path="/total-calls" element={<TotalCalls />} />
           <Route path="/ambulance-bookings" element={<AmbulanceBookings />} />
           <Route path="/new-patients" element={<NewPatients />} />

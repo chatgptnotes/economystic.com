@@ -9,7 +9,180 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      ambulance_bookings: {
+        Row: {
+          ambulance_type: string | null
+          booking_time: string | null
+          created_at: string
+          destination: string | null
+          driver_name: string | null
+          id: string
+          patient_name: string | null
+          phone_number: string | null
+          pickup_location: string | null
+          report_id: string | null
+          status: string | null
+        }
+        Insert: {
+          ambulance_type?: string | null
+          booking_time?: string | null
+          created_at?: string
+          destination?: string | null
+          driver_name?: string | null
+          id?: string
+          patient_name?: string | null
+          phone_number?: string | null
+          pickup_location?: string | null
+          report_id?: string | null
+          status?: string | null
+        }
+        Update: {
+          ambulance_type?: string | null
+          booking_time?: string | null
+          created_at?: string
+          destination?: string | null
+          driver_name?: string | null
+          id?: string
+          patient_name?: string | null
+          phone_number?: string | null
+          pickup_location?: string | null
+          report_id?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ambulance_bookings_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      call_records: {
+        Row: {
+          call_duration: number | null
+          call_status: string | null
+          call_time: string | null
+          call_type: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          patient_name: string | null
+          phone_number: string | null
+          report_id: string | null
+        }
+        Insert: {
+          call_duration?: number | null
+          call_status?: string | null
+          call_time?: string | null
+          call_type?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          patient_name?: string | null
+          phone_number?: string | null
+          report_id?: string | null
+        }
+        Update: {
+          call_duration?: number | null
+          call_status?: string | null
+          call_time?: string | null
+          call_type?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          patient_name?: string | null
+          phone_number?: string | null
+          report_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_records_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reports: {
+        Row: {
+          analysis_status: string | null
+          file_path: string
+          id: string
+          name: string
+          processed: boolean | null
+          type: string
+          uploaded_at: string
+        }
+        Insert: {
+          analysis_status?: string | null
+          file_path: string
+          id?: string
+          name: string
+          processed?: boolean | null
+          type: string
+          uploaded_at?: string
+        }
+        Update: {
+          analysis_status?: string | null
+          file_path?: string
+          id?: string
+          name?: string
+          processed?: boolean | null
+          type?: string
+          uploaded_at?: string
+        }
+        Relationships: []
+      }
+      whatsapp_messages: {
+        Row: {
+          created_at: string
+          delivery_status: string | null
+          id: string
+          message_content: string | null
+          message_type: string | null
+          patient_name: string | null
+          phone_number: string | null
+          read_status: string | null
+          report_id: string | null
+          sent_time: string | null
+        }
+        Insert: {
+          created_at?: string
+          delivery_status?: string | null
+          id?: string
+          message_content?: string | null
+          message_type?: string | null
+          patient_name?: string | null
+          phone_number?: string | null
+          read_status?: string | null
+          report_id?: string | null
+          sent_time?: string | null
+        }
+        Update: {
+          created_at?: string
+          delivery_status?: string | null
+          id?: string
+          message_content?: string | null
+          message_type?: string | null
+          patient_name?: string | null
+          phone_number?: string | null
+          read_status?: string | null
+          report_id?: string | null
+          sent_time?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_messages_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

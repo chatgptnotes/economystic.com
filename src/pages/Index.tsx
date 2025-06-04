@@ -6,8 +6,9 @@ import CallManager from "@/components/CallManager";
 import WhatsAppTracker from "@/components/WhatsAppTracker";
 import PatientDatabase from "@/components/PatientDatabase";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
+import SocialMediaDashboard from "@/components/SocialMediaDashboard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Phone, Users, MessageSquare, BarChart3 } from "lucide-react";
+import { Phone, Users, MessageSquare, BarChart3, Share2 } from "lucide-react";
 
 const Index = () => {
   return (
@@ -18,7 +19,7 @@ const Index = () => {
         <DashboardStats />
         
         <Tabs defaultValue="calls" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-6">
+          <TabsList className="grid w-full grid-cols-5 mb-6">
             <TabsTrigger value="calls" className="flex items-center space-x-2">
               <Phone className="h-4 w-4" />
               <span>Call Management</span>
@@ -30,6 +31,10 @@ const Index = () => {
             <TabsTrigger value="whatsapp" className="flex items-center space-x-2">
               <MessageSquare className="h-4 w-4" />
               <span>WhatsApp Tracker</span>
+            </TabsTrigger>
+            <TabsTrigger value="social" className="flex items-center space-x-2">
+              <Share2 className="h-4 w-4" />
+              <span>Social Media</span>
             </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center space-x-2">
               <BarChart3 className="h-4 w-4" />
@@ -47,6 +52,10 @@ const Index = () => {
           
           <TabsContent value="whatsapp">
             <WhatsAppTracker />
+          </TabsContent>
+          
+          <TabsContent value="social">
+            <SocialMediaDashboard />
           </TabsContent>
           
           <TabsContent value="analytics">

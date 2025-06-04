@@ -59,6 +59,87 @@ export type Database = {
           },
         ]
       }
+      business_social_accounts: {
+        Row: {
+          account_handle: string | null
+          account_url: string | null
+          business_id: string
+          created_at: string
+          followers_count: number | null
+          id: string
+          is_active: boolean | null
+          platform_id: string
+          updated_at: string
+        }
+        Insert: {
+          account_handle?: string | null
+          account_url?: string | null
+          business_id: string
+          created_at?: string
+          followers_count?: number | null
+          id?: string
+          is_active?: boolean | null
+          platform_id: string
+          updated_at?: string
+        }
+        Update: {
+          account_handle?: string | null
+          account_url?: string | null
+          business_id?: string
+          created_at?: string
+          followers_count?: number | null
+          id?: string
+          is_active?: boolean | null
+          platform_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_social_accounts_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_social_accounts_platform_id_fkey"
+            columns: ["platform_id"]
+            isOneToOne: false
+            referencedRelation: "social_media_platforms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      businesses: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: []
+      }
       call_records: {
         Row: {
           call_direction: string | null
@@ -141,6 +222,159 @@ export type Database = {
           uploaded_at?: string
         }
         Relationships: []
+      }
+      social_media_analytics: {
+        Row: {
+          business_id: string
+          created_at: string
+          date: string
+          followers_count: number | null
+          id: string
+          platform_id: string
+          posts_count: number | null
+          total_comments: number | null
+          total_likes: number | null
+          total_shares: number | null
+          total_views: number | null
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          date: string
+          followers_count?: number | null
+          id?: string
+          platform_id: string
+          posts_count?: number | null
+          total_comments?: number | null
+          total_likes?: number | null
+          total_shares?: number | null
+          total_views?: number | null
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          date?: string
+          followers_count?: number | null
+          id?: string
+          platform_id?: string
+          posts_count?: number | null
+          total_comments?: number | null
+          total_likes?: number | null
+          total_shares?: number | null
+          total_views?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_media_analytics_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_media_analytics_platform_id_fkey"
+            columns: ["platform_id"]
+            isOneToOne: false
+            referencedRelation: "social_media_platforms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_media_platforms: {
+        Row: {
+          base_url: string | null
+          created_at: string
+          icon_name: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          base_url?: string | null
+          created_at?: string
+          icon_name?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          base_url?: string | null
+          created_at?: string
+          icon_name?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      social_media_posts: {
+        Row: {
+          business_id: string
+          comments_count: number | null
+          content: string
+          created_at: string
+          id: string
+          image_url: string | null
+          likes_count: number | null
+          platform_id: string
+          post_url: string | null
+          published_at: string | null
+          scheduled_at: string | null
+          shares_count: number | null
+          status: string
+          title: string | null
+          updated_at: string
+          views_count: number | null
+        }
+        Insert: {
+          business_id: string
+          comments_count?: number | null
+          content: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          likes_count?: number | null
+          platform_id: string
+          post_url?: string | null
+          published_at?: string | null
+          scheduled_at?: string | null
+          shares_count?: number | null
+          status?: string
+          title?: string | null
+          updated_at?: string
+          views_count?: number | null
+        }
+        Update: {
+          business_id?: string
+          comments_count?: number | null
+          content?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          likes_count?: number | null
+          platform_id?: string
+          post_url?: string | null
+          published_at?: string | null
+          scheduled_at?: string | null
+          shares_count?: number | null
+          status?: string
+          title?: string | null
+          updated_at?: string
+          views_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_media_posts_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_media_posts_platform_id_fkey"
+            columns: ["platform_id"]
+            isOneToOne: false
+            referencedRelation: "social_media_platforms"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       whatsapp_messages: {
         Row: {

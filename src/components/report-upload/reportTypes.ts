@@ -31,13 +31,13 @@ export const reportTypes = [
     ]
   },
   {
-    id: 'judicial_leads',
-    title: 'Judicial Leads Report',
-    description: 'Upload judicial leads and case reports',
+    id: 'just_dial_leads',
+    title: 'Just Dial Leads Report',
+    description: 'Upload Just Dial leads and enquiry reports',
     fields: [
-      { label: 'Court Jurisdiction', placeholder: 'e.g., Mumbai High Court' },
-      { label: 'Case Type', placeholder: 'e.g., Civil, Criminal, Family' },
-      { label: 'Date Range', placeholder: 'e.g., 01/01/2024 - 31/01/2024' }
+      { label: 'Service Category', placeholder: 'e.g., Orthopaedic, Dental' },
+      { label: 'Location Filter', placeholder: 'e.g., Mumbai, Nagpur' },
+      { label: 'Date Range', placeholder: 'e.g., 01/06/2024 - 04/06/2024' }
     ]
   }
 ];

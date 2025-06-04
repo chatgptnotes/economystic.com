@@ -97,6 +97,49 @@ const judicialLeadsSampleData = [
   }
 ];
 
+const justDialLeadsSampleData = [
+  {
+    date: "04 Jun 2024",
+    time: "10:38 am",
+    name: "N K",
+    location: "New Mhalge, Nagpur",
+    category: "Orthopaedic",
+    source: "Best Deal"
+  },
+  {
+    date: "04 Jun 2024",
+    time: "10:35 am",
+    name: "Kiran Mesh",
+    location: "Dhantoli, Nagpur",
+    category: "Orthopaedic",
+    source: "Call"
+  },
+  {
+    date: "03 Jun 2024",
+    time: "01:41 pm",
+    name: "Yashswee D",
+    location: "Sadar, Nagpur",
+    category: "Orthopaedic",
+    source: "Best Deal"
+  },
+  {
+    date: "03 Jun 2024",
+    time: "12:01 pm",
+    name: "Jd User",
+    location: "Ajni, Nagpur",
+    category: "Orthopaedic",
+    source: "Competitor"
+  },
+  {
+    date: "03 Jun 2024",
+    time: "07:49 am",
+    name: "Vishnu",
+    location: "Nagpur",
+    category: "Orthopaedic",
+    source: "Best Deal"
+  }
+];
+
 // Convert data to CSV format
 const convertToCSV = (data: any[]): string => {
   if (data.length === 0) return '';
@@ -152,9 +195,9 @@ export const downloadSpreadsheetTemplate = (reportType: string) => {
       sampleData = ambulanceSampleData;
       filename = 'ambulance_bookings_template.csv';
       break;
-    case 'judicial_leads':
-      sampleData = judicialLeadsSampleData;
-      filename = 'judicial_leads_template.csv';
+    case 'just_dial_leads':
+      sampleData = justDialLeadsSampleData;
+      filename = 'just_dial_leads_template.csv';
       break;
     default:
       console.error('Unknown report type:', reportType);

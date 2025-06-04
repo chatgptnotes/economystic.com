@@ -22,7 +22,7 @@ const ReportUpload = () => {
     whatsapp_double_tick: { field1: '', field2: '', field3: '' },
     centro_call_center: { field1: '', field2: '', field3: '' },
     raftaar_ambulance: { field1: '', field2: '', field3: '' },
-    judicial_leads: { field1: '', field2: '', field3: '' }
+    just_dial_leads: { field1: '', field2: '', field3: '' }
   });
   const { toast } = useToast();
 

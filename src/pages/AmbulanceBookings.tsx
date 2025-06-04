@@ -21,7 +21,7 @@ const AmbulanceBookings = () => {
   const [bookings] = useState<AmbulanceBooking[]>([
     {
       id: "1",
-      patientName: "John Doe",
+      patientName: "Rajesh Kumar",
       phoneNumber: "+91 98765 43210",
       pickupLocation: "123 Main St, Mumbai",
       destination: "City Hospital",
@@ -31,7 +31,7 @@ const AmbulanceBookings = () => {
     },
     {
       id: "2",
-      patientName: "Sarah Smith",
+      patientName: "Priya Sharma",
       phoneNumber: "+91 87654 32109",
       pickupLocation: "456 Park Ave, Mumbai",
       destination: "Emergency Care Center",
@@ -41,7 +41,7 @@ const AmbulanceBookings = () => {
     },
     {
       id: "3",
-      patientName: "Mike Johnson",
+      patientName: "Arjun Patel",
       phoneNumber: "+91 76543 21098",
       pickupLocation: "789 Oak St, Mumbai",
       destination: "Specialty Clinic",

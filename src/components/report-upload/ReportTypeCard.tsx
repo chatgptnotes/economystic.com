@@ -33,8 +33,15 @@ const ReportTypeCard = ({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      console.log('File selected:', file.name);
       onFileUpload(file);
     }
+  };
+
+  const handleUploadClick = () => {
+    console.log('Upload button clicked for:', reportType.id);
+    console.log('Current form data:', formData);
+    fileInputRef.current?.click();
   };
 
   return (
@@ -54,7 +61,10 @@ const ReportTypeCard = ({
               type="text"
               placeholder={field.placeholder}
               value={formData[`field${index + 1}`] || ''}
-              onChange={(e) => onInputChange(index, e.target.value)}
+              onChange={(e) => {
+                console.log(`Field ${index + 1} changed:`, e.target.value);
+                onInputChange(index, e.target.value);
+              }}
               className="text-sm"
               disabled={uploading}
             />
@@ -75,7 +85,7 @@ const ReportTypeCard = ({
       <Button
         disabled={uploading}
         className="w-full"
-        onClick={() => fileInputRef.current?.click()}
+        onClick={handleUploadClick}
       >
         {uploading ? (
           <>

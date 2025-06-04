@@ -1,9 +1,9 @@
-
 import { useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import { Upload, FileText, CheckCircle, Clock, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -19,6 +19,11 @@ interface Report {
 const ReportUpload = () => {
   const [uploading, setUploading] = useState<Record<string, boolean>>({});
   const [reports, setReports] = useState<Report[]>([]);
+  const [formData, setFormData] = useState<Record<string, Record<string, string>>>({
+    whatsapp_double_tick: { field1: '', field2: '', field3: '' },
+    centro_call_center: { field1: '', field2: '', field3: '' },
+    raftaar_ambulance: { field1: '', field2: '', field3: '' }
+  });
   const { toast } = useToast();
   
   // Create refs for each file input
@@ -28,19 +33,44 @@ const ReportUpload = () => {
     {
       id: 'whatsapp_double_tick',
       title: 'WhatsApp Double Tick Report',
-      description: 'Upload WhatsApp message delivery reports'
+      description: 'Upload WhatsApp message delivery reports',
+      fields: [
+        { label: 'Date Range', placeholder: 'e.g., 01/01/2024 - 31/01/2024' },
+        { label: 'Campaign Name', placeholder: 'e.g., Monthly Health Tips' },
+        { label: 'Target Audience', placeholder: 'e.g., Diabetes patients' }
+      ]
     },
     {
       id: 'centro_call_center',
       title: 'Centro Call Center Report',
-      description: 'Upload call center software reports'
+      description: 'Upload call center software reports',
+      fields: [
+        { label: 'Call Period', placeholder: 'e.g., Last 30 days' },
+        { label: 'Department', placeholder: 'e.g., Patient Support' },
+        { label: 'Call Type', placeholder: 'e.g., Appointment bookings' }
+      ]
     },
     {
       id: 'raftaar_ambulance',
       title: 'Raftaar Ambulance Bookings',
-      description: 'Upload ambulance booking reports'
+      description: 'Upload ambulance booking reports',
+      fields: [
+        { label: 'Service Area', placeholder: 'e.g., Mumbai Central' },
+        { label: 'Time Period', placeholder: 'e.g., Weekly report' },
+        { label: 'Emergency Type', placeholder: 'e.g., Critical care' }
+      ]
     }
   ];
+
+  const handleInputChange = (reportType: string, fieldIndex: number, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [reportType]: {
+        ...prev[reportType],
+        [`field${fieldIndex + 1}`]: value
+      }
+    }));
+  };
 
   const handleFileUpload = async (file: File, reportType: string) => {
     if (!file) return;
@@ -59,14 +89,16 @@ const ReportUpload = () => {
 
       if (uploadError) throw uploadError;
 
-      // Save report record to database
+      // Save report record to database with additional context data
+      const contextData = formData[reportType];
       const { data: reportData, error: dbError } = await supabase
         .from('reports')
         .insert({
           name: file.name,
           type: reportType,
           file_path: filePath,
-          analysis_status: 'pending'
+          analysis_status: 'pending',
+          context_data: contextData
         })
         .select()
         .single();
@@ -75,7 +107,12 @@ const ReportUpload = () => {
 
       // Trigger AI analysis
       const { error: analysisError } = await supabase.functions.invoke('analyze-report', {
-        body: { reportId: reportData.id, filePath: filePath, reportType: reportType }
+        body: { 
+          reportId: reportData.id, 
+          filePath: filePath, 
+          reportType: reportType,
+          contextData: contextData
+        }
       });
 
       if (analysisError) {
@@ -97,6 +134,12 @@ const ReportUpload = () => {
         title: "Upload Successful",
         description: `${file.name} has been uploaded and AI analysis is starting.`,
       });
+
+      // Clear form data for this report type
+      setFormData(prev => ({
+        ...prev,
+        [reportType]: { field1: '', field2: '', field3: '' }
+      }));
 
       // Refresh reports list
       loadReports();
@@ -165,6 +208,26 @@ const ReportUpload = () => {
               <div key={reportType.id} className="border rounded-lg p-4">
                 <h3 className="font-semibold text-gray-900 mb-2">{reportType.title}</h3>
                 <p className="text-sm text-gray-600 mb-4">{reportType.description}</p>
+                
+                {/* Context Data Input Fields */}
+                <div className="space-y-3 mb-4">
+                  {reportType.fields.map((field, index) => (
+                    <div key={index}>
+                      <Label htmlFor={`${reportType.id}-field${index + 1}`} className="text-xs text-gray-600">
+                        {field.label}
+                      </Label>
+                      <Input
+                        id={`${reportType.id}-field${index + 1}`}
+                        type="text"
+                        placeholder={field.placeholder}
+                        value={formData[reportType.id][`field${index + 1}`]}
+                        onChange={(e) => handleInputChange(reportType.id, index, e.target.value)}
+                        className="text-sm"
+                        disabled={uploading[reportType.id]}
+                      />
+                    </div>
+                  ))}
+                </div>
                 
                 <Input
                   ref={(el) => {

@@ -41,7 +41,9 @@ const ReportTypeCard = ({
   const handleUploadClick = () => {
     console.log('Upload button clicked for:', reportType.id);
     console.log('Current form data:', formData);
-    fileInputRef.current?.click();
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
   };
 
   return (
@@ -72,13 +74,12 @@ const ReportTypeCard = ({
         ))}
       </div>
       
-      <Input
+      <input
         ref={fileInputRef}
         type="file"
         accept=".csv,.xlsx,.xls,.txt,.jpg,.jpeg"
         onChange={handleFileChange}
         disabled={uploading}
-        className="mb-2"
         style={{ display: 'none' }}
       />
       

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,12 +9,30 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
+interface TelecomService {
+  id: string;
+  service_type: string;
+  service_number: string;
+  provider_name: string;
+  company_name: string;
+  department: string;
+  assigned_to: string;
+  monthly_cost: number;
+  bill_due_date: string;
+  wifi_password: string;
+  contact_person: string;
+  contact_phone: string;
+  is_active: boolean;
+  notes: string;
+}
+
 interface TelecomServiceFormProps {
+  service?: TelecomService;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-const TelecomServiceForm = ({ onClose, onSuccess }: TelecomServiceFormProps) => {
+const TelecomServiceForm = ({ service, onClose, onSuccess }: TelecomServiceFormProps) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -34,37 +52,73 @@ const TelecomServiceForm = ({ onClose, onSuccess }: TelecomServiceFormProps) => 
     notes: ""
   });
 
+  useEffect(() => {
+    if (service) {
+      setFormData({
+        service_type: service.service_type || "",
+        service_number: service.service_number || "",
+        provider_name: service.provider_name || "",
+        company_name: service.company_name || "",
+        department: service.department || "",
+        assigned_to: service.assigned_to || "",
+        monthly_cost: service.monthly_cost ? service.monthly_cost.toString() : "",
+        bill_due_date: service.bill_due_date || "",
+        contract_start_date: "",
+        contract_end_date: "",
+        wifi_password: service.wifi_password || "",
+        contact_person: service.contact_person || "",
+        contact_phone: service.contact_phone || "",
+        notes: service.notes || ""
+      });
+    }
+  }, [service]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const { error } = await supabase
-        .from('telecom_services')
-        .insert([{
-          ...formData,
-          monthly_cost: formData.monthly_cost ? parseFloat(formData.monthly_cost) : null,
-          bill_due_date: formData.bill_due_date || null,
-          contract_start_date: formData.contract_start_date || null,
-          contract_end_date: formData.contract_end_date || null,
-          wifi_password: formData.wifi_password || null,
-          contact_person: formData.contact_person || null,
-          contact_phone: formData.contact_phone || null
-        }]);
+      const dataToSubmit = {
+        ...formData,
+        monthly_cost: formData.monthly_cost ? parseFloat(formData.monthly_cost) : null,
+        bill_due_date: formData.bill_due_date || null,
+        contract_start_date: formData.contract_start_date || null,
+        contract_end_date: formData.contract_end_date || null,
+        wifi_password: formData.wifi_password || null,
+        contact_person: formData.contact_person || null,
+        contact_phone: formData.contact_phone || null
+      };
+
+      let error;
+      
+      if (service) {
+        // Update existing service
+        const { error: updateError } = await supabase
+          .from('telecom_services')
+          .update(dataToSubmit)
+          .eq('id', service.id);
+        error = updateError;
+      } else {
+        // Create new service
+        const { error: insertError } = await supabase
+          .from('telecom_services')
+          .insert([dataToSubmit]);
+        error = insertError;
+      }
 
       if (error) throw error;
 
       toast({
         title: "Success",
-        description: "Telecom service added successfully",
+        description: `Telecom service ${service ? 'updated' : 'added'} successfully`,
       });
 
       onSuccess();
     } catch (error) {
-      console.error('Error adding telecom service:', error);
+      console.error('Error saving telecom service:', error);
       toast({
         title: "Error",
-        description: "Failed to add telecom service",
+        description: `Failed to ${service ? 'update' : 'add'} telecom service`,
         variant: "destructive",
       });
     } finally {
@@ -79,7 +133,7 @@ const TelecomServiceForm = ({ onClose, onSuccess }: TelecomServiceFormProps) => 
   return (
     <Card className="max-w-4xl mx-auto">
       <CardHeader>
-        <CardTitle>Add New Telecom Service</CardTitle>
+        <CardTitle>{service ? 'Edit' : 'Add New'} Telecom Service</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -243,7 +297,7 @@ const TelecomServiceForm = ({ onClose, onSuccess }: TelecomServiceFormProps) => 
               Cancel
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Adding..." : "Add Service"}
+              {isLoading ? (service ? "Updating..." : "Adding...") : (service ? "Update Service" : "Add Service")}
             </Button>
           </div>
         </form>

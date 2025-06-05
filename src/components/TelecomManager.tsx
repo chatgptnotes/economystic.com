@@ -1,10 +1,11 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Phone, Wifi, Globe, Calendar, CheckCircle, XCircle, AlertTriangle, Plus, Eye, EyeOff, Trash2 } from "lucide-react";
+import { Phone, Wifi, Globe, Calendar, CheckCircle, XCircle, AlertTriangle, Plus, Eye, EyeOff, Trash2, Edit } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -41,6 +42,7 @@ const TelecomManager = () => {
   const { toast } = useToast();
   const [showServiceForm, setShowServiceForm] = useState(false);
   const [showCheckForm, setShowCheckForm] = useState<string | null>(null);
+  const [editingService, setEditingService] = useState<TelecomService | null>(null);
   const [filterType, setFilterType] = useState<string>("all");
   const [showPasswords, setShowPasswords] = useState<{ [key: string]: boolean }>({});
 
@@ -116,6 +118,15 @@ const TelecomManager = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleEditService = (service: TelecomService) => {
+    setEditingService(service);
+  };
+
+  const handleEditSuccess = () => {
+    setEditingService(null);
+    refetchServices();
   };
 
   const togglePasswordVisibility = (serviceId: string) => {
@@ -364,6 +375,13 @@ const TelecomManager = () => {
                           >
                             Check Now
                           </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleEditService(service)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <Button
@@ -412,6 +430,14 @@ const TelecomManager = () => {
             setShowServiceForm(false);
             refetchServices();
           }}
+        />
+      )}
+
+      {editingService && (
+        <TelecomServiceForm
+          service={editingService}
+          onClose={() => setEditingService(null)}
+          onSuccess={handleEditSuccess}
         />
       )}
 

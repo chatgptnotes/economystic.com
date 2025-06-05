@@ -10,12 +10,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { format } from "date-fns";
 import { Search, Filter, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import type { Database } from "@/integrations/supabase/types";
+
+type AuditOperation = Database["public"]["Enums"]["audit_operation"];
 
 interface AuditLog {
   id: string;
   table_name: string;
   record_id: string;
-  operation: string;
+  operation: AuditOperation;
   old_values: any;
   new_values: any;
   changed_fields: string[];
@@ -48,7 +51,7 @@ const AuditLogs = () => {
       }
 
       if (operationFilter !== 'all') {
-        query = query.eq('operation', operationFilter);
+        query = query.eq('operation', operationFilter as AuditOperation);
       }
 
       const { data, error } = await query;

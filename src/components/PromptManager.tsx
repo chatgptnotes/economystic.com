@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,11 +24,26 @@ interface Prompt {
   tags: string[];
 }
 
+interface Project {
+  id: string;
+  name: string;
+  description: string;
+  language: string;
+  visibility: 'Public' | 'Private';
+  lastUpdated: string;
+  assignedTo: string;
+  platform: 'Cursor' | 'Lovable' | 'V0' | 'Unknown';
+  domainAssociated?: string;
+  githubUrl: string;
+  isActive: boolean;
+}
+
 const PromptManager = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProject, setSelectedProject] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [projectSearchTerm, setProjectSearchTerm] = useState("");
   const [newPrompt, setNewPrompt] = useState({
     title: '',
     content: '',
@@ -40,15 +56,21 @@ const PromptManager = () => {
   const queryClient = useQueryClient();
 
   // Mock project data - this would come from your ProjectManager in a real implementation
-  const projects = [
-    { id: "1", name: "DrM_Hope_Multi-tenancy-04-06-2025" },
-    { id: "2", name: "adamrit.in" },
-    { id: "3", name: "ambufast.in" },
-    { id: "4", name: "drmhope.com" },
-    { id: "5", name: "yellowfever.in" }
+  const mockProjects: Project[] = [
+    { id: "1", name: "DrM_Hope_Multi-tenancy-04-06-2025", description: "DrM_Hope_Multi-tenancy 04/06/2025", language: "TypeScript", visibility: "Private", lastUpdated: "6 hours ago", assignedTo: "Bhupendra", platform: "Unknown", githubUrl: "", isActive: true },
+    { id: "2", name: "adamrit.in", description: "chatgptnotes/adamrit.in", language: "TypeScript", visibility: "Private", lastUpdated: "2 days ago", assignedTo: "Dinesh", platform: "Unknown", githubUrl: "", isActive: true },
+    { id: "3", name: "ambufast.in", description: "The Emergency Ambulance Service at Your Fingertips", language: "TypeScript", visibility: "Private", lastUpdated: "2 weeks ago", assignedTo: "Prathik", platform: "Unknown", githubUrl: "", isActive: true },
+    { id: "4", name: "drmhope.com", description: "", language: "TypeScript", visibility: "Private", lastUpdated: "2 weeks ago", assignedTo: "Pooja", platform: "Unknown", githubUrl: "", isActive: true },
+    { id: "5", name: "yellowfever.in", description: "", language: "TypeScript", visibility: "Public", lastUpdated: "3 weeks ago", assignedTo: "Poonam", platform: "Unknown", githubUrl: "", isActive: true }
   ];
 
   const categories = ['development', 'design', 'testing', 'documentation', 'general'];
+
+  // Filter projects based on search term
+  const filteredProjects = mockProjects.filter(project =>
+    project.name.toLowerCase().includes(projectSearchTerm.toLowerCase()) ||
+    project.description.toLowerCase().includes(projectSearchTerm.toLowerCase())
+  );
 
   // Fetch prompts from Supabase
   const { data: prompts = [], isLoading } = useQuery({
@@ -143,7 +165,7 @@ const PromptManager = () => {
       return;
     }
 
-    const selectedProject = projects.find(p => p.id === newPrompt.project_id);
+    const selectedProject = mockProjects.find(p => p.id === newPrompt.project_id);
     const tags = newPrompt.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
 
     addPromptMutation.mutate({
@@ -227,17 +249,30 @@ const PromptManager = () => {
 
               <div>
                 <Label htmlFor="promptProject">Project</Label>
-                <select
-                  id="promptProject"
-                  className="w-full px-3 py-2 border rounded-md"
-                  value={newPrompt.project_id}
-                  onChange={(e) => setNewPrompt(prev => ({ ...prev, project_id: e.target.value }))}
-                >
-                  <option value="">Select a project</option>
-                  {projects.map(project => (
-                    <option key={project.id} value={project.id}>{project.name}</option>
-                  ))}
-                </select>
+                <div className="space-y-2">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Input
+                      placeholder="Search projects..."
+                      value={projectSearchTerm}
+                      onChange={(e) => setProjectSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                  <select
+                    id="promptProject"
+                    className="w-full px-3 py-2 border rounded-md max-h-40 overflow-y-auto"
+                    value={newPrompt.project_id}
+                    onChange={(e) => setNewPrompt(prev => ({ ...prev, project_id: e.target.value }))}
+                  >
+                    <option value="">Select a project</option>
+                    {filteredProjects.map(project => (
+                      <option key={project.id} value={project.id}>
+                        {project.name} {project.description && `- ${project.description}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               <div>
@@ -310,7 +345,7 @@ const PromptManager = () => {
           onChange={(e) => setSelectedProject(e.target.value)}
         >
           <option value="all">All Projects</option>
-          {projects.map(project => (
+          {mockProjects.map(project => (
             <option key={project.id} value={project.id}>{project.name}</option>
           ))}
         </select>

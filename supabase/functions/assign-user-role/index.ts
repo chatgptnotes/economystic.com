@@ -25,6 +25,8 @@ Deno.serve(async (req) => {
 
     const { email, role }: AssignRoleRequest = await req.json();
 
+    console.log('Received request:', { email, role });
+
     if (!email || !role) {
       return new Response(
         JSON.stringify({ error: 'Email and role are required' }),
@@ -35,13 +37,18 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Get user by email from auth.users (only service role can do this)
-    const { data: users, error: userError } = await supabaseClient.auth.admin.listUsers();
+    // Get user by email from auth.users using the admin API
+    const { data: authUsers, error: authError } = await supabaseClient.auth.admin.listUsers();
     
-    if (userError) {
-      console.error('Error fetching users:', userError);
+    console.log('Auth users result:', { 
+      userCount: authUsers?.users?.length || 0, 
+      error: authError 
+    });
+
+    if (authError) {
+      console.error('Error fetching auth users:', authError);
       return new Response(
-        JSON.stringify({ error: 'Failed to fetch users' }),
+        JSON.stringify({ error: 'Failed to fetch users: ' + authError.message }),
         { 
           status: 500, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -49,11 +56,24 @@ Deno.serve(async (req) => {
       );
     }
 
-    const user = users.users.find(u => u.email === email);
+    const user = authUsers.users.find(u => u.email?.toLowerCase() === email.toLowerCase());
+    
+    console.log('User lookup result:', { 
+      found: !!user, 
+      userId: user?.id,
+      searchEmail: email.toLowerCase(),
+      allEmails: authUsers.users.map(u => u.email) 
+    });
     
     if (!user) {
       return new Response(
-        JSON.stringify({ error: 'User not found' }),
+        JSON.stringify({ 
+          error: 'User not found',
+          debug: {
+            searchEmail: email.toLowerCase(),
+            availableEmails: authUsers.users.map(u => u.email).filter(Boolean)
+          }
+        }),
         { 
           status: 404, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -62,12 +82,25 @@ Deno.serve(async (req) => {
     }
 
     // Check if role already exists
-    const { data: existingRole } = await supabaseClient
+    const { data: existingRole, error: existingRoleError } = await supabaseClient
       .from('user_roles')
       .select('*')
       .eq('user_id', user.id)
       .eq('role', role)
-      .single();
+      .maybeSingle();
+
+    console.log('Existing role check:', { existingRole, error: existingRoleError });
+
+    if (existingRoleError) {
+      console.error('Error checking existing role:', existingRoleError);
+      return new Response(
+        JSON.stringify({ error: 'Failed to check existing role: ' + existingRoleError.message }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
 
     if (existingRole) {
       return new Response(
@@ -89,10 +122,12 @@ Deno.serve(async (req) => {
       .select()
       .single();
 
+    console.log('Role assignment result:', { data, error });
+
     if (error) {
       console.error('Error inserting role:', error);
       return new Response(
-        JSON.stringify({ error: 'Failed to assign role' }),
+        JSON.stringify({ error: 'Failed to assign role: ' + error.message }),
         { 
           status: 500, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -117,7 +152,10 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('Error in assign-user-role function:', error);
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ 
+        error: 'Internal server error', 
+        details: error instanceof Error ? error.message : 'Unknown error'
+      }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 

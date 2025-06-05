@@ -1,3 +1,7 @@
+<think>
+
+</think>
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -303,6 +307,23 @@ const ProjectManager = () => {
     toast({
       title: "Priority Updated",
       description: `"${projectName}" priority set to ${newPriority}`,
+    });
+  };
+
+  const handlePlatformChange = (projectId: string, newPlatform: 'Cursor' | 'Lovable' | 'V0' | 'Stitch' | 'Windsurf' | 'Clerk' | 'Codex' | 'Vercel' | 'Unknown') => {
+    setProjects(prev => {
+      const updated = prev.map(project => 
+        project.id === projectId 
+          ? { ...project, platform: newPlatform }
+          : project
+      );
+      return updated;
+    });
+
+    const projectName = projects.find(p => p.id === projectId)?.name;
+    toast({
+      title: "Platform Updated",
+      description: `"${projectName}" platform changed to ${newPlatform}`,
     });
   };
 
@@ -664,9 +685,29 @@ const ProjectManager = () => {
                         </Select>
                       </TableCell>
                       <TableCell>
-                        <Badge className={`${getPlatformColor(project.platform)} border`} variant="outline">
-                          {project.platform}
-                        </Badge>
+                        <Select
+                          value={project.platform}
+                          onValueChange={(value: 'Cursor' | 'Lovable' | 'V0' | 'Stitch' | 'Windsurf' | 'Clerk' | 'Codex' | 'Vercel' | 'Unknown') => handlePlatformChange(project.id, value)}
+                        >
+                          <SelectTrigger className="w-32">
+                            <SelectValue>
+                              <Badge className={`${getPlatformColor(project.platform)} border`} variant="outline">
+                                {project.platform}
+                              </Badge>
+                            </SelectValue>
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Lovable">Lovable</SelectItem>
+                            <SelectItem value="Cursor">Cursor</SelectItem>
+                            <SelectItem value="V0">V0</SelectItem>
+                            <SelectItem value="Stitch">Stitch</SelectItem>
+                            <SelectItem value="Windsurf">Windsurf</SelectItem>
+                            <SelectItem value="Clerk">Clerk</SelectItem>
+                            <SelectItem value="Codex">Codex</SelectItem>
+                            <SelectItem value="Vercel">Vercel</SelectItem>
+                            <SelectItem value="Unknown">Unknown</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </TableCell>
                       <TableCell>
                         {project.domainAssociated ? (

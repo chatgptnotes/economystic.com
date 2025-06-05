@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -76,7 +75,7 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
       
       toast({
         title: "Voice Chat Error",
-        description: `Connection failed: ${error.message || 'Unknown error'}`,
+        description: `Connection failed: ${error}`,
         variant: "destructive",
       });
     },

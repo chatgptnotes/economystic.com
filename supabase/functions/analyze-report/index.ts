@@ -116,7 +116,21 @@ async function analyzeWithAI(fileText: string, reportType: string, contextData?:
   }
 
   let systemPrompt = '';
-  if (reportType === 'centro_call_center') {
+  if (reportType === 'raftaar_ambulance') {
+    systemPrompt = `You are an AI assistant that analyzes ambulance booking reports. Extract structured data from the provided CSV or spreadsheet and return it as JSON.
+
+For ambulance booking data, extract these fields for each booking record:
+- patient_name (string)
+- phone_number (string, clean format without extra characters)
+- pickup_location (string)
+- destination (string)
+- booking_time (string, ISO timestamp format)
+- ambulance_type (string)
+- status (string: completed, pending, cancelled, etc.)
+- driver_name (string)
+
+Return the data as a JSON array of objects with these exact field names. Always return valid JSON format.`;
+  } else if (reportType === 'centro_call_center') {
     systemPrompt = `You are an AI assistant that analyzes call center reports. Extract structured data from the provided CSV or spreadsheet and return it as JSON. 
 
 For call center data, extract these fields for each call record:
@@ -223,6 +237,8 @@ async function processAnalysisResult(supabaseClient: any, reportId: string, repo
       await processCallCenterData(supabaseClient, reportId, parsedData);
     } else if (reportType === 'raftaar_ambulance') {
       await processAmbulanceData(supabaseClient, reportId, parsedData);
+    } else if (reportType === 'just_dial_leads') {
+      await processJustDialData(supabaseClient, reportId, parsedData);
     }
   } catch (dataProcessError) {
     console.error('Error processing data:', dataProcessError);
@@ -315,8 +331,15 @@ async function processAmbulanceData(supabaseClient: any, reportId: string, data:
   const bookings = Array.isArray(data) ? data : data.bookings || data.extracted_data || [];
   console.log('Processing ambulance bookings:', bookings.length);
   
+  if (bookings.length === 0) {
+    console.log('No ambulance booking data found in parsed result');
+    return;
+  }
+  
   for (const booking of bookings) {
     try {
+      console.log('Inserting ambulance booking:', booking);
+      
       const { error } = await supabaseClient
         .from('ambulance_bookings')
         .insert({
@@ -324,8 +347,8 @@ async function processAmbulanceData(supabaseClient: any, reportId: string, data:
           patient_name: booking.patient_name || booking.name || 'Unknown',
           phone_number: booking.phone_number || booking.phone || '',
           pickup_location: booking.pickup_location || booking.pickup || '',
-          destination: booking.destination || booking.drop || '',
-          booking_time: booking.booking_time || booking.timestamp || new Date().toISOString(),
+          destination: booking.destination || booking.drop || booking.destination || '',
+          booking_time: booking.booking_time || booking.timestamp || booking.date || new Date().toISOString(),
           ambulance_type: booking.ambulance_type || booking.type || 'standard',
           status: booking.status || 'completed',
           driver_name: booking.driver_name || booking.driver || ''
@@ -334,10 +357,18 @@ async function processAmbulanceData(supabaseClient: any, reportId: string, data:
       if (error) {
         console.error('Error inserting ambulance booking:', error);
         throw error;
+      } else {
+        console.log('Successfully inserted ambulance booking for:', booking.patient_name);
       }
     } catch (insertError) {
       console.error('Error inserting ambulance booking:', insertError);
       throw insertError;
     }
   }
+}
+
+async function processJustDialData(supabaseClient: any, reportId: string, data: any) {
+  // Implementation for Just Dial leads processing would go here
+  console.log('Processing Just Dial leads data:', data);
+  // For now, just log that we received the data
 }

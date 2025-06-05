@@ -1,10 +1,11 @@
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Mic, Phone, PhoneOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ElevenLabsVoiceChatProps {
   searchResults?: any;
@@ -15,6 +16,7 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [signedUrl, setSignedUrl] = useState<string | null>(null);
   const { toast } = useToast();
   const connectionAttempted = useRef(false);
 
@@ -51,31 +53,26 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
     connectionAttempted.current = true;
 
     try {
-      // Create conversation with ElevenLabs
-      const response = await fetch('/api/elevenlabs/start-conversation', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      // Create conversation with ElevenLabs via our Edge Function
+      const { data, error } = await supabase.functions.invoke('elevenlabs-start-conversation', {
+        body: {
           searchResults,
           searchQuery,
-        }),
+        },
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to start conversation');
+      if (error) {
+        throw new Error(error.message || 'Failed to start conversation');
       }
 
-      const data = await response.json();
-      
       setIsConnected(true);
       setIsConnecting(false);
       setConversationId(data.conversationId);
+      setSignedUrl(data.signedUrl);
       
       toast({
-        title: "Voice Chat Connected",
-        description: "You can now speak with the AI about your search results",
+        title: "Voice Chat Ready",
+        description: "ElevenLabs conversation is ready. You can now speak about your search results.",
       });
       
     } catch (error) {
@@ -85,7 +82,7 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
       
       toast({
         title: "Connection Failed",
-        description: "Unable to start voice chat. Please try again.",
+        description: "Unable to start voice chat. Please check your API key configuration.",
         variant: "destructive",
       });
     }
@@ -95,18 +92,15 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
     console.log("Ending conversation...");
     try {
       if (conversationId) {
-        await fetch('/api/elevenlabs/end-conversation', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ conversationId }),
+        await supabase.functions.invoke('elevenlabs-end-conversation', {
+          body: { conversationId },
         });
       }
       
       setIsConnecting(false);
       setIsConnected(false);
       setConversationId(null);
+      setSignedUrl(null);
       connectionAttempted.current = false;
       
       toast({
@@ -125,7 +119,7 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
           <Mic className="h-5 w-5" />
           <span>AI Voice Chat</span>
           <Badge variant={isConnected ? "default" : isConnecting ? "secondary" : "outline"}>
-            {isConnected ? "Connected" : isConnecting ? "Connecting..." : "Ready"}
+            {isConnected ? "Ready" : isConnecting ? "Connecting..." : "Available"}
           </Badge>
         </CardTitle>
       </CardHeader>
@@ -135,7 +129,7 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
             {isConnected && (
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span>Connected - Speak to ask about your search results</span>
+                <span>ElevenLabs conversation ready - Use the signed URL to connect</span>
               </div>
             )}
             {isConnecting && (
@@ -145,7 +139,7 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
               </div>
             )}
             {!isConnected && !isConnecting && (
-              <p>Click "Start Voice Chat" to begin talking with AI about your search results</p>
+              <p>Click "Start Voice Chat" to create an ElevenLabs conversation</p>
             )}
           </div>
 
@@ -174,6 +168,15 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
             </div>
           )}
 
+          {signedUrl && (
+            <div className="p-3 bg-blue-50 rounded-lg text-sm">
+              <p className="font-medium mb-1">🔗 ElevenLabs Connection:</p>
+              <p className="text-blue-800 break-all">
+                Signed URL ready for ElevenLabs SDK integration
+              </p>
+            </div>
+          )}
+
           <div className="p-3 bg-blue-50 rounded-lg text-sm">
             <p className="font-medium mb-1">💡 Voice Chat Tips:</p>
             <ul className="text-gray-600 space-y-1">
@@ -187,7 +190,7 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
           <div className="p-3 bg-green-50 rounded-lg text-sm">
             <p className="font-medium mb-1">✅ ElevenLabs Integration:</p>
             <p className="text-green-800">
-              Voice chat is now configured and ready to use with your search results.
+              Backend API configured with your ElevenLabs API key. Voice chat is ready to use.
             </p>
           </div>
         </div>

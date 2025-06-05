@@ -970,6 +970,7 @@ export type Database = {
           contract_end_date: string | null
           contract_start_date: string | null
           created_at: string
+          current_holder: string | null
           department: string | null
           id: string
           is_active: boolean | null
@@ -990,6 +991,7 @@ export type Database = {
           contract_end_date?: string | null
           contract_start_date?: string | null
           created_at?: string
+          current_holder?: string | null
           department?: string | null
           id?: string
           is_active?: boolean | null
@@ -1010,6 +1012,7 @@ export type Database = {
           contract_end_date?: string | null
           contract_start_date?: string | null
           created_at?: string
+          current_holder?: string | null
           department?: string | null
           id?: string
           is_active?: boolean | null

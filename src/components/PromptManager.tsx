@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -75,14 +74,12 @@ const PromptManager = () => {
       category: string;
       tags: string[];
     }) => {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) throw new Error('User not authenticated');
-
+      // For now, use a placeholder user ID until authentication is implemented
       const { data, error } = await supabase
         .from('prompts')
         .insert([{
           ...promptData,
-          created_by: userData.user.id
+          created_by: '00000000-0000-0000-0000-000000000000' // Placeholder UUID
         }])
         .select()
         .single();

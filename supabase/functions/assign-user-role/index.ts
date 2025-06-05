@@ -56,7 +56,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const user = authUsers.users.find(u => u.email?.toLowerCase() === email.toLowerCase());
+    let user = authUsers.users.find(u => u.email?.toLowerCase() === email.toLowerCase());
     
     console.log('User lookup result:', { 
       found: !!user, 
@@ -65,17 +65,44 @@ Deno.serve(async (req) => {
       allEmails: authUsers.users.map(u => u.email) 
     });
     
+    // If user doesn't exist, create them
+    if (!user) {
+      console.log('User not found, creating new user account for:', email);
+      
+      // Generate a temporary password (user will need to reset it)
+      const tempPassword = Math.random().toString(36).slice(-12) + Math.random().toString(36).slice(-12);
+      
+      const { data: newUserData, error: createError } = await supabaseClient.auth.admin.createUser({
+        email: email,
+        password: tempPassword,
+        email_confirm: true, // Auto-confirm email since admin is creating it
+      });
+
+      console.log('User creation result:', { 
+        success: !!newUserData.user, 
+        userId: newUserData.user?.id,
+        error: createError 
+      });
+
+      if (createError) {
+        console.error('Error creating user:', createError);
+        return new Response(
+          JSON.stringify({ error: 'Failed to create user: ' + createError.message }),
+          { 
+            status: 500, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+
+      user = newUserData.user;
+    }
+
     if (!user) {
       return new Response(
-        JSON.stringify({ 
-          error: 'User not found',
-          debug: {
-            searchEmail: email.toLowerCase(),
-            availableEmails: authUsers.users.map(u => u.email).filter(Boolean)
-          }
-        }),
+        JSON.stringify({ error: 'Failed to get or create user' }),
         { 
-          status: 404, 
+          status: 500, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       );
@@ -141,7 +168,8 @@ Deno.serve(async (req) => {
         data: {
           ...data,
           user_email: email
-        }
+        },
+        message: user ? 'Role assigned successfully' : 'User created and role assigned successfully'
       }),
       { 
         status: 200, 

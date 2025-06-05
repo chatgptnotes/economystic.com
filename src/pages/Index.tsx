@@ -9,8 +9,9 @@ import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import SocialMediaDashboard from "@/components/SocialMediaDashboard";
 import DomainManager from "@/components/DomainManager";
 import ProjectManager from "@/components/ProjectManager";
+import PromptManager from "@/components/PromptManager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Phone, Users, MessageSquare, BarChart3, Share2, Globe, FolderGit2 } from "lucide-react";
+import { Phone, Users, MessageSquare, BarChart3, Share2, Globe, FolderGit2, FileText } from "lucide-react";
 
 const Index = () => {
   return (
@@ -21,7 +22,7 @@ const Index = () => {
         <DashboardStats />
         
         <Tabs defaultValue="calls" className="w-full">
-          <TabsList className="grid w-full grid-cols-7 mb-6">
+          <TabsList className="grid w-full grid-cols-8 mb-6">
             <TabsTrigger value="calls" className="flex items-center space-x-2">
               <Phone className="h-4 w-4" />
               <span>Call Management</span>
@@ -45,6 +46,10 @@ const Index = () => {
             <TabsTrigger value="projects" className="flex items-center space-x-2">
               <FolderGit2 className="h-4 w-4" />
               <span>Project Manager</span>
+            </TabsTrigger>
+            <TabsTrigger value="prompts" className="flex items-center space-x-2">
+              <FileText className="h-4 w-4" />
+              <span>Prompts</span>
             </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center space-x-2">
               <BarChart3 className="h-4 w-4" />
@@ -74,6 +79,10 @@ const Index = () => {
           
           <TabsContent value="projects">
             <ProjectManager />
+          </TabsContent>
+          
+          <TabsContent value="prompts">
+            <PromptManager />
           </TabsContent>
           
           <TabsContent value="analytics">

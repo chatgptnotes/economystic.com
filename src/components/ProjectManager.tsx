@@ -40,6 +40,20 @@ const ProjectManager = () => {
 
   const teamMembers = ["Bhupendra", "Dinesh", "Prathik", "Pooja", "Poonam", "Monish", "Aman", "Priyanka"];
 
+  // All available domains for mapping
+  const availableDomains = [
+    'anohra.com', 'hopesoftwares.com', 'gmcnagpuralumni.com', 'drmhope.com',
+    'modernmedicalentrepreneur.com', 'anohra.ai', 'drmurali.ai', 'yellowfevervaccines.com',
+    'economystic.ai', 'adamrit.ai', 'digihealthtwin.com', 'digihealthtwin.ai',
+    'rescueseva.com', 'onescanonelife.com', 'emergencyseva.ai', 'bachao.co',
+    'bachao.xyz', 'bachao.store', 'bachao.net', 'bachao.info', 'bachaomujhebachao.com',
+    'ayushmannagpurhospital.com', 'rseva.health', 'maharashtratv24.in', 'rescueseva.in',
+    'onescanonelife.in', 'instaaid.in', 'bachaobachao.in', 'mujhebachao.in',
+    'theayushmanhospital.com', 'hopefoundationtrust.in', 'hopehospital.in',
+    'anohra.in', 'adamrit.com', 'yellowfever.in', 'digihealthtwin.in',
+    'emergencyseva.in', 'ambufast.in'
+  ];
+
   useEffect(() => {
     initializeProjects();
   }, []);
@@ -229,6 +243,33 @@ const ProjectManager = () => {
     
     toast({
       title: "Project Reassigned",
+      description: message,
+    });
+  };
+
+  const handleDomainMappingChange = (domain: string, newProjectId: string) => {
+    setProjects(prev => {
+      const updated = prev.map(project => {
+        // Remove the domain from any project that currently has it
+        if (project.domainAssociated === domain) {
+          return { ...project, domainAssociated: undefined };
+        }
+        // Assign the domain to the selected project
+        if (project.id === newProjectId) {
+          return { ...project, domainAssociated: domain };
+        }
+        return project;
+      });
+      return updated;
+    });
+
+    const projectName = projects.find(p => p.id === newProjectId)?.name;
+    const message = newProjectId === "none" 
+      ? `Domain "${domain}" is now unmapped`
+      : `Domain "${domain}" has been mapped to "${projectName}"`;
+    
+    toast({
+      title: "Domain Mapping Updated",
       description: message,
     });
   };
@@ -703,24 +744,57 @@ const ProjectManager = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {projects
-                  .filter(p => p.domainAssociated)
-                  .map((project) => (
-                    <div key={project.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div>
-                        <h3 className="font-medium">{project.domainAssociated}</h3>
-                        <p className="text-sm text-gray-600">{project.name}</p>
+                {availableDomains.map((domain) => {
+                  const mappedProject = projects.find(p => p.domainAssociated === domain);
+                  
+                  return (
+                    <div key={domain} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex-1">
+                        <h3 className="font-medium">{domain}</h3>
+                        <p className="text-sm text-gray-600">
+                          {mappedProject ? mappedProject.name : 'No project mapped'}
+                        </p>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Badge className={getTeamMemberColor(project.assignedTo)}>
-                          {project.assignedTo}
-                        </Badge>
-                        <Badge className={getPlatformColor(project.platform)}>
-                          {project.platform}
-                        </Badge>
+                        <Select
+                          value={mappedProject?.id || "none"}
+                          onValueChange={(value) => handleDomainMappingChange(domain, value)}
+                        >
+                          <SelectTrigger className="w-48">
+                            <SelectValue placeholder="Select project" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">
+                              <span className="text-gray-500">No mapping</span>
+                            </SelectItem>
+                            {projects
+                              .filter(p => p.isActive)
+                              .map((project) => (
+                                <SelectItem key={project.id} value={project.id}>
+                                  <div className="flex items-center space-x-2">
+                                    <span>{project.name}</span>
+                                    <Badge className={getTeamMemberColor(project.assignedTo)} variant="outline">
+                                      {project.assignedTo}
+                                    </Badge>
+                                  </div>
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                        {mappedProject && (
+                          <div className="flex items-center space-x-2">
+                            <Badge className={getTeamMemberColor(mappedProject.assignedTo)}>
+                              {mappedProject.assignedTo}
+                            </Badge>
+                            <Badge className={getPlatformColor(mappedProject.platform)}>
+                              {mappedProject.platform}
+                            </Badge>
+                          </div>
+                        )}
                       </div>
                     </div>
-                  ))}
+                  );
+                })}
               </div>
             </CardContent>
           </Card>

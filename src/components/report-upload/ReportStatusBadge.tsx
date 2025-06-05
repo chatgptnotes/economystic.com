@@ -25,11 +25,21 @@ const ReportStatusBadge = ({ status }: ReportStatusBadgeProps) => {
     }
   };
 
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'completed': return 'Analysis Complete';
+      case 'processing': return 'Analyzing Data...';
+      case 'failed': return 'Analysis Failed';
+      case 'pending': return 'Waiting to Process';
+      default: return status;
+    }
+  };
+
   return (
     <div className="flex items-center space-x-2">
       {getStatusIcon(status)}
       <Badge className={getStatusColor(status)}>
-        {status}
+        {getStatusLabel(status)}
       </Badge>
     </div>
   );

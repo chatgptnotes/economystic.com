@@ -45,7 +45,7 @@ serve(async (req) => {
     await processAnalysisResult(supabaseClient, reportId, reportType, analysisResult);
     await updateReportStatus(supabaseClient, reportId, 'completed', true);
 
-    console.log(`Analysis completed for report ${reportId}`);
+    console.log(`Analysis completed successfully for report ${reportId}`);
 
     return new Response(
       JSON.stringify({ success: true, message: 'Report analyzed successfully' }),
@@ -54,12 +54,14 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in analyze-report function:', error);
+    console.error('Error stack:', error.stack);
     await handleAnalysisError(supabaseClient, requestBody?.reportId, error);
 
     return new Response(
       JSON.stringify({ 
         error: error.message,
-        reportId: requestBody?.reportId 
+        reportId: requestBody?.reportId,
+        details: error.stack
       }),
       { 
         status: 500,
@@ -70,43 +72,71 @@ serve(async (req) => {
 });
 
 async function updateReportStatus(supabaseClient: any, reportId: string, status: string, processed?: boolean) {
-  const updateData: any = { analysis_status: status };
-  if (processed !== undefined) {
-    updateData.processed = processed;
-  }
+  try {
+    const updateData: any = { analysis_status: status };
+    if (processed !== undefined) {
+      updateData.processed = processed;
+    }
 
-  await supabaseClient
-    .from('reports')
-    .update(updateData)
-    .eq('id', reportId);
+    const { error } = await supabaseClient
+      .from('reports')
+      .update(updateData)
+      .eq('id', reportId);
+
+    if (error) {
+      console.error('Error updating report status:', error);
+      throw error;
+    }
+
+    console.log(`Report ${reportId} status updated to: ${status}`);
+  } catch (error) {
+    console.error('Failed to update report status:', error);
+    throw error;
+  }
 }
 
 async function downloadAndValidateFile(supabaseClient: any, filePath: string): Promise<string> {
-  const downloadPromise = supabaseClient.storage
-    .from('reports')
-    .download(filePath);
+  try {
+    console.log('Downloading file:', filePath);
+    
+    const downloadPromise = supabaseClient.storage
+      .from('reports')
+      .download(filePath);
 
-  const timeoutPromise = new Promise((_, reject) => 
-    setTimeout(() => reject(new Error('File download timeout')), 30000)
-  );
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('File download timeout after 30 seconds')), 30000)
+    );
 
-  const { data: fileData, error: downloadError } = await Promise.race([
-    downloadPromise,
-    timeoutPromise
-  ]);
+    const { data: fileData, error: downloadError } = await Promise.race([
+      downloadPromise,
+      timeoutPromise
+    ]);
 
-  if (downloadError) {
-    throw new Error(`Failed to download file: ${downloadError.message}`);
+    if (downloadError) {
+      console.error('Download error:', downloadError);
+      throw new Error(`Failed to download file: ${downloadError.message}`);
+    }
+
+    if (!fileData) {
+      throw new Error('No file data received');
+    }
+
+    const fileText = await fileData.text();
+    console.log('File content length:', fileText.length);
+
+    if (fileText.length === 0) {
+      throw new Error('File is empty');
+    }
+
+    if (fileText.length > 100000) {
+      throw new Error('File too large for processing (max 100KB)');
+    }
+
+    return fileText;
+  } catch (error) {
+    console.error('Error in downloadAndValidateFile:', error);
+    throw error;
   }
-
-  const fileText = await fileData.text();
-  console.log('File content length:', fileText.length);
-
-  if (fileText.length > 100000) {
-    throw new Error('File too large for processing');
-  }
-
-  return fileText;
 }
 
 async function analyzeWithAI(fileText: string, reportType: string, contextData?: Record<string, string>): Promise<any> {
@@ -124,12 +154,26 @@ For ambulance booking data, extract these fields for each booking record:
 - phone_number (string, clean format without extra characters)
 - pickup_location (string)
 - destination (string)
-- booking_time (string, ISO timestamp format)
+- booking_time (string, ISO timestamp format like "2024-01-15T10:30:00Z")
 - ambulance_type (string)
 - status (string: completed, pending, cancelled, etc.)
 - driver_name (string)
 
-Return the data as a JSON array of objects with these exact field names. Always return valid JSON format.`;
+IMPORTANT: Return the data as a JSON array of objects with these exact field names. If the file contains headers, ignore them. Always return valid JSON format.
+
+Example format:
+[
+  {
+    "patient_name": "John Doe",
+    "phone_number": "+1234567890",
+    "pickup_location": "Hospital A",
+    "destination": "Home",
+    "booking_time": "2024-01-15T10:30:00Z",
+    "ambulance_type": "Basic",
+    "status": "completed",
+    "driver_name": "Driver Name"
+  }
+]`;
   } else if (reportType === 'centro_call_center') {
     systemPrompt = `You are an AI assistant that analyzes call center reports. Extract structured data from the provided CSV or spreadsheet and return it as JSON. 
 
@@ -139,59 +183,80 @@ For call center data, extract these fields for each call record:
 - call_type (string)
 - call_duration (integer, duration in seconds or minutes)
 - call_status (string: completed, ongoing, missed, etc.)
-- call_time (string, ISO timestamp format)
+- call_time (string, ISO timestamp format like "2024-01-15T10:30:00Z")
 - call_direction (string: inbound, outbound)
 - notes (string)
 
 Return the data as a JSON array of objects with these exact field names. Always return valid JSON format.`;
+  } else if (reportType === 'whatsapp_double_tick') {
+    systemPrompt = `You are an AI assistant that analyzes WhatsApp message reports. Extract structured data from the provided CSV or spreadsheet and return it as JSON.
+
+For WhatsApp message data, extract these fields for each message record:
+- patient_name (string)
+- phone_number (string, clean format without extra characters)
+- message_content (string)
+- message_type (string: text, image, document, etc.)
+- sent_time (string, ISO timestamp format like "2024-01-15T10:30:00Z")
+- delivery_status (string: sent, delivered, read, etc.)
+- read_status (string: read, unread)
+- response (string)
+
+Return the data as a JSON array of objects with these exact field names. Always return valid JSON format.`;
   } else {
-    systemPrompt = `You are an AI assistant that analyzes healthcare reports. Extract structured data from the provided ${reportType} report and return it as JSON. Focus on extracting relevant patient data, timestamps, and key metrics. Always return valid JSON format.`;
+    systemPrompt = `You are an AI assistant that analyzes healthcare reports. Extract structured data from the provided ${reportType} report and return it as JSON. Focus on extracting relevant patient data, timestamps, and key metrics. Always return valid JSON format as an array of objects.`;
   }
 
-  const openaiPromise = fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${openaiApiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content: systemPrompt
-        },
-        {
-          role: 'user',
-          content: `Please analyze this ${reportType} report and extract structured data. Context: ${JSON.stringify(contextData || {})}. Return the result as JSON:\n\n${fileText}`
-        }
-      ],
-      temperature: 0.1,
-      max_tokens: 3000,
-    }),
-  });
+  try {
+    console.log('Calling OpenAI API...');
+    
+    const openaiPromise = fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openaiApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: systemPrompt
+          },
+          {
+            role: 'user',
+            content: `Please analyze this ${reportType} report and extract structured data. Context: ${JSON.stringify(contextData || {})}. Return the result as JSON:\n\n${fileText}`
+          }
+        ],
+        temperature: 0.1,
+        max_tokens: 3000,
+      }),
+    });
 
-  const aiTimeoutPromise = new Promise((_, reject) => 
-    setTimeout(() => reject(new Error('OpenAI API timeout')), 60000)
-  );
+    const aiTimeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('OpenAI API timeout after 60 seconds')), 60000)
+    );
 
-  const openaiResponse = await Promise.race([openaiPromise, aiTimeoutPromise]);
+    const openaiResponse = await Promise.race([openaiPromise, aiTimeoutPromise]);
 
-  if (!openaiResponse.ok) {
-    const errorText = await openaiResponse.text();
-    console.error('OpenAI API error:', openaiResponse.status, errorText);
-    throw new Error(`OpenAI API error: ${openaiResponse.status}`);
+    if (!openaiResponse.ok) {
+      const errorText = await openaiResponse.text();
+      console.error('OpenAI API error:', openaiResponse.status, errorText);
+      throw new Error(`OpenAI API error: ${openaiResponse.status} - ${errorText}`);
+    }
+
+    const openaiResult = await openaiResponse.json();
+    const analysisResult = openaiResult.choices[0]?.message?.content;
+
+    if (!analysisResult) {
+      throw new Error('No analysis result from OpenAI');
+    }
+
+    console.log('Raw AI response:', analysisResult);
+    return parseAIResponse(analysisResult);
+  } catch (error) {
+    console.error('Error in analyzeWithAI:', error);
+    throw error;
   }
-
-  const openaiResult = await openaiResponse.json();
-  const analysisResult = openaiResult.choices[0]?.message?.content;
-
-  if (!analysisResult) {
-    throw new Error('No analysis result from OpenAI');
-  }
-
-  console.log('Raw AI response:', analysisResult);
-  return parseAIResponse(analysisResult);
 }
 
 function parseAIResponse(analysisResult: string): any {
@@ -222,7 +287,7 @@ function parseAIResponse(analysisResult: string): any {
   } catch (parseError) {
     console.error('Failed to parse AI response as JSON:', analysisResult);
     console.error('Parse error:', parseError);
-    throw new Error('Invalid AI response format');
+    throw new Error(`Invalid AI response format: ${parseError.message}`);
   }
 }
 
@@ -230,6 +295,30 @@ async function processAnalysisResult(supabaseClient: any, reportId: string, repo
   try {
     console.log('Processing analysis result for type:', reportType);
     console.log('Parsed data:', JSON.stringify(parsedData, null, 2));
+    
+    if (!Array.isArray(parsedData)) {
+      console.log('Parsed data is not an array, checking for nested data...');
+      // Handle cases where AI returns nested structure
+      if (parsedData.patients) {
+        parsedData = parsedData.patients;
+      } else if (parsedData.calls) {
+        parsedData = parsedData.calls;
+      } else if (parsedData.bookings) {
+        parsedData = parsedData.bookings;
+      } else if (parsedData.messages) {
+        parsedData = parsedData.messages;
+      } else if (parsedData.extracted_data) {
+        parsedData = parsedData.extracted_data;
+      } else {
+        throw new Error('Invalid data structure: expected an array or object with known data properties');
+      }
+    }
+
+    if (!Array.isArray(parsedData)) {
+      throw new Error('Invalid data structure: data must be an array');
+    }
+
+    console.log(`Processing ${parsedData.length} records for ${reportType}`);
     
     if (reportType === 'whatsapp_double_tick') {
       await processWhatsAppData(supabaseClient, reportId, parsedData);
@@ -240,9 +329,11 @@ async function processAnalysisResult(supabaseClient: any, reportId: string, repo
     } else if (reportType === 'just_dial_leads') {
       await processJustDialData(supabaseClient, reportId, parsedData);
     }
+    
+    console.log(`Successfully processed ${parsedData.length} records for ${reportType}`);
   } catch (dataProcessError) {
     console.error('Error processing data:', dataProcessError);
-    throw dataProcessError; // Re-throw to mark the analysis as failed
+    throw dataProcessError;
   }
 }
 
@@ -250,17 +341,17 @@ async function handleAnalysisError(supabaseClient: any, reportId: string | undef
   if (reportId && supabaseClient) {
     try {
       await updateReportStatus(supabaseClient, reportId, 'failed', false);
+      console.log(`Marked report ${reportId} as failed due to error: ${error.message}`);
     } catch (updateError) {
-      console.error('Failed to update report status:', updateError);
+      console.error('Failed to update report status to failed:', updateError);
     }
   }
 }
 
-async function processWhatsAppData(supabaseClient: any, reportId: string, data: any) {
-  const messages = Array.isArray(data) ? data : data.messages || data.extracted_data || [];
-  console.log('Processing WhatsApp messages:', messages.length);
+async function processWhatsAppData(supabaseClient: any, reportId: string, data: any[]) {
+  console.log('Processing WhatsApp messages:', data.length);
   
-  for (const message of messages) {
+  for (const message of data) {
     try {
       const { error } = await supabaseClient
         .from('whatsapp_messages')
@@ -268,8 +359,8 @@ async function processWhatsAppData(supabaseClient: any, reportId: string, data: 
           report_id: reportId,
           patient_name: message.patient_name || message.name || 'Unknown',
           phone_number: message.phone_number || message.phone || '',
-          message_content: message.content || message.message || message.message_content || '',
-          message_type: message.type || message.message_type || 'text',
+          message_content: message.message_content || message.content || message.message || '',
+          message_type: message.message_type || message.type || 'text',
           sent_time: message.sent_time || message.timestamp || new Date().toISOString(),
           delivery_status: message.delivery_status || 'sent',
           read_status: message.read_status || 'unread',
@@ -287,16 +378,15 @@ async function processWhatsAppData(supabaseClient: any, reportId: string, data: 
   }
 }
 
-async function processCallCenterData(supabaseClient: any, reportId: string, data: any) {
-  const calls = Array.isArray(data) ? data : data.calls || data.extracted_data || [];
-  console.log('Processing call center data:', calls.length, 'calls');
+async function processCallCenterData(supabaseClient: any, reportId: string, data: any[]) {
+  console.log('Processing call center data:', data.length, 'calls');
   
-  if (calls.length === 0) {
+  if (data.length === 0) {
     console.log('No call data found in parsed result');
     return;
   }
   
-  for (const call of calls) {
+  for (const call of data) {
     try {
       console.log('Inserting call record:', call);
       
@@ -327,18 +417,23 @@ async function processCallCenterData(supabaseClient: any, reportId: string, data
   }
 }
 
-async function processAmbulanceData(supabaseClient: any, reportId: string, data: any) {
-  const bookings = Array.isArray(data) ? data : data.bookings || data.extracted_data || [];
-  console.log('Processing ambulance bookings:', bookings.length);
+async function processAmbulanceData(supabaseClient: any, reportId: string, data: any[]) {
+  console.log('Processing ambulance bookings:', data.length);
   
-  if (bookings.length === 0) {
+  if (data.length === 0) {
     console.log('No ambulance booking data found in parsed result');
     return;
   }
   
-  for (const booking of bookings) {
+  for (const booking of data) {
     try {
       console.log('Inserting ambulance booking:', booking);
+      
+      // Ensure we have a valid booking_time
+      let bookingTime = booking.booking_time || booking.timestamp || booking.date;
+      if (!bookingTime) {
+        bookingTime = new Date().toISOString();
+      }
       
       const { error } = await supabaseClient
         .from('ambulance_bookings')
@@ -346,9 +441,9 @@ async function processAmbulanceData(supabaseClient: any, reportId: string, data:
           report_id: reportId,
           patient_name: booking.patient_name || booking.name || 'Unknown',
           phone_number: booking.phone_number || booking.phone || '',
-          pickup_location: booking.pickup_location || booking.pickup || '',
-          destination: booking.destination || booking.drop || booking.destination || '',
-          booking_time: booking.booking_time || booking.timestamp || booking.date || new Date().toISOString(),
+          pickup_location: booking.pickup_location || booking.pickup || booking.from || '',
+          destination: booking.destination || booking.drop || booking.to || '',
+          booking_time: bookingTime,
           ambulance_type: booking.ambulance_type || booking.type || 'standard',
           status: booking.status || 'completed',
           driver_name: booking.driver_name || booking.driver || ''
@@ -367,8 +462,8 @@ async function processAmbulanceData(supabaseClient: any, reportId: string, data:
   }
 }
 
-async function processJustDialData(supabaseClient: any, reportId: string, data: any) {
+async function processJustDialData(supabaseClient: any, reportId: string, data: any[]) {
+  console.log('Processing Just Dial leads data:', data.length);
   // Implementation for Just Dial leads processing would go here
-  console.log('Processing Just Dial leads data:', data);
   // For now, just log that we received the data
 }

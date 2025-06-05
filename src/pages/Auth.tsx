@@ -17,7 +17,7 @@ const Auth = () => {
             </CardTitle>
             <p className="text-gray-600">
               {isSignUp 
-                ? "Sign up to access Ayushman Polyclinic Analytics" 
+                ? "Sign up to access economystic.ai Analytics" 
                 : "Sign in to your account"}
             </p>
             <p className="text-sm text-blue-600 mt-2">

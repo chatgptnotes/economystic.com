@@ -9,22 +9,22 @@ const Landing = () => {
     {
       icon: Activity,
       title: "Real-time Analytics",
-      description: "Monitor your healthcare operations with live data and insights"
+      description: "Monitor your business operations with live data and insights"
     },
     {
       icon: Users,
-      title: "Patient Management",
-      description: "Comprehensive patient database with advanced tracking capabilities"
+      title: "Data Management",
+      description: "Comprehensive data management with advanced tracking capabilities"
     },
     {
       icon: Phone,
-      title: "Call Management",
-      description: "Streamlined call tracking and follow-up management system"
+      title: "Communication Tracking",
+      description: "Streamlined communication tracking and management system"
     },
     {
       icon: MessageSquare,
-      title: "WhatsApp Integration",
-      description: "Track and manage WhatsApp communications seamlessly"
+      title: "Platform Integration",
+      description: "Track and manage communications across multiple platforms seamlessly"
     },
     {
       icon: BarChart3,
@@ -34,15 +34,15 @@ const Landing = () => {
     {
       icon: Shield,
       title: "Secure & Compliant",
-      description: "Healthcare-grade security with full compliance standards"
+      description: "Enterprise-grade security with full compliance standards"
     }
   ];
 
   const benefits = [
-    "Streamline healthcare operations",
-    "Improve patient satisfaction",
+    "Streamline business operations",
+    "Improve decision making",
     "Reduce administrative overhead",
-    "Data-driven decision making",
+    "Data-driven insights",
     "24/7 monitoring capabilities"
   ];
 
@@ -58,7 +58,7 @@ const Landing = () => {
               </div>
               <div>
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-                  Ayushman Polyclinic
+                  economystic.ai
                 </h1>
                 <p className="text-sm text-slate-500 font-medium">Analytics Dashboard</p>
               </div>
@@ -78,12 +78,12 @@ const Landing = () => {
       <section className="px-6 py-20 max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-6">
-            Healthcare Analytics
+            Business Analytics
             <span className="block">Reimagined</span>
           </h1>
           <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-8 leading-relaxed">
-            Transform your healthcare operations with our comprehensive analytics platform. 
-            Monitor, analyze, and optimize every aspect of your polyclinic's performance.
+            Transform your business operations with our comprehensive analytics platform. 
+            Monitor, analyze, and optimize every aspect of your organization's performance.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -123,7 +123,7 @@ const Landing = () => {
               Why Choose Our Platform?
             </h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Join hundreds of healthcare providers who trust our platform to optimize their operations
+              Join hundreds of businesses who trust our platform to optimize their operations
             </p>
           </div>
           
@@ -141,7 +141,7 @@ const Landing = () => {
             </div>
             
             <div className="bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl p-8">
-              <h3 className="text-2xl font-semibold text-slate-800 mb-4">Trusted by Healthcare Leaders</h3>
+              <h3 className="text-2xl font-semibold text-slate-800 mb-4">Trusted by Business Leaders</h3>
               <div className="grid grid-cols-2 gap-6 text-center">
                 <div>
                   <div className="text-3xl font-bold text-blue-600">500+</div>
@@ -156,7 +156,7 @@ const Landing = () => {
                   <div className="text-sm text-slate-600">Support</div>
                 </div>
                 <div>
-                  <div className="text-3xl font-bold text-blue-600">HIPAA</div>
+                  <div className="text-3xl font-bold text-blue-600">SOC2</div>
                   <div className="text-sm text-slate-600">Compliant</div>
                 </div>
               </div>
@@ -166,9 +166,9 @@ const Landing = () => {
 
         {/* CTA Section */}
         <div className="text-center bg-gradient-to-r from-blue-500 to-indigo-600 rounded-3xl p-12 text-white">
-          <h2 className="text-4xl font-bold mb-4">Ready to Transform Your Practice?</h2>
+          <h2 className="text-4xl font-bold mb-4">Ready to Transform Your Business?</h2>
           <p className="text-xl mb-8 opacity-90">
-            Join the future of healthcare analytics today. No setup fees, no long-term contracts.
+            Join the future of business analytics today. No setup fees, no long-term contracts.
           </p>
           <Link to="/auth">
             <Button size="lg" variant="secondary" className="bg-white text-blue-600 hover:bg-gray-100 rounded-xl px-8 py-4 text-lg font-semibold">
@@ -188,12 +188,12 @@ const Landing = () => {
                 <Activity className="h-6 w-6 text-white" />
               </div>
               <div>
-                <div className="font-bold">Ayushman Polyclinic</div>
+                <div className="font-bold">economystic.ai</div>
                 <div className="text-sm text-slate-400">Analytics Dashboard</div>
               </div>
             </div>
             <div className="text-sm text-slate-400">
-              © 2024 Ayushman Polyclinic. All rights reserved.
+              © 2024 economystic.ai. All rights reserved.
             </div>
           </div>
         </div>

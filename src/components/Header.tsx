@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Activity, FileText, Table, Home, Search } from "lucide-react";
+import { Activity, FileText, Table, Home, Search, Shield } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { SignedIn, SignedOut, UserButton, SignInButton } from "@clerk/clerk-react";
 
@@ -63,6 +63,16 @@ const Header = () => {
                   >
                     <FileText className="h-4 w-4" />
                     <span>Reports</span>
+                  </Button>
+                </Link>
+
+                <Link to="/audit">
+                  <Button 
+                    variant={isActive("/audit") ? "default" : "ghost"} 
+                    className="flex items-center space-x-2"
+                  >
+                    <Shield className="h-4 w-4" />
+                    <span>Audit</span>
                   </Button>
                 </Link>
               </nav>

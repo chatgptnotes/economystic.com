@@ -21,6 +21,7 @@ import DomainManagement from "./pages/DomainManagement";
 import ProjectManagement from "./pages/ProjectManagement";
 import PromptManagement from "./pages/PromptManagement";
 import IntelligentSearchPage from "./pages/IntelligentSearch";
+import AuditPage from "./pages/AuditPage";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ const App = () => (
           <Route path="/intelligent-search" element={<ProtectedRoute><IntelligentSearchPage /></ProtectedRoute>} />
           <Route path="/reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
           <Route path="/data-tables" element={<ProtectedRoute><DataTables /></ProtectedRoute>} />
+          <Route path="/audit" element={<ProtectedRoute><AuditPage /></ProtectedRoute>} />
           <Route path="/total-calls" element={<ProtectedRoute><TotalCalls /></ProtectedRoute>} />
           <Route path="/ambulance-bookings" element={<ProtectedRoute><AmbulanceBookings /></ProtectedRoute>} />
           <Route path="/new-patients" element={<ProtectedRoute><NewPatients /></ProtectedRoute>} />

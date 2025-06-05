@@ -8,7 +8,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Github, Users, Code, Calendar, ExternalLink, FileText, Edit, Trash2, GripVertical } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Search, Github, Users, Code, Calendar, ExternalLink, FileText, Edit, Trash2, GripVertical, UserX } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ProjectFileManager from "./ProjectFileManager";
 import ProjectEditForm from "./ProjectEditForm";
@@ -25,6 +26,7 @@ interface Project {
   platform: 'Cursor' | 'Lovable' | 'V0' | 'Unknown';
   domainAssociated?: string;
   githubUrl: string;
+  isActive: boolean;
 }
 
 const ProjectManager = () => {
@@ -34,6 +36,7 @@ const ProjectManager = () => {
   const [selectedMember, setSelectedMember] = useState("all");
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [showInactive, setShowInactive] = useState(true);
 
   const teamMembers = ["Bhupendra", "Dinesh", "Prathik", "Pooja", "Poonam", "Monish"];
 
@@ -143,7 +146,8 @@ const ProjectManager = () => {
       assignedTo: getRandomTeamMember(),
       platform: detectPlatform(project.name, project.description),
       domainAssociated: findAssociatedDomain(project.name),
-      githubUrl: `https://github.com/yourusername/${project.name}`
+      githubUrl: `https://github.com/yourusername/${project.name}`,
+      isActive: Math.random() > 0.2 // 80% of projects are active by default
     }));
 
     setProjects(transformedProjects);
@@ -154,6 +158,20 @@ const ProjectManager = () => {
     toast({
       title: "Success",
       description: `Project "${projectName}" has been deleted`,
+    });
+  };
+
+  const handleProjectStatusToggle = (projectId: string, isActive: boolean) => {
+    setProjects(prev => prev.map(project => 
+      project.id === projectId 
+        ? { ...project, isActive }
+        : project
+    ));
+
+    const projectName = projects.find(p => p.id === projectId)?.name;
+    toast({
+      title: isActive ? "Project Activated" : "Project Deactivated",
+      description: `"${projectName}" has been marked as ${isActive ? 'active' : 'inactive'}`,
     });
   };
 
@@ -205,9 +223,13 @@ const ProjectManager = () => {
     });
 
     const projectName = projects.find(p => p.id === projectId)?.name;
+    const message = newAssignee === "Unassigned" 
+      ? `"${projectName}" is now unassigned`
+      : `"${projectName}" has been assigned to ${newAssignee}`;
+    
     toast({
       title: "Project Reassigned",
-      description: `"${projectName}" has been assigned to ${newAssignee}`,
+      description: message,
     });
   };
 
@@ -215,10 +237,14 @@ const ProjectManager = () => {
     const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          project.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesMember = selectedMember === "all" || project.assignedTo === selectedMember;
-    return matchesSearch && matchesMember;
+    const matchesStatus = showInactive || project.isActive;
+    return matchesSearch && matchesMember && matchesStatus;
   });
 
   const getTeamMemberColor = (member: string) => {
+    if (member === "Unassigned") {
+      return "bg-gray-100 text-gray-600";
+    }
     const colors = {
       "Bhupendra": "bg-blue-100 text-blue-800",
       "Dinesh": "bg-green-100 text-green-800",
@@ -241,14 +267,19 @@ const ProjectManager = () => {
   };
 
   const projectsByMember = teamMembers.reduce((acc, member) => {
-    acc[member] = projects.filter(p => p.assignedTo === member).length;
+    acc[member] = projects.filter(p => p.assignedTo === member && p.isActive).length;
     return acc;
   }, {} as Record<string, number>);
 
   const projectsByPlatform = projects.reduce((acc, project) => {
-    acc[project.platform] = (acc[project.platform] || 0) + 1;
+    if (project.isActive) {
+      acc[project.platform] = (acc[project.platform] || 0) + 1;
+    }
     return acc;
   }, {} as Record<string, number>);
+
+  const activeProjects = projects.filter(p => p.isActive);
+  const unassignedProjects = projects.filter(p => p.assignedTo === "Unassigned" && p.isActive);
 
   const handleProjectUpdate = (updatedProject: Project) => {
     setProjects(prev => prev.map(p => p.id === updatedProject.id ? updatedProject : p));
@@ -284,18 +315,29 @@ const ProjectManager = () => {
           {teamMembers.map(member => (
             <option key={member} value={member}>{member}</option>
           ))}
+          <option value="Unassigned">Unassigned</option>
         </select>
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="show-inactive"
+            checked={showInactive}
+            onCheckedChange={setShowInactive}
+          />
+          <label htmlFor="show-inactive" className="text-sm text-gray-600">
+            Show inactive projects
+          </label>
+        </div>
       </div>
 
       {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
               <Github className="h-8 w-8 text-blue-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Projects</p>
-                <p className="text-2xl font-bold text-gray-900">{projects.length}</p>
+                <p className="text-sm font-medium text-gray-600">Active Projects</p>
+                <p className="text-2xl font-bold text-gray-900">{activeProjects.length}</p>
               </div>
             </div>
           </CardContent>
@@ -316,10 +358,22 @@ const ProjectManager = () => {
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
+              <UserX className="h-8 w-8 text-orange-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Unassigned</p>
+                <p className="text-2xl font-bold text-gray-900">{unassignedProjects.length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
               <Code className="h-8 w-8 text-purple-600" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Languages</p>
-                <p className="text-2xl font-bold text-gray-900">{new Set(projects.map(p => p.language)).size}</p>
+                <p className="text-2xl font-bold text-gray-900">{new Set(activeProjects.map(p => p.language)).size}</p>
               </div>
             </div>
           </CardContent>
@@ -330,8 +384,8 @@ const ProjectManager = () => {
             <div className="flex items-center">
               <Calendar className="h-8 w-8 text-orange-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Active Projects</p>
-                <p className="text-2xl font-bold text-gray-900">{projects.filter(p => p.lastUpdated.includes('hours') || p.lastUpdated.includes('yesterday')).length}</p>
+                <p className="text-sm font-medium text-gray-600">Recently Updated</p>
+                <p className="text-2xl font-bold text-gray-900">{activeProjects.filter(p => p.lastUpdated.includes('hours') || p.lastUpdated.includes('yesterday')).length}</p>
               </div>
             </div>
           </CardContent>
@@ -355,6 +409,7 @@ const ProjectManager = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Status</TableHead>
                     <TableHead>Project Name</TableHead>
                     <TableHead>Language</TableHead>
                     <TableHead>Assigned To</TableHead>
@@ -366,7 +421,14 @@ const ProjectManager = () => {
                 </TableHeader>
                 <TableBody>
                   {filteredProjects.map((project) => (
-                    <TableRow key={project.id}>
+                    <TableRow key={project.id} className={!project.isActive ? "opacity-60" : ""}>
+                      <TableCell>
+                        <Switch
+                          checked={project.isActive}
+                          onCheckedChange={(checked) => handleProjectStatusToggle(project.id, checked)}
+                          size="sm"
+                        />
+                      </TableCell>
                       <TableCell>
                         <div>
                           <div className="flex items-center space-x-2">
@@ -374,6 +436,11 @@ const ProjectManager = () => {
                             <Badge variant={project.visibility === 'Private' ? 'secondary' : 'default'}>
                               {project.visibility}
                             </Badge>
+                            {!project.isActive && (
+                              <Badge variant="outline" className="text-gray-500">
+                                Inactive
+                              </Badge>
+                            )}
                           </div>
                           {project.description && (
                             <p className="text-sm text-gray-500 mt-1">{project.description}</p>
@@ -391,11 +458,26 @@ const ProjectManager = () => {
                           <SelectTrigger className="w-32">
                             <SelectValue>
                               <Badge className={getTeamMemberColor(project.assignedTo)}>
-                                {project.assignedTo}
+                                {project.assignedTo === "Unassigned" ? (
+                                  <div className="flex items-center">
+                                    <UserX className="h-3 w-3 mr-1" />
+                                    Unassigned
+                                  </div>
+                                ) : (
+                                  project.assignedTo
+                                )}
                               </Badge>
                             </SelectValue>
                           </SelectTrigger>
                           <SelectContent>
+                            <SelectItem value="Unassigned">
+                              <div className="flex items-center">
+                                <UserX className="h-3 w-3 mr-2" />
+                                <Badge className={getTeamMemberColor("Unassigned")}>
+                                  Unassigned
+                                </Badge>
+                              </div>
+                            </SelectItem>
                             {teamMembers.map(member => (
                               <SelectItem key={member} value={member}>
                                 <Badge className={getTeamMemberColor(member)}>

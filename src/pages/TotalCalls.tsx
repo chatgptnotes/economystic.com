@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { Phone, ArrowLeft, Filter, Calendar as CalendarIcon } from "lucide-react";
+import { Phone, ArrowLeft, Filter, Calendar as CalendarIcon, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCallAPI } from "@/hooks/useCallAPI";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,7 +28,9 @@ const TotalCalls = () => {
   const [calls, setCalls] = useState<CallRecord[]>([]);
   const [filteredCalls, setFilteredCalls] = useState<CallRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [dateFrom, setDateFrom] = useState<Date | undefined>();
+  const [dateTo, setDateTo] = useState<Date | undefined>();
+  const [showDateFilter, setShowDateFilter] = useState(false);
   const { makeCall, isLoading } = useCallAPI();
 
   const fetchCalls = async () => {
@@ -46,6 +48,7 @@ const TotalCalls = () => {
 
       console.log('Call records fetched:', data?.length || 0);
       setCalls(data || []);
+      setFilteredCalls(data || []); // Show all data by default
     } catch (error) {
       console.error('Error in fetchCalls:', error);
     } finally {
@@ -53,16 +56,27 @@ const TotalCalls = () => {
     }
   };
 
-  const filterCallsByDate = (callsData: CallRecord[], filterDate: Date) => {
-    const filterDateString = format(filterDate, 'yyyy-MM-dd');
-    console.log('Filtering calls for date:', filterDateString);
-    
+  const filterCallsByDateRange = (callsData: CallRecord[]) => {
+    if (!dateFrom && !dateTo) {
+      setFilteredCalls(callsData);
+      return;
+    }
+
     const filtered = callsData.filter(call => {
       if (!call.call_time) return false;
       
       try {
-        const callDate = format(new Date(call.call_time), 'yyyy-MM-dd');
-        return callDate === filterDateString;
+        const callDate = new Date(call.call_time);
+        
+        if (dateFrom && dateTo) {
+          return callDate >= dateFrom && callDate <= dateTo;
+        } else if (dateFrom) {
+          return callDate >= dateFrom;
+        } else if (dateTo) {
+          return callDate <= dateTo;
+        }
+        
+        return true;
       } catch {
         return false;
       }
@@ -70,6 +84,12 @@ const TotalCalls = () => {
     
     console.log('Filtered calls count:', filtered.length);
     setFilteredCalls(filtered);
+  };
+
+  const clearDateFilter = () => {
+    setDateFrom(undefined);
+    setDateTo(undefined);
+    setFilteredCalls(calls);
   };
 
   useEffect(() => {
@@ -94,11 +114,9 @@ const TotalCalls = () => {
 
   useEffect(() => {
     if (calls.length > 0) {
-      filterCallsByDate(calls, selectedDate);
-    } else {
-      setFilteredCalls([]);
+      filterCallsByDateRange(calls);
     }
-  }, [calls, selectedDate]);
+  }, [calls, dateFrom, dateTo]);
 
   const handleCallBack = async (phoneNumber: string, patientName: string) => {
     console.log(`Calling back ${patientName} at ${phoneNumber}`);
@@ -143,6 +161,17 @@ const TotalCalls = () => {
     }
   };
 
+  const getDateRangeText = () => {
+    if (dateFrom && dateTo) {
+      return `${format(dateFrom, 'MMM dd')} - ${format(dateTo, 'MMM dd, yyyy')}`;
+    } else if (dateFrom) {
+      return `From ${format(dateFrom, 'MMM dd, yyyy')}`;
+    } else if (dateTo) {
+      return `Until ${format(dateTo, 'MMM dd, yyyy')}`;
+    }
+    return 'All time';
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto">
@@ -157,36 +186,90 @@ const TotalCalls = () => {
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Total Calls</h1>
               <p className="text-gray-600">
-                {filteredCalls.length} calls found for {format(selectedDate, 'MMM dd, yyyy')}
+                {filteredCalls.length} calls found ({getDateRangeText()})
               </p>
             </div>
           </div>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className={cn(
-                "w-[240px] justify-start text-left font-normal",
-                !selectedDate && "text-muted-foreground"
-              )}>
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
+          
+          <div className="flex items-center space-x-2">
+            {(dateFrom || dateTo) && (
+              <Button variant="outline" size="sm" onClick={clearDateFilter}>
+                <X className="h-4 w-4 mr-1" />
+                Clear Filter
               </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={(date) => date && setSelectedDate(date)}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
+            )}
+            <Popover open={showDateFilter} onOpenChange={setShowDateFilter}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-[200px] justify-start">
+                  <Filter className="mr-2 h-4 w-4" />
+                  Date Range
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="end">
+                <div className="p-4 space-y-4">
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">From Date:</label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !dateFrom && "text-muted-foreground"
+                        )}>
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {dateFrom ? format(dateFrom, "PPP") : "Select start date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={dateFrom}
+                          onSelect={setDateFrom}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">To Date:</label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !dateTo && "text-muted-foreground"
+                        )}>
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {dateTo ? format(dateTo, "PPP") : "Select end date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={dateTo}
+                          onSelect={setDateTo}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  
+                  <Button 
+                    onClick={() => setShowDateFilter(false)} 
+                    className="w-full"
+                  >
+                    Apply Filter
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
 
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
               <Phone className="h-5 w-5 mr-2 text-blue-600" />
-              Call Records for {format(selectedDate, 'MMMM dd, yyyy')}
+              Call Records ({getDateRangeText()})
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -197,8 +280,10 @@ const TotalCalls = () => {
             ) : filteredCalls.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-gray-500">
-                  No call records found for {format(selectedDate, 'MMMM dd, yyyy')}. 
-                  {calls.length > 0 ? ' Try selecting a different date.' : ' Upload reports to see call data here.'}
+                  {calls.length === 0 
+                    ? 'No call records found. Upload reports to see call data here.'
+                    : 'No call records found for the selected date range. Try adjusting your filter.'
+                  }
                 </p>
               </div>
             ) : (

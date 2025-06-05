@@ -3,10 +3,14 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Phone, ArrowLeft, Filter } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { Phone, ArrowLeft, Filter, Calendar as CalendarIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCallAPI } from "@/hooks/useCallAPI";
 import { supabase } from "@/integrations/supabase/client";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface CallRecord {
   id: string;
@@ -22,7 +26,9 @@ interface CallRecord {
 
 const TotalCalls = () => {
   const [calls, setCalls] = useState<CallRecord[]>([]);
+  const [filteredCalls, setFilteredCalls] = useState<CallRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const { makeCall, isLoading } = useCallAPI();
 
   const fetchCalls = async () => {
@@ -47,6 +53,25 @@ const TotalCalls = () => {
     }
   };
 
+  const filterCallsByDate = (callsData: CallRecord[], filterDate: Date) => {
+    const filterDateString = format(filterDate, 'yyyy-MM-dd');
+    console.log('Filtering calls for date:', filterDateString);
+    
+    const filtered = callsData.filter(call => {
+      if (!call.call_time) return false;
+      
+      try {
+        const callDate = format(new Date(call.call_time), 'yyyy-MM-dd');
+        return callDate === filterDateString;
+      } catch {
+        return false;
+      }
+    });
+    
+    console.log('Filtered calls count:', filtered.length);
+    setFilteredCalls(filtered);
+  };
+
   useEffect(() => {
     fetchCalls();
 
@@ -66,6 +91,14 @@ const TotalCalls = () => {
       supabase.removeChannel(callRecordsSubscription);
     };
   }, []);
+
+  useEffect(() => {
+    if (calls.length > 0) {
+      filterCallsByDate(calls, selectedDate);
+    } else {
+      setFilteredCalls([]);
+    }
+  }, [calls, selectedDate]);
 
   const handleCallBack = async (phoneNumber: string, patientName: string) => {
     console.log(`Calling back ${patientName} at ${phoneNumber}`);
@@ -124,21 +157,36 @@ const TotalCalls = () => {
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Total Calls</h1>
               <p className="text-gray-600">
-                {calls.length} calls found {calls.length > 0 && `(from uploaded reports)`}
+                {filteredCalls.length} calls found for {format(selectedDate, 'MMM dd, yyyy')}
               </p>
             </div>
           </div>
-          <Button variant="outline">
-            <Filter className="h-4 w-4 mr-2" />
-            Filter
-          </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className={cn(
+                "w-[240px] justify-start text-left font-normal",
+                !selectedDate && "text-muted-foreground"
+              )}>
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={(date) => date && setSelectedDate(date)}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
         </div>
 
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
               <Phone className="h-5 w-5 mr-2 text-blue-600" />
-              All Call Records
+              Call Records for {format(selectedDate, 'MMMM dd, yyyy')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -146,13 +194,16 @@ const TotalCalls = () => {
               <div className="text-center py-8">
                 <p className="text-gray-500">Loading call records...</p>
               </div>
-            ) : calls.length === 0 ? (
+            ) : filteredCalls.length === 0 ? (
               <div className="text-center py-8">
-                <p className="text-gray-500">No call records found. Upload reports to see call data here.</p>
+                <p className="text-gray-500">
+                  No call records found for {format(selectedDate, 'MMMM dd, yyyy')}. 
+                  {calls.length > 0 ? ' Try selecting a different date.' : ' Upload reports to see call data here.'}
+                </p>
               </div>
             ) : (
               <div className="space-y-4">
-                {calls.map((call) => (
+                {filteredCalls.map((call) => (
                   <div key={call.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
                     <div className="flex items-center justify-between">
                       <div className="flex-1">

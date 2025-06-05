@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -484,7 +485,7 @@ const ProjectManager = () => {
                 const memberProjects = projects.filter(p => p.assignedTo === member);
                 
                 return (
-                  <Droppable droppableId={member} key={member}>
+                  <Droppable droppableId={member} key={member} type="PROJECT">
                     {(provided, snapshot) => (
                       <Card 
                         className={`transition-colors duration-200 ${snapshot.isDraggingOver ? 'bg-blue-50 border-blue-300' : ''}`}
@@ -502,25 +503,30 @@ const ProjectManager = () => {
                         <CardContent className="min-h-[200px]">
                           <div className="space-y-2">
                             {memberProjects.map((project, index) => (
-                              <Draggable key={project.id} draggableId={project.id} index={index}>
+                              <Draggable 
+                                key={project.id} 
+                                draggableId={project.id} 
+                                index={index}
+                                type="PROJECT"
+                              >
                                 {(provided, snapshot) => (
                                   <div
                                     ref={provided.innerRef}
                                     {...provided.draggableProps}
-                                    className={`flex items-center justify-between text-sm p-2 rounded border transition-all duration-200 ${
+                                    className={`flex items-center justify-between text-sm p-3 rounded-lg border transition-all duration-200 ${
                                       snapshot.isDragging 
-                                        ? 'bg-blue-100 border-blue-300 shadow-lg' 
-                                        : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                                        ? 'bg-blue-100 border-blue-300 shadow-lg rotate-2' 
+                                        : 'bg-gray-50 border-gray-200 hover:bg-gray-100 cursor-grab'
                                     }`}
                                   >
                                     <div className="flex items-center flex-1 min-w-0">
                                       <div 
                                         {...provided.dragHandleProps}
-                                        className="mr-2 cursor-grab active:cursor-grabbing"
+                                        className="mr-2 cursor-grab active:cursor-grabbing hover:text-blue-500"
                                       >
                                         <GripVertical className="h-4 w-4 text-gray-400" />
                                       </div>
-                                      <span className="truncate flex-1">{project.name}</span>
+                                      <span className="truncate flex-1 font-medium">{project.name}</span>
                                     </div>
                                     <Badge variant="outline" className="text-xs ml-2 flex-shrink-0">
                                       {project.language}

@@ -1,8 +1,8 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, Phone, Check, CheckCheck, Clock } from "lucide-react";
+import { useCallAPI } from "@/hooks/useCallAPI";
 
 interface WhatsAppMessage {
   id: string;
@@ -16,6 +16,13 @@ interface WhatsAppMessage {
 }
 
 const WhatsAppTracker = () => {
+  const { makeCall, isLoading } = useCallAPI();
+
+  const handleCallNow = async (phoneNumber: string, patientName: string) => {
+    console.log(`Making follow-up call to ${patientName} at ${phoneNumber}`);
+    await makeCall({ phoneNumber });
+  };
+
   const messages: WhatsAppMessage[] = [
     {
       id: "1",
@@ -119,9 +126,14 @@ const WhatsAppTracker = () => {
                 </div>
                 <div className="flex space-x-2 ml-4">
                   {message.followUpRequired && (
-                    <Button size="sm" variant="outline">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => handleCallNow(message.phoneNumber, message.patientName)}
+                      disabled={isLoading}
+                    >
                       <Phone className="h-4 w-4 mr-1" />
-                      Call Now
+                      {isLoading ? 'Calling...' : 'Call Now'}
                     </Button>
                   )}
                   <Button size="sm" variant="outline">

@@ -1,10 +1,10 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Phone, ArrowLeft, Filter } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useCallAPI } from "@/hooks/useCallAPI";
 
 interface CallRecord {
   id: string;
@@ -55,6 +55,13 @@ const TotalCalls = () => {
       time: "02:15 PM"
     }
   ]);
+
+  const { makeCall, isLoading } = useCallAPI();
+
+  const handleCallBack = async (phoneNumber: string, patientName: string) => {
+    console.log(`Calling back ${patientName} at ${phoneNumber}`);
+    await makeCall({ phoneNumber });
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -114,9 +121,14 @@ const TotalCalls = () => {
                       </div>
                     </div>
                     <div className="flex space-x-2">
-                      <Button size="sm" variant="outline">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => handleCallBack(call.phoneNumber, call.patientName)}
+                        disabled={isLoading}
+                      >
                         <Phone className="h-4 w-4 mr-1" />
-                        Call Back
+                        {isLoading ? 'Calling...' : 'Call Back'}
                       </Button>
                     </div>
                   </div>

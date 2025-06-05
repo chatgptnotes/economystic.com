@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Phone, Ambulance, User, MessageSquare, Calendar, Bell } from "lucide-react";
+import { useCallAPI } from "@/hooks/useCallAPI";
 
 interface CallRecord {
   id: string;
@@ -74,6 +75,13 @@ const CallManager = () => {
     }
   ]);
 
+  const { makeCall, isLoading } = useCallAPI();
+
+  const handleMakeCall = async (phoneNumber: string, patientName: string) => {
+    console.log(`Initiating call to ${patientName} at ${phoneNumber}`);
+    await makeCall({ phoneNumber });
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pending": return "bg-yellow-100 text-yellow-800";
@@ -129,9 +137,14 @@ const CallManager = () => {
                 </div>
               </div>
               <div className="flex space-x-2">
-                <Button size="sm" variant="outline">
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => handleMakeCall(call.phoneNumber, call.patientName)}
+                  disabled={isLoading}
+                >
                   <Phone className="h-4 w-4 mr-1" />
-                  Call
+                  {isLoading ? 'Calling...' : 'Call'}
                 </Button>
                 <Button size="sm" variant="outline">
                   Edit

@@ -556,7 +556,7 @@ export type Database = {
           category: string
           content: string
           created_at: string
-          created_by: string
+          created_by: string | null
           id: string
           project_id: string
           project_name: string
@@ -568,7 +568,7 @@ export type Database = {
           category?: string
           content: string
           created_at?: string
-          created_by: string
+          created_by?: string | null
           id?: string
           project_id: string
           project_name: string
@@ -580,7 +580,7 @@ export type Database = {
           category?: string
           content?: string
           created_at?: string
-          created_by?: string
+          created_by?: string | null
           id?: string
           project_id?: string
           project_name?: string

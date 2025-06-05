@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Phone, Users, Calendar, MessageSquare, Ambulance, User, Bell, FileText } from "lucide-react";
@@ -61,68 +60,124 @@ const DashboardStats = () => {
     recentReports: []
   });
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        // Fetch call records with report relationships
-        const { data: callRecords } = await supabase
-          .from('call_records')
-          .select(`
-            id,
-            patient_name,
-            call_type,
-            call_status,
-            reports (name, type)
-          `);
-        
-        // Fetch ambulance bookings with report relationships
-        const { data: ambulanceBookings } = await supabase
-          .from('ambulance_bookings')
-          .select(`
-            id,
-            patient_name,
-            status,
-            reports (name, type)
-          `);
-        
-        // Fetch WhatsApp messages with report relationships
-        const { data: whatsappMessages } = await supabase
-          .from('whatsapp_messages')
-          .select(`
-            id,
-            patient_name,
-            message_type,
-            delivery_status,
-            reports (name, type)
-          `);
-        
-        // Fetch completed reports
-        const { data: reports } = await supabase
-          .from('reports')
-          .select('*')
-          .eq('analysis_status', 'completed')
-          .order('uploaded_at', { ascending: false })
-          .limit(5);
-
-        setStats({
-          totalCalls: callRecords?.length || 0,
-          ambulanceBookings: ambulanceBookings?.length || 0,
-          whatsappMessages: whatsappMessages?.length || 0,
-          completedReports: reports?.length || 0,
-          recentReports: reports || []
-        });
-
-        // Log the data relationships for debugging
-        console.log('Call records with reports:', callRecords);
-        console.log('Ambulance bookings with reports:', ambulanceBookings);
-        console.log('WhatsApp messages with reports:', whatsappMessages);
-        console.log('Recent reports:', reports);
-      } catch (error) {
-        console.error('Error fetching dashboard stats:', error);
+  const fetchStats = async () => {
+    try {
+      console.log('Fetching dashboard stats...');
+      
+      // Fetch call records with report relationships
+      const { data: callRecords, error: callError } = await supabase
+        .from('call_records')
+        .select(`
+          id,
+          patient_name,
+          call_type,
+          call_status,
+          reports (name, type)
+        `);
+      
+      if (callError) {
+        console.error('Error fetching call records:', callError);
+      } else {
+        console.log('Call records fetched:', callRecords?.length || 0);
       }
-    };
+      
+      // Fetch ambulance bookings with report relationships
+      const { data: ambulanceBookings, error: ambulanceError } = await supabase
+        .from('ambulance_bookings')
+        .select(`
+          id,
+          patient_name,
+          status,
+          reports (name, type)
+        `);
+      
+      if (ambulanceError) {
+        console.error('Error fetching ambulance bookings:', ambulanceError);
+      } else {
+        console.log('Ambulance bookings fetched:', ambulanceBookings?.length || 0);
+      }
+      
+      // Fetch WhatsApp messages with report relationships
+      const { data: whatsappMessages, error: whatsappError } = await supabase
+        .from('whatsapp_messages')
+        .select(`
+          id,
+          patient_name,
+          message_type,
+          delivery_status,
+          reports (name, type)
+        `);
+      
+      if (whatsappError) {
+        console.error('Error fetching whatsapp messages:', whatsappError);
+      } else {
+        console.log('WhatsApp messages fetched:', whatsappMessages?.length || 0);
+      }
+      
+      // Fetch completed reports
+      const { data: reports, error: reportsError } = await supabase
+        .from('reports')
+        .select('*')
+        .eq('analysis_status', 'completed')
+        .order('uploaded_at', { ascending: false })
+        .limit(5);
 
+      if (reportsError) {
+        console.error('Error fetching reports:', reportsError);
+      } else {
+        console.log('Completed reports fetched:', reports?.length || 0);
+      }
+
+      setStats({
+        totalCalls: callRecords?.length || 0,
+        ambulanceBookings: ambulanceBookings?.length || 0,
+        whatsappMessages: whatsappMessages?.length || 0,
+        completedReports: reports?.length || 0,
+        recentReports: reports || []
+      });
+
+      // Log the data relationships for debugging
+      console.log('Dashboard stats updated:', {
+        totalCalls: callRecords?.length || 0,
+        ambulanceBookings: ambulanceBookings?.length || 0,
+        whatsappMessages: whatsappMessages?.length || 0,
+        completedReports: reports?.length || 0
+      });
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error);
+    }
+  };
+
+  useEffect(() => {
     fetchStats();
+    
+    // Set up real-time subscriptions to refresh stats when data changes
+    const callRecordsSubscription = supabase
+      .channel('call_records_changes')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'call_records' }, 
+        () => {
+          console.log('Call records changed, refreshing stats...');
+          fetchStats();
+        }
+      )
+      .subscribe();
+
+    const reportsSubscription = supabase
+      .channel('reports_changes')
+      .on('postgres_changes', 
+        { event: 'UPDATE', schema: 'public', table: 'reports' }, 
+        (payload) => {
+          console.log('Report status changed:', payload);
+          fetchStats();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(callRecordsSubscription);
+      supabase.removeChannel(reportsSubscription);
+    };
   }, []);
 
   const dashboardStats = [

@@ -37,7 +37,10 @@ serve(async (req) => {
     await updateReportStatus(supabaseClient, reportId, 'processing');
 
     const fileText = await downloadAndValidateFile(supabaseClient, filePath);
+    console.log('File downloaded, content preview:', fileText.substring(0, 500));
+    
     const analysisResult = await analyzeWithAI(fileText, reportType, contextData);
+    console.log('AI analysis result:', JSON.stringify(analysisResult, null, 2));
     
     await processAnalysisResult(supabaseClient, reportId, reportType, analysisResult);
     await updateReportStatus(supabaseClient, reportId, 'completed', true);
@@ -112,6 +115,25 @@ async function analyzeWithAI(fileText: string, reportType: string, contextData?:
     throw new Error('OpenAI API key not configured');
   }
 
+  let systemPrompt = '';
+  if (reportType === 'centro_call_center') {
+    systemPrompt = `You are an AI assistant that analyzes call center reports. Extract structured data from the provided CSV or spreadsheet and return it as JSON. 
+
+For call center data, extract these fields for each call record:
+- patient_name (string)
+- phone_number (string, clean format without extra characters)
+- call_type (string)
+- call_duration (integer, duration in seconds or minutes)
+- call_status (string: completed, ongoing, missed, etc.)
+- call_time (string, ISO timestamp format)
+- call_direction (string: inbound, outbound)
+- notes (string)
+
+Return the data as a JSON array of objects with these exact field names. Always return valid JSON format.`;
+  } else {
+    systemPrompt = `You are an AI assistant that analyzes healthcare reports. Extract structured data from the provided ${reportType} report and return it as JSON. Focus on extracting relevant patient data, timestamps, and key metrics. Always return valid JSON format.`;
+  }
+
   const openaiPromise = fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -123,15 +145,15 @@ async function analyzeWithAI(fileText: string, reportType: string, contextData?:
       messages: [
         {
           role: 'system',
-          content: `You are an AI assistant that analyzes healthcare reports. Extract structured data from the provided ${reportType} report and return it as JSON. Focus on extracting relevant patient data, timestamps, and key metrics. Always return valid JSON format. If you cannot parse the data, return {"error": "Unable to parse file", "message": "File format not supported or corrupted"}.`
+          content: systemPrompt
         },
         {
           role: 'user',
-          content: `Please analyze this ${reportType} report and extract structured data. Context: ${JSON.stringify(contextData || {})}. Return the result as JSON with appropriate fields for the data type:\n\n${fileText.substring(0, 4000)}`
+          content: `Please analyze this ${reportType} report and extract structured data. Context: ${JSON.stringify(contextData || {})}. Return the result as JSON:\n\n${fileText}`
         }
       ],
       temperature: 0.1,
-      max_tokens: 2000,
+      max_tokens: 3000,
     }),
   });
 
@@ -154,13 +176,29 @@ async function analyzeWithAI(fileText: string, reportType: string, contextData?:
     throw new Error('No analysis result from OpenAI');
   }
 
-  console.log('AI Analysis completed');
+  console.log('Raw AI response:', analysisResult);
   return parseAIResponse(analysisResult);
 }
 
 function parseAIResponse(analysisResult: string): any {
   try {
-    const parsedData = JSON.parse(analysisResult);
+    // Clean the response to extract JSON
+    let cleanedResult = analysisResult.trim();
+    
+    // Remove markdown code blocks if present
+    if (cleanedResult.startsWith('```json')) {
+      cleanedResult = cleanedResult.substring(7);
+    }
+    if (cleanedResult.startsWith('```')) {
+      cleanedResult = cleanedResult.substring(3);
+    }
+    if (cleanedResult.endsWith('```')) {
+      cleanedResult = cleanedResult.substring(0, cleanedResult.length - 3);
+    }
+    
+    cleanedResult = cleanedResult.trim();
+    
+    const parsedData = JSON.parse(cleanedResult);
     
     if (parsedData.error) {
       throw new Error(parsedData.message || 'AI analysis failed');
@@ -169,12 +207,16 @@ function parseAIResponse(analysisResult: string): any {
     return parsedData;
   } catch (parseError) {
     console.error('Failed to parse AI response as JSON:', analysisResult);
+    console.error('Parse error:', parseError);
     throw new Error('Invalid AI response format');
   }
 }
 
 async function processAnalysisResult(supabaseClient: any, reportId: string, reportType: string, parsedData: any) {
   try {
+    console.log('Processing analysis result for type:', reportType);
+    console.log('Parsed data:', JSON.stringify(parsedData, null, 2));
+    
     if (reportType === 'whatsapp_double_tick') {
       await processWhatsAppData(supabaseClient, reportId, parsedData);
     } else if (reportType === 'centro_call_center') {
@@ -184,7 +226,7 @@ async function processAnalysisResult(supabaseClient: any, reportId: string, repo
     }
   } catch (dataProcessError) {
     console.error('Error processing data:', dataProcessError);
-    // Don't fail the entire process if data insertion fails
+    throw dataProcessError; // Re-throw to mark the analysis as failed
   }
 }
 
@@ -200,10 +242,11 @@ async function handleAnalysisError(supabaseClient: any, reportId: string | undef
 
 async function processWhatsAppData(supabaseClient: any, reportId: string, data: any) {
   const messages = Array.isArray(data) ? data : data.messages || data.extracted_data || [];
+  console.log('Processing WhatsApp messages:', messages.length);
   
   for (const message of messages) {
     try {
-      await supabaseClient
+      const { error } = await supabaseClient
         .from('whatsapp_messages')
         .insert({
           report_id: reportId,
@@ -216,42 +259,65 @@ async function processWhatsAppData(supabaseClient: any, reportId: string, data: 
           read_status: message.read_status || 'unread',
           response: message.response || ''
         });
+      
+      if (error) {
+        console.error('Error inserting WhatsApp message:', error);
+        throw error;
+      }
     } catch (insertError) {
       console.error('Error inserting WhatsApp message:', insertError);
+      throw insertError;
     }
   }
 }
 
 async function processCallCenterData(supabaseClient: any, reportId: string, data: any) {
   const calls = Array.isArray(data) ? data : data.calls || data.extracted_data || [];
+  console.log('Processing call center data:', calls.length, 'calls');
+  
+  if (calls.length === 0) {
+    console.log('No call data found in parsed result');
+    return;
+  }
   
   for (const call of calls) {
     try {
-      await supabaseClient
+      console.log('Inserting call record:', call);
+      
+      const { error } = await supabaseClient
         .from('call_records')
         .insert({
           report_id: reportId,
           patient_name: call.patient_name || call.name || 'Unknown',
           phone_number: call.phone_number || call.phone || '',
           call_type: call.call_type || call.type || 'unknown',
-          call_duration: call.duration || call.call_duration || 0,
-          call_status: call.status || call.call_status || 'completed',
+          call_duration: parseInt(call.call_duration || call.duration || '0'),
+          call_status: call.call_status || call.status || 'completed',
           call_time: call.call_time || call.timestamp || new Date().toISOString(),
           call_direction: call.call_direction || call.direction || 'inbound',
           notes: call.notes || call.description || ''
         });
+      
+      if (error) {
+        console.error('Error inserting call record:', error);
+        throw error;
+      } else {
+        console.log('Successfully inserted call record for:', call.patient_name);
+      }
     } catch (insertError) {
       console.error('Error inserting call record:', insertError);
+      throw insertError;
     }
   }
 }
 
 async function processAmbulanceData(supabaseClient: any, reportId: string, data: any) {
   const bookings = Array.isArray(data) ? data : data.bookings || data.extracted_data || [];
+  console.log('Processing ambulance bookings:', bookings.length);
   
   for (const booking of bookings) {
     try {
-      await supabaseClient
+      const { error } = await supabaseClient
         .from('ambulance_bookings')
         .insert({
           report_id: reportId,
@@ -264,8 +330,14 @@ async function processAmbulanceData(supabaseClient: any, reportId: string, data:
           status: booking.status || 'completed',
           driver_name: booking.driver_name || booking.driver || ''
         });
+      
+      if (error) {
+        console.error('Error inserting ambulance booking:', error);
+        throw error;
+      }
     } catch (insertError) {
       console.error('Error inserting ambulance booking:', insertError);
+      throw insertError;
     }
   }
 }

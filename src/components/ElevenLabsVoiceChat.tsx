@@ -101,11 +101,12 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
         throw new Error(error.message || 'Failed to start conversation');
       }
 
+      console.log("Received signed URL from edge function:", data.signedUrl);
       setConversationId(data.conversationId);
       
-      // Start the conversation using the signed URL
+      // Start the conversation using the signed URL with correct parameter structure
       await conversation.startSession({
-        url: data.signedUrl,
+        signedUrl: data.signedUrl,
       });
       
     } catch (error) {

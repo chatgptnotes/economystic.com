@@ -8,6 +8,7 @@ import { Search, ChevronDown, ChevronUp, Database, User, Phone, Calendar, FileTe
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import VoiceRecorder from "./VoiceRecorder";
+import ElevenLabsVoiceChat from "./ElevenLabsVoiceChat";
 
 interface SearchResult {
   table: string;
@@ -193,7 +194,7 @@ const IntelligentSearch = () => {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-4">
+    <div className="w-full max-w-6xl mx-auto space-y-4">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
@@ -227,6 +228,14 @@ const IntelligentSearch = () => {
           </p>
         </CardContent>
       </Card>
+
+      {/* ElevenLabs Voice Chat - Show after search results */}
+      {searchResults && (
+        <ElevenLabsVoiceChat 
+          searchResults={searchResults} 
+          searchQuery={query}
+        />
+      )}
 
       {searchResults && (
         <Card>

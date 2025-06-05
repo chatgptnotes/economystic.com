@@ -38,7 +38,7 @@ const ProjectManager = () => {
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [showInactive, setShowInactive] = useState(true);
 
-  const teamMembers = ["Bhupendra", "Dinesh", "Prathik", "Pooja", "Poonam", "Monish"];
+  const teamMembers = ["Bhupendra", "Dinesh", "Prathik", "Pooja", "Poonam", "Monish", "Aman", "Priyanka"];
 
   useEffect(() => {
     initializeProjects();
@@ -251,7 +251,9 @@ const ProjectManager = () => {
       "Prathik": "bg-purple-100 text-purple-800",
       "Pooja": "bg-pink-100 text-pink-800",
       "Poonam": "bg-yellow-100 text-yellow-800",
-      "Monish": "bg-orange-100 text-orange-800"
+      "Monish": "bg-orange-100 text-orange-800",
+      "Aman": "bg-indigo-100 text-indigo-800",
+      "Priyanka": "bg-rose-100 text-rose-800"
     };
     return colors[member as keyof typeof colors] || "bg-gray-100 text-gray-800";
   };
@@ -426,7 +428,6 @@ const ProjectManager = () => {
                         <Switch
                           checked={project.isActive}
                           onCheckedChange={(checked) => handleProjectStatusToggle(project.id, checked)}
-                          size="sm"
                         />
                       </TableCell>
                       <TableCell>

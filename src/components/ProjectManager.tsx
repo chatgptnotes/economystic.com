@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,7 +23,7 @@ interface Project {
   visibility: 'Public' | 'Private';
   lastUpdated: string;
   assignedTo: string;
-  platform: 'Cursor' | 'Lovable' | 'V0' | 'Unknown';
+  platform: 'Cursor' | 'Lovable' | 'V0' | 'Stitch' | 'Windsurf' | 'Clerk' | 'Codex' | 'Vercel' | 'Unknown';
   domainAssociated?: string;
   githubUrl: string;
   isActive: boolean;
@@ -72,11 +71,16 @@ const ProjectManager = () => {
     return priorities[Math.floor(Math.random() * priorities.length)];
   };
 
-  const detectPlatform = (name: string, description: string): 'Cursor' | 'Lovable' | 'V0' | 'Unknown' => {
+  const detectPlatform = (name: string, description: string): 'Cursor' | 'Lovable' | 'V0' | 'Stitch' | 'Windsurf' | 'Clerk' | 'Codex' | 'Vercel' | 'Unknown' => {
     const nameAndDesc = `${name} ${description}`.toLowerCase();
     if (nameAndDesc.includes('lovable') || nameAndDesc.includes('spark')) return 'Lovable';
     if (nameAndDesc.includes('v0') || nameAndDesc.includes('untitled')) return 'V0';
     if (nameAndDesc.includes('cursor')) return 'Cursor';
+    if (nameAndDesc.includes('stitch')) return 'Stitch';
+    if (nameAndDesc.includes('windsurf')) return 'Windsurf';
+    if (nameAndDesc.includes('clerk')) return 'Clerk';
+    if (nameAndDesc.includes('codex')) return 'Codex';
+    if (nameAndDesc.includes('vercel')) return 'Vercel';
     return 'Unknown';
   };
 
@@ -349,6 +353,11 @@ const ProjectManager = () => {
       "Lovable": "bg-purple-100 text-purple-800 border-purple-200",
       "Cursor": "bg-blue-100 text-blue-800 border-blue-200",
       "V0": "bg-green-100 text-green-800 border-green-200",
+      "Stitch": "bg-orange-100 text-orange-800 border-orange-200",
+      "Windsurf": "bg-cyan-100 text-cyan-800 border-cyan-200",
+      "Clerk": "bg-indigo-100 text-indigo-800 border-indigo-200",
+      "Codex": "bg-pink-100 text-pink-800 border-pink-200",
+      "Vercel": "bg-slate-100 text-slate-800 border-slate-200",
       "Unknown": "bg-gray-100 text-gray-800 border-gray-200"
     };
     return colors[platform as keyof typeof colors] || "bg-gray-100 text-gray-800 border-gray-200";

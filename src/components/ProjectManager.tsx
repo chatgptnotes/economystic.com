@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Github, Users, Code, Calendar, ExternalLink } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Search, Github, Users, Code, Calendar, ExternalLink, FileText } from "lucide-react";
+import ProjectFileManager from "./ProjectFileManager";
 
 interface Project {
   id: string;
@@ -25,6 +26,7 @@ const ProjectManager = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedMember, setSelectedMember] = useState("all");
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   const teamMembers = ["Bhupendra", "Dinesh", "Prathik", "Pooja", "Poonam", "Monish"];
 
@@ -328,11 +330,35 @@ const ProjectManager = () => {
                         {project.lastUpdated}
                       </TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="sm" asChild>
-                          <a href={project.githubUrl} target="_blank" rel="noopener noreferrer">
-                            <ExternalLink className="h-4 w-4" />
-                          </a>
-                        </Button>
+                        <div className="flex space-x-1">
+                          <Button variant="ghost" size="sm" asChild>
+                            <a href={project.githubUrl} target="_blank" rel="noopener noreferrer">
+                              <ExternalLink className="h-4 w-4" />
+                            </a>
+                          </Button>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => setSelectedProject(project)}
+                              >
+                                <FileText className="h-4 w-4" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-4xl">
+                              <DialogHeader>
+                                <DialogTitle>Project Documents - {project.name}</DialogTitle>
+                              </DialogHeader>
+                              {selectedProject && (
+                                <ProjectFileManager 
+                                  projectId={selectedProject.id}
+                                  projectName={selectedProject.name}
+                                />
+                              )}
+                            </DialogContent>
+                          </Dialog>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}

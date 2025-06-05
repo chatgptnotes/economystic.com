@@ -1,81 +1,71 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Phone, Ambulance, User, MessageSquare, Calendar, Bell } from "lucide-react";
 import { useCallAPI } from "@/hooks/useCallAPI";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CallRecord {
   id: string;
-  patientName: string;
-  phoneNumber: string;
-  callType: string;
-  status: "pending" | "completed" | "follow-up";
-  priority: "high" | "medium" | "low";
+  patient_name: string;
+  phone_number: string;
+  call_type: string;
+  call_status: "pending" | "completed" | "follow-up";
+  call_duration: number;
+  call_time: string;
+  call_direction: string;
   notes: string;
-  scheduledTime?: string;
 }
 
 const CallManager = () => {
-  const [calls] = useState<CallRecord[]>([
-    {
-      id: "1",
-      patientName: "Rajesh Kumar",
-      phoneNumber: "+91 98765 43210",
-      callType: "Rseva Testing",
-      status: "pending",
-      priority: "high",
-      notes: "Follow-up on COVID test results"
-    },
-    {
-      id: "2",
-      patientName: "Priya Sharma",
-      phoneNumber: "+91 87654 32109",
-      callType: "Ambulance Booking",
-      status: "completed",
-      priority: "high",
-      notes: "Emergency pickup confirmed for 2 PM"
-    },
-    {
-      id: "3",
-      patientName: "Arjun Patel",
-      phoneNumber: "+91 76543 21098",
-      callType: "JustDial Lead",
-      status: "follow-up",
-      priority: "medium",
-      notes: "Interested in cardiology consultation"
-    },
-    {
-      id: "4",
-      patientName: "Kavya Nair",
-      phoneNumber: "+91 65432 10987",
-      callType: "Google Ads Inquiry",
-      status: "pending",
-      priority: "medium",
-      notes: "Dental implant inquiry from Google Ads"
-    },
-    {
-      id: "5",
-      patientName: "Vikram Singh",
-      phoneNumber: "+91 54321 09876",
-      callType: "Patient Call",
-      status: "completed",
-      priority: "low",
-      notes: "General inquiry about visiting hours"
-    },
-    {
-      id: "6",
-      patientName: "Sunita Agarwal",
-      phoneNumber: "+91 43210 98765",
-      callType: "Camp Registration",
-      status: "pending",
-      priority: "medium",
-      notes: "Health camp registration for diabetes screening"
-    }
-  ]);
-
+  const [calls, setCalls] = useState<CallRecord[]>([]);
+  const [loading, setLoading] = useState(true);
   const { makeCall, isLoading } = useCallAPI();
+
+  const fetchCalls = async () => {
+    try {
+      console.log('Fetching call records for CallManager...');
+      const { data, error } = await supabase
+        .from('call_records')
+        .select('*')
+        .order('call_time', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching call records:', error);
+        return;
+      }
+
+      console.log('Call records fetched for CallManager:', data?.length || 0);
+      setCalls(data || []);
+    } catch (error) {
+      console.error('Error in fetchCalls:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCalls();
+
+    // Set up real-time subscription for new call records
+    const callRecordsSubscription = supabase
+      .channel('call_manager_realtime')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'call_records' }, 
+        () => {
+          console.log('Call records changed, refreshing CallManager...');
+          fetchCalls();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(callRecordsSubscription);
+    };
+  }, []);
 
   const handleMakeCall = async (phoneNumber: string, patientName: string) => {
     console.log(`Initiating call to ${patientName} at ${phoneNumber}`);
@@ -83,77 +73,115 @@ const CallManager = () => {
   };
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case "pending": return "bg-yellow-100 text-yellow-800";
+    switch (status?.toLowerCase()) {
       case "completed": return "bg-green-100 text-green-800";
-      case "follow-up": return "bg-blue-100 text-blue-800";
+      case "missed": case "failed": return "bg-red-100 text-red-800";
+      case "ongoing": case "processing": return "bg-blue-100 text-blue-800";
       default: return "bg-gray-100 text-gray-800";
     }
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "high": return "bg-red-100 text-red-800";
-      case "medium": return "bg-orange-100 text-orange-800";
-      case "low": return "bg-green-100 text-green-800";
-      default: return "bg-gray-100 text-gray-800";
-    }
+  const getPriorityColor = (duration: number) => {
+    if (duration > 300) return "bg-green-100 text-green-800"; // long calls
+    if (duration > 60) return "bg-orange-100 text-orange-800"; // medium calls
+    return "bg-red-100 text-red-800"; // short calls
   };
 
   const getCallTypeIcon = (callType: string) => {
-    switch (callType) {
-      case "Ambulance Booking": return <Ambulance className="h-4 w-4" />;
-      case "Patient Call": return <User className="h-4 w-4" />;
-      case "JustDial Lead": case "Google Ads Inquiry": return <MessageSquare className="h-4 w-4" />;
-      case "Camp Registration": return <Calendar className="h-4 w-4" />;
-      default: return <Phone className="h-4 w-4" />;
-    }
+    const type = callType?.toLowerCase() || '';
+    if (type.includes('ambulance')) return <Ambulance className="h-4 w-4" />;
+    if (type.includes('patient')) return <User className="h-4 w-4" />;
+    if (type.includes('lead') || type.includes('inquiry')) return <MessageSquare className="h-4 w-4" />;
+    if (type.includes('appointment')) return <Calendar className="h-4 w-4" />;
+    return <Phone className="h-4 w-4" />;
   };
 
   const filterCallsByType = (type: string) => {
     if (type === "all") return calls;
-    return calls.filter(call => call.callType.toLowerCase().includes(type.toLowerCase()));
+    return calls.filter(call => 
+      call.call_type?.toLowerCase().includes(type.toLowerCase()) ||
+      call.notes?.toLowerCase().includes(type.toLowerCase())
+    );
+  };
+
+  const formatDuration = (duration: number) => {
+    if (!duration || duration === 0) return "0:00";
+    const minutes = Math.floor(duration / 60);
+    const seconds = duration % 60;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  const formatCallTime = (callTime: string) => {
+    if (!callTime) return "N/A";
+    try {
+      return new Date(callTime).toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: true 
+      });
+    } catch {
+      return "N/A";
+    }
   };
 
   const CallList = ({ callData }: { callData: CallRecord[] }) => (
     <div className="space-y-4">
-      {callData.map((call) => (
-        <Card key={call.id} className="hover:shadow-md transition-shadow duration-200">
-          <CardContent className="p-4">
-            <div className="flex items-start justify-between">
-              <div className="flex items-start space-x-3">
-                <div className="text-blue-600 mt-1">
-                  {getCallTypeIcon(call.callType)}
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900">{call.patientName}</h3>
-                  <p className="text-sm text-gray-600">{call.phoneNumber}</p>
-                  <p className="text-sm text-gray-500 mt-1">{call.notes}</p>
-                  <div className="flex items-center space-x-2 mt-2">
-                    <Badge className={getStatusColor(call.status)}>{call.status}</Badge>
-                    <Badge className={getPriorityColor(call.priority)}>{call.priority}</Badge>
-                    <span className="text-xs text-gray-500">{call.callType}</span>
+      {loading ? (
+        <div className="text-center py-8">
+          <p className="text-gray-500">Loading call records...</p>
+        </div>
+      ) : callData.length === 0 ? (
+        <div className="text-center py-8">
+          <p className="text-gray-500">No call records found. Upload reports to see call data here.</p>
+        </div>
+      ) : (
+        callData.map((call) => (
+          <Card key={call.id} className="hover:shadow-md transition-shadow duration-200">
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between">
+                <div className="flex items-start space-x-3">
+                  <div className="text-blue-600 mt-1">
+                    {getCallTypeIcon(call.call_type)}
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900">
+                      {call.patient_name || 'Unknown Patient'}
+                    </h3>
+                    <p className="text-sm text-gray-600">{call.phone_number || 'No phone number'}</p>
+                    <p className="text-sm text-gray-500 mt-1">{call.notes || 'No notes available'}</p>
+                    <div className="flex items-center space-x-2 mt-2">
+                      <Badge className={getStatusColor(call.call_status)}>
+                        {call.call_status || 'unknown'}
+                      </Badge>
+                      <Badge className={getPriorityColor(call.call_duration)}>
+                        {formatDuration(call.call_duration)}
+                      </Badge>
+                      <span className="text-xs text-gray-500">{call.call_type || 'Unknown type'}</span>
+                      <span className="text-xs text-gray-500">
+                        {formatCallTime(call.call_time)}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {call.call_direction || 'unknown'}
+                      </span>
+                    </div>
                   </div>
                 </div>
+                <div className="flex space-x-2">
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => handleMakeCall(call.phone_number, call.patient_name)}
+                    disabled={isLoading || !call.phone_number}
+                  >
+                    <Phone className="h-4 w-4 mr-1" />
+                    {isLoading ? 'Calling...' : 'Call Back'}
+                  </Button>
+                </div>
               </div>
-              <div className="flex space-x-2">
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={() => handleMakeCall(call.phoneNumber, call.patientName)}
-                  disabled={isLoading}
-                >
-                  <Phone className="h-4 w-4 mr-1" />
-                  {isLoading ? 'Calling...' : 'Call'}
-                </Button>
-                <Button size="sm" variant="outline">
-                  Edit
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+            </CardContent>
+          </Card>
+        ))
+      )}
     </div>
   );
 

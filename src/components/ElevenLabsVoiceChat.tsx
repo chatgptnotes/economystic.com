@@ -39,7 +39,7 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
       return;
     }
 
-    console.log("Starting voice chat connection process...");
+    console.log("Starting ElevenLabs voice chat connection...");
     
     const hasPermission = await requestMicrophonePermission();
     if (!hasPermission) {
@@ -51,17 +51,32 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
     connectionAttempted.current = true;
 
     try {
-      // Simulate connection for now - this would be replaced with actual ElevenLabs integration
-      setTimeout(() => {
-        setIsConnected(true);
-        setIsConnecting(false);
-        setConversationId("demo-conversation-" + Date.now());
-        
-        toast({
-          title: "Voice Chat Connected",
-          description: "You can now speak with the AI about your search results",
-        });
-      }, 2000);
+      // Create conversation with ElevenLabs
+      const response = await fetch('/api/elevenlabs/start-conversation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          searchResults,
+          searchQuery,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to start conversation');
+      }
+
+      const data = await response.json();
+      
+      setIsConnected(true);
+      setIsConnecting(false);
+      setConversationId(data.conversationId);
+      
+      toast({
+        title: "Voice Chat Connected",
+        description: "You can now speak with the AI about your search results",
+      });
       
     } catch (error) {
       console.error("Failed to start conversation:", error);
@@ -79,6 +94,16 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
   const endConversation = async () => {
     console.log("Ending conversation...");
     try {
+      if (conversationId) {
+        await fetch('/api/elevenlabs/end-conversation', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ conversationId }),
+        });
+      }
+      
       setIsConnecting(false);
       setIsConnected(false);
       setConversationId(null);
@@ -109,14 +134,14 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
           <div className="text-sm text-gray-600">
             {isConnected && (
               <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span>Listening... Speak to ask about your search results</span>
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span>Connected - Speak to ask about your search results</span>
               </div>
             )}
             {isConnecting && (
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
-                <span>Connecting to voice chat...</span>
+                <span>Connecting to ElevenLabs voice chat...</span>
               </div>
             )}
             {!isConnected && !isConnecting && (
@@ -159,10 +184,10 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
             </ul>
           </div>
 
-          <div className="p-3 bg-yellow-50 rounded-lg text-sm">
-            <p className="font-medium mb-1">⚠️ Demo Mode:</p>
-            <p className="text-yellow-800">
-              This is currently a demo version. To enable full ElevenLabs voice functionality, an API key configuration is required.
+          <div className="p-3 bg-green-50 rounded-lg text-sm">
+            <p className="font-medium mb-1">✅ ElevenLabs Integration:</p>
+            <p className="text-green-800">
+              Voice chat is now configured and ready to use with your search results.
             </p>
           </div>
         </div>

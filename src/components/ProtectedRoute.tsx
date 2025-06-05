@@ -1,5 +1,4 @@
-
-import { useUser } from "@clerk/clerk-react";
+import { useUser, useAuth } from "@clerk/clerk-react";
 import { Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,6 +9,7 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { isLoaded, isSignedIn, user } = useUser();
+  const { getToken } = useAuth();
 
   useEffect(() => {
     console.log('ProtectedRoute: Auth state', { isLoaded, isSignedIn, userId: user?.id });
@@ -21,7 +21,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
           console.log('ProtectedRoute: Setting up Supabase session for user:', user.id);
           
           // Create a Supabase session using the Clerk user token
-          const token = await user.getToken();
+          const token = await getToken();
           console.log('ProtectedRoute: Got Clerk token:', !!token);
           
           if (token) {
@@ -40,7 +40,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     if (isLoaded && isSignedIn) {
       setupSupabaseSession();
     }
-  }, [isLoaded, isSignedIn, user]);
+  }, [isLoaded, isSignedIn, user, getToken]);
 
   if (!isLoaded) {
     return (

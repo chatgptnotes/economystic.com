@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,12 +19,14 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
   const [conversationId, setConversationId] = useState<string | null>(null);
   const { toast } = useToast();
   const connectionAttempted = useRef(false);
+  const connectionInProgress = useRef(false);
 
   const conversation = useConversation({
     onConnect: () => {
       console.log("ElevenLabs conversation connected");
       setIsConnected(true);
       setIsConnecting(false);
+      connectionInProgress.current = false;
       toast({
         title: "Voice Chat Connected",
         description: "You can now speak with the AI about your search results",
@@ -34,6 +37,7 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
       setIsConnected(false);
       setIsConnecting(false);
       connectionAttempted.current = false;
+      connectionInProgress.current = false;
       toast({
         title: "Voice Chat Disconnected",
         description: "Voice conversation has ended",
@@ -47,6 +51,7 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
       setIsConnecting(false);
       setIsConnected(false);
       connectionAttempted.current = false;
+      connectionInProgress.current = false;
       toast({
         title: "Voice Chat Error",
         description: "Failed to connect to voice chat. Please try again.",
@@ -71,7 +76,8 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
   };
 
   const startConversation = async () => {
-    if (isConnecting || isConnected || connectionAttempted.current) {
+    // Prevent multiple simultaneous connection attempts
+    if (isConnecting || isConnected || connectionAttempted.current || connectionInProgress.current) {
       console.log("Connection already in progress or established");
       return;
     }
@@ -84,8 +90,10 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
       return;
     }
 
+    // Set connection flags to prevent duplicate attempts
     setIsConnecting(true);
     connectionAttempted.current = true;
+    connectionInProgress.current = true;
 
     try {
       // Create conversation with ElevenLabs via our Edge Function
@@ -127,6 +135,7 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
       console.error("Failed to start conversation:", error);
       setIsConnecting(false);
       connectionAttempted.current = false;
+      connectionInProgress.current = false;
       
       toast({
         title: "Connection Failed",
@@ -138,6 +147,13 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
 
   const endConversation = async () => {
     console.log("Ending conversation...");
+    
+    // Prevent multiple end attempts
+    if (!isConnected && !isConnecting) {
+      console.log("No active conversation to end");
+      return;
+    }
+
     try {
       // End the ElevenLabs conversation
       await conversation.endSession();
@@ -152,10 +168,38 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
       setIsConnected(false);
       setConversationId(null);
       connectionAttempted.current = false;
+      connectionInProgress.current = false;
       
     } catch (error) {
       console.error("Failed to end conversation:", error);
+      // Force reset connection state even if ending fails
+      setIsConnecting(false);
+      setIsConnected(false);
+      setConversationId(null);
+      connectionAttempted.current = false;
+      connectionInProgress.current = false;
     }
+  };
+
+  // Reset connection state when component unmounts
+  useEffect(() => {
+    return () => {
+      if (isConnected || isConnecting) {
+        endConversation();
+      }
+    };
+  }, []);
+
+  const getConnectionStatus = () => {
+    if (isConnected) return "Connected";
+    if (isConnecting) return "Connecting...";
+    return "Available";
+  };
+
+  const getConnectionBadgeVariant = () => {
+    if (isConnected) return "default";
+    if (isConnecting) return "secondary";
+    return "outline";
   };
 
   return (
@@ -164,8 +208,8 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
         <CardTitle className="flex items-center space-x-2">
           <Mic className="h-5 w-5" />
           <span>AI Voice Chat</span>
-          <Badge variant={isConnected ? "default" : isConnecting ? "secondary" : "outline"}>
-            {isConnected ? "Connected" : isConnecting ? "Connecting..." : "Available"}
+          <Badge variant={getConnectionBadgeVariant()}>
+            {getConnectionStatus()}
           </Badge>
           {conversation.isSpeaking && (
             <Badge variant="destructive" className="animate-pulse">
@@ -196,7 +240,11 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
 
           <div className="flex space-x-2">
             {!isConnected && !isConnecting ? (
-              <Button onClick={startConversation} className="flex items-center space-x-2">
+              <Button 
+                onClick={startConversation} 
+                className="flex items-center space-x-2"
+                disabled={connectionInProgress.current}
+              >
                 <Phone className="h-4 w-4" />
                 <span>Start Voice Chat</span>
               </Button>
@@ -250,38 +298,6 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
       </CardContent>
     </Card>
   );
-};
-
-const requestMicrophonePermission = async () => {
-  try {
-    await navigator.mediaDevices.getUserMedia({ audio: true });
-    return true;
-  } catch (error) {
-    console.error("Microphone permission denied:", error);
-    return false;
-  }
-};
-
-const endConversation = async () => {
-  console.log("Ending conversation...");
-  try {
-    // End the ElevenLabs conversation
-    await conversation.endSession();
-    
-    if (conversationId) {
-      await supabase.functions.invoke('elevenlabs-end-conversation', {
-        body: { conversationId },
-      });
-    }
-    
-    setIsConnecting(false);
-    setIsConnected(false);
-    setConversationId(null);
-    connectionAttempted.current = false;
-    
-  } catch (error) {
-    console.error("Failed to end conversation:", error);
-  }
 };
 
 export default ElevenLabsVoiceChat;

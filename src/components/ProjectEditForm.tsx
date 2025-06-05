@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { Search } from "lucide-react";
 
 interface Project {
   id: string;
@@ -29,6 +30,7 @@ interface ProjectEditFormProps {
 
 const ProjectEditForm = ({ project, teamMembers, onSave, onCancel }: ProjectEditFormProps) => {
   const { toast } = useToast();
+  const [domainSearchTerm, setDomainSearchTerm] = useState("");
   const [formData, setFormData] = useState({
     name: project.name,
     description: project.description,
@@ -39,6 +41,25 @@ const ProjectEditForm = ({ project, teamMembers, onSave, onCancel }: ProjectEdit
     domainAssociated: project.domainAssociated || '',
     githubUrl: project.githubUrl
   });
+
+  // All available domains
+  const availableDomains = [
+    'anohra.com', 'hopesoftwares.com', 'gmcnagpuralumni.com', 'drmhope.com',
+    'modernmedicalentrepreneur.com', 'anohra.ai', 'drmurali.ai', 'yellowfevervaccines.com',
+    'economystic.ai', 'adamrit.ai', 'digihealthtwin.com', 'digihealthtwin.ai',
+    'rescueseva.com', 'onescanonelife.com', 'emergencyseva.ai', 'bachao.co',
+    'bachao.xyz', 'bachao.store', 'bachao.net', 'bachao.info', 'bachaomujhebachao.com',
+    'ayushmannagpurhospital.com', 'rseva.health', 'maharashtratv24.in', 'rescueseva.in',
+    'onescanonelife.in', 'instaaid.in', 'bachaobachao.in', 'mujhebachao.in',
+    'theayushmanhospital.com', 'hopefoundationtrust.in', 'hopehospital.in',
+    'anohra.in', 'adamrit.com', 'yellowfever.in', 'digihealthtwin.in',
+    'emergencyseva.in', 'ambufast.in'
+  ];
+
+  // Filter domains based on search term
+  const filteredDomains = availableDomains.filter(domain =>
+    domain.toLowerCase().includes(domainSearchTerm.toLowerCase())
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -155,12 +176,42 @@ const ProjectEditForm = ({ project, teamMembers, onSave, onCancel }: ProjectEdit
 
         <div>
           <Label htmlFor="domainAssociated">Associated Domain</Label>
-          <Input
-            id="domainAssociated"
-            value={formData.domainAssociated}
-            onChange={(e) => handleInputChange('domainAssociated', e.target.value)}
-            placeholder="e.g., example.com"
-          />
+          <div className="space-y-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                placeholder="Search domains..."
+                value={domainSearchTerm}
+                onChange={(e) => setDomainSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Select 
+              value={formData.domainAssociated} 
+              onValueChange={(value) => handleInputChange('domainAssociated', value === "none" ? "" : value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a domain">
+                  {formData.domainAssociated || "No domain selected"}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent className="max-h-60">
+                <SelectItem value="none">
+                  <span className="text-gray-500">No domain</span>
+                </SelectItem>
+                {filteredDomains.map((domain) => (
+                  <SelectItem key={domain} value={domain}>
+                    {domain}
+                  </SelectItem>
+                ))}
+                {filteredDomains.length === 0 && domainSearchTerm && (
+                  <div className="px-2 py-1 text-sm text-gray-500">
+                    No domains found matching "{domainSearchTerm}"
+                  </div>
+                )}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 

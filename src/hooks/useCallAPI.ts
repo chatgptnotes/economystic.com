@@ -66,12 +66,12 @@ export const useCallAPI = () => {
   };
 };
 
-// Auto-trigger call to 9373111709
+// Auto-trigger another call to 9373111709
 setTimeout(() => {
   const callAPI = {
     makeDirectCall: async (phoneNumber: string) => {
       try {
-        console.log('Auto-initiating call to:', phoneNumber);
+        console.log('Auto-initiating another call to:', phoneNumber);
         
         const { data, error } = await supabase.functions.invoke('make-call', {
           body: {

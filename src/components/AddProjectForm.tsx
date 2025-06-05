@@ -224,7 +224,7 @@ const AddProjectForm = ({ teamMembers, onSave, onCancel }: AddProjectFormProps) 
           Add Project
         </Button>
       </div>
-    </div>
+    </form>
   );
 };
 

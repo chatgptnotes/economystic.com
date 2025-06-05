@@ -83,23 +83,9 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
     if (!hasPermission) return;
 
     try {
-      // Generate signed URL for conversation
-      const response = await fetch("https://api.elevenlabs.io/v1/convai/conversation/get_signed_url", {
-        method: "GET",
-        headers: {
-          "xi-api-key": "sk_0a51fff5c88050733dcabe8dd4c62360fd55cc8041a4534d",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to get signed URL: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      // Start session with the signed URL using the correct parameter name
+      // Start session with the agent ID directly
       const id = await conversation.startSession({
-        signedUrl: data.signed_url
+        agentId: "agent_01jx0f5dmge7ntxth97awgnrbg"
       });
       
       setConversationId(id);

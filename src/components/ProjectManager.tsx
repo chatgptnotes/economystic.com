@@ -15,6 +15,7 @@ import ProjectFileManager from "./ProjectFileManager";
 import ProjectEditForm from "./ProjectEditForm";
 import AddProjectForm from "./AddProjectForm";
 import { DragDropContext, Droppable, Draggable, DropResult } from "react-beautiful-dnd";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Project {
   id: string;
@@ -34,6 +35,7 @@ interface Project {
 const ProjectManager = () => {
   const { toast } = useToast();
   const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [projectSearchTerm, setProjectSearchTerm] = useState("");
   const [domainSearchTerm, setDomainSearchTerm] = useState("");
@@ -61,8 +63,139 @@ const ProjectManager = () => {
   ];
 
   useEffect(() => {
-    initializeProjects();
+    loadProjects();
   }, []);
+
+  const loadProjects = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('projects')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading projects:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load projects from database",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const transformedProjects: Project[] = (data || []).map(project => ({
+        id: project.id,
+        name: project.name,
+        description: project.description || '',
+        language: project.language,
+        visibility: project.visibility as 'Public' | 'Private',
+        lastUpdated: formatLastUpdated(project.updated_at),
+        assignedTo: project.assigned_to,
+        platform: project.platform as 'Cursor' | 'Lovable' | 'V0' | 'Stitch' | 'Windsurf' | 'Clerk' | 'Codex' | 'Vercel' | 'Unknown',
+        domainAssociated: project.domain_associated || undefined,
+        githubUrl: project.github_url,
+        isActive: project.is_active,
+        priority: project.priority as 'High' | 'Medium' | 'Low'
+      }));
+
+      setProjects(transformedProjects);
+    } catch (error) {
+      console.error('Error loading projects:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load projects",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatLastUpdated = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffInMs = now.getTime() - date.getTime();
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    const diffInDays = Math.floor(diffInHours / 24);
+
+    if (diffInHours < 1) return 'just now';
+    if (diffInHours < 24) return `${diffInHours} hours ago`;
+    if (diffInDays === 1) return 'yesterday';
+    if (diffInDays < 7) return `${diffInDays} days ago`;
+    if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} weeks ago`;
+    return date.toLocaleDateString();
+  };
+
+  const handleDeleteProject = async (projectId: string, projectName: string) => {
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .delete()
+        .eq('id', projectId);
+
+      if (error) {
+        console.error('Error deleting project:', error);
+        toast({
+          title: "Error",
+          description: "Failed to delete project",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      setProjects(prev => prev.filter(p => p.id !== projectId));
+      toast({
+        title: "Success",
+        description: `Project "${projectName}" has been deleted`,
+      });
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete project",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleProjectStatusToggle = async (projectId: string, isActive: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .update({ is_active: isActive })
+        .eq('id', projectId);
+
+      if (error) {
+        console.error('Error updating project status:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update project status",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      setProjects(prev => prev.map(project => 
+        project.id === projectId 
+          ? { ...project, isActive }
+          : project
+      ));
+
+      const projectName = projects.find(p => p.id === projectId)?.name;
+      toast({
+        title: isActive ? "Project Activated" : "Project Deactivated",
+        description: `"${projectName}" has been marked as ${isActive ? 'active' : 'inactive'}`,
+      });
+    } catch (error) {
+      console.error('Error updating project status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update project status",
+        variant: "destructive"
+      });
+    }
+  };
 
   const getRandomTeamMember = () => {
     return teamMembers[Math.floor(Math.random() * teamMembers.length)];
@@ -106,106 +239,6 @@ const ProjectManager = () => {
     );
   };
 
-  const initializeProjects = () => {
-    const projectData = [
-      { name: "DrM_Hope_Multi-tenancy-04-06-2025", description: "DrM_Hope_Multi-tenancy 04/06/2025", language: "TypeScript", visibility: "Private" as const, lastUpdated: "6 hours ago" },
-      { name: "mern-machin-test", description: "mern-machin-test", language: "JavaScript", visibility: "Public" as const, lastUpdated: "yesterday" },
-      { name: "adamrit.in", description: "chatgptnotes/adamrit.in", language: "TypeScript", visibility: "Private" as const, lastUpdated: "2 days ago" },
-      { name: "raftaar-help", description: "", language: "Kotlin", visibility: "Public" as const, lastUpdated: "2 days ago" },
-      { name: "betserlife-sos-guardian", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "3 days ago" },
-      { name: "adamrit.com25-05-2025", description: "adamrit.con25/05/2025", language: "TypeScript", visibility: "Public" as const, lastUpdated: "last week" },
-      { name: "adamrit.com", description: "adamrit.com", language: "TypeScript", visibility: "Private" as const, lastUpdated: "last week" },
-      { name: "ambufast.in", description: "The Emergency Ambulance Service at Your Fingertips Get an ambulance within 15 minutes of your emergency call or QR scan", language: "TypeScript", visibility: "Private" as const, lastUpdated: "2 weeks ago" },
-      { name: "next", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "2 weeks ago" },
-      { name: "New_HMIS_Next_js_latest", description: "New_HMIS_Next_js_latest", language: "JavaScript", visibility: "Private" as const, lastUpdated: "2 weeks ago" },
-      { name: "CorporateBilling21-05-2025HMIS", description: "", language: "JavaScript", visibility: "Public" as const, lastUpdated: "2 weeks ago" },
-      { name: "drmhope.com-ESIC", description: "drmhope.com", language: "TypeScript", visibility: "Public" as const, lastUpdated: "2 weeks ago" },
-      { name: "drmhope.com", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "2 weeks ago" },
-      { name: "drmhope-multitenancy", description: "", language: "TypeScript", visibility: "Public" as const, lastUpdated: "3 weeks ago" },
-      { name: "rseva.health", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "3 weeks ago" },
-      { name: "New_HMIS_Next_js", description: "New_HMIS_Next_js", language: "TypeScript", visibility: "Public" as const, lastUpdated: "3 weeks ago" },
-      { name: "emergencyiosapp", description: "", language: "Swift", visibility: "Public" as const, lastUpdated: "3 weeks ago" },
-      { name: "v0-onescanonelife.com-13th-May", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "3 weeks ago" },
-      { name: "yellowfever13-05-2025server", description: "", language: "TypeScript", visibility: "Public" as const, lastUpdated: "3 weeks ago" },
-      { name: "v0-untitled-project", description: "", language: "TypeScript", visibility: "Public" as const, lastUpdated: "3 weeks ago" },
-      { name: "yellowfever.in2", description: "", language: "TypeScript", visibility: "Public" as const, lastUpdated: "3 weeks ago" },
-      { name: "maharashtratv24in8may2025", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "last month" },
-      { name: "ayushamnhospitalwebsitenextjs", description: "ayushamnhospitalwebsitenextjs", language: "HTML", visibility: "Public" as const, lastUpdated: "last month" },
-      { name: "yellowfever.in_5.4.2025_11-43-b0", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "May 5" },
-      { name: "yellowfever.in_5.4.2025_11-43", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "May 5" },
-      { name: "theayushmanhospital-laravel", description: "new SEO optimaize website", language: "Blade", visibility: "Public" as const, lastUpdated: "May 1" },
-      { name: "emergencyapp", description: "", language: "JavaScript", visibility: "Public" as const, lastUpdated: "May 1" },
-      { name: "HmisVersionUpdate30-04-2025", description: "", language: "JavaScript", visibility: "Public" as const, lastUpdated: "Apr 30" },
-      { name: "one-scan-one-life", description: "", language: "TypeScript", visibility: "Public" as const, lastUpdated: "Apr 29" },
-      { name: "demo.bachao.co-2--24-April-4.24-PM", description: "", language: "Blade", visibility: "Private" as const, lastUpdated: "Apr 24" },
-      { name: "hmis_raftaarlaravel_11", description: "", language: "Blade", visibility: "Private" as const, lastUpdated: "Apr 23" },
-      { name: "Rseva_laravel11_livewire3", description: "Rseva_laravel11_livewire3", language: "Blade", visibility: "Private" as const, lastUpdated: "Apr 23" },
-      { name: "Rsev-for-cursor", description: "we made for cursor !", language: "Blade", visibility: "Public" as const, lastUpdated: "Apr 22" },
-      { name: "lovable-raftaar-laravel-1page", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "Apr 22" },
-      { name: "lovable-start-for-ayushman-3rd-attempt-site", description: "", language: "EJS", visibility: "Private" as const, lastUpdated: "Apr 22" },
-      { name: "spark-the-beginning", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "Apr 21" },
-      { name: "ayushman-website-3rd-attempt", description: "", language: "EJS", visibility: "Private" as const, lastUpdated: "Apr 21" },
-      { name: "life-scan-harmony-project", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "Apr 21" },
-      { name: "newHope", description: "The repo is of the hopesoftwares.com", language: "PHP", visibility: "Public" as const, lastUpdated: "Apr 21" },
-      { name: "hopeproject", description: "All ondc related work of folders and file", language: "JavaScript", visibility: "Public" as const, lastUpdated: "Apr 21" },
-      { name: "hope", description: "Hospital management software built in 2013. used in Hope and Ayushman. has Chatgpt -summary code builtin. This has a user manual in wiki", language: "PHP", visibility: "Private" as const, lastUpdated: "Apr 21" },
-      { name: "RaftaarHealth", description: "RaftaarHealth", language: "JavaScript", visibility: "Public" as const, lastUpdated: "Apr 19" },
-      { name: "hopenew", description: "hope new software", language: "JavaScript", visibility: "Public" as const, lastUpdated: "Apr 17" },
-      { name: "hopesoftwares", description: "hospital HMIS project", language: "JavaScript", visibility: "Private" as const, lastUpdated: "Apr 17" },
-      { name: "HMIS", description: "", language: "JavaScript", visibility: "Private" as const, lastUpdated: "Apr 17" },
-      { name: "html-project", description: "A modern e-commerce website", language: "HTML", visibility: "Private" as const, lastUpdated: "Apr 16" },
-      { name: "Tracking", description: "driver tracking project", language: "PHP", visibility: "Public" as const, lastUpdated: "Apr 16" },
-      { name: "ayushman-hospital-muralisir-website", description: "ayushman-hospital-muralisir-website", language: "JavaScript", visibility: "Public" as const, lastUpdated: "Apr 16" },
-      { name: "ayushman-hospital", description: "Ayushman Nagpur Hospital website built with Next.js", language: "JavaScript", visibility: "Public" as const, lastUpdated: "Apr 15" },
-      { name: "ayushman-hospital-website", description: "", language: "JavaScript", visibility: "Public" as const, lastUpdated: "Apr 15" },
-      { name: "verification-logs", description: "Forked from ONDC-Official/verification-logs ONDC Pre-production issue & discussion board", language: "HTML", visibility: "Public" as const, lastUpdated: "Mar 12" },
-      { name: "emergencysevaondcapp", description: "All ondc related work of folders and file", language: "PHP", visibility: "Private" as const, lastUpdated: "Feb 27" },
-      { name: "RSEVA", description: "", language: "JavaScript", visibility: "Public" as const, lastUpdated: "Feb 25" },
-      { name: "adminemergencyseva", description: "The repo is of the admin.emergencyseva.in", language: "JavaScript", visibility: "Private" as const, lastUpdated: "Jan 15" },
-      { name: "ondc_demo", description: "", language: "JavaScript", visibility: "Private" as const, lastUpdated: "Nov 18, 2024" },
-      { name: "bachaobachaoin", description: "", language: "Blade", visibility: "Private" as const, lastUpdated: "Nov 7, 2024" },
-      { name: "public_html", description: "", language: "HTML", visibility: "Public" as const, lastUpdated: "Oct 8, 2024" },
-      { name: "DrM-Hope", description: "", language: "JavaScript", visibility: "Private" as const, lastUpdated: "Sep 27, 2024" },
-      { name: "demo2Hopesoftwares", description: "", language: "JavaScript", visibility: "Private" as const, lastUpdated: "Sep 27, 2024" },
-      { name: "vehicletracker", description: "Vehicle Tracking Code uploaded by Pratik", language: "PHP", visibility: "Private" as const, lastUpdated: "Jul 10, 2024" }
-    ];
-
-    const transformedProjects = projectData.map((project, index) => ({
-      id: (index + 1).toString(),
-      ...project,
-      assignedTo: getRandomTeamMember(),
-      platform: detectPlatform(project.name, project.description),
-      domainAssociated: findAssociatedDomain(project.name),
-      githubUrl: `https://github.com/yourusername/${project.name}`,
-      isActive: Math.random() > 0.2,
-      priority: getRandomPriority()
-    }));
-
-    setProjects(transformedProjects);
-  };
-
-  const handleDeleteProject = (projectId: string, projectName: string) => {
-    setProjects(prev => prev.filter(p => p.id !== projectId));
-    toast({
-      title: "Success",
-      description: `Project "${projectName}" has been deleted`,
-    });
-  };
-
-  const handleProjectStatusToggle = (projectId: string, isActive: boolean) => {
-    setProjects(prev => prev.map(project => 
-      project.id === projectId 
-        ? { ...project, isActive }
-        : project
-    ));
-
-    const projectName = projects.find(p => p.id === projectId)?.name;
-    toast({
-      title: isActive ? "Project Activated" : "Project Deactivated",
-      description: `"${projectName}" has been marked as ${isActive ? 'active' : 'inactive'}`,
-    });
-  };
-
   const handleDragEnd = (result: DropResult) => {
     const { destination, source, draggableId } = result;
 
@@ -226,103 +259,206 @@ const ProjectManager = () => {
 
     console.log('Updating project assignment:', { projectId, newAssignedTo });
 
-    setProjects(prev => {
-      const updated = prev.map(project => 
-        project.id === projectId 
-          ? { ...project, assignedTo: newAssignedTo }
-          : project
-      );
-      console.log('Updated projects:', updated);
-      return updated;
-    });
-
-    const projectName = projects.find(p => p.id === projectId)?.name;
-    toast({
-      title: "Project Reassigned",
-      description: `"${projectName}" has been assigned to ${newAssignedTo}`,
-    });
+    // Update via the assignment change handler which will sync with Supabase
+    handleAssignmentChange(projectId, newAssignedTo);
   };
 
-  const handleAssignmentChange = (projectId: string, newAssignee: string) => {
-    setProjects(prev => {
-      const updated = prev.map(project => 
-        project.id === projectId 
-          ? { ...project, assignedTo: newAssignee }
-          : project
-      );
-      return updated;
-    });
+  const handleAssignmentChange = async (projectId: string, newAssignee: string) => {
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .update({ assigned_to: newAssignee })
+        .eq('id', projectId);
 
-    const projectName = projects.find(p => p.id === projectId)?.name;
-    const message = newAssignee === "Unassigned" 
-      ? `"${projectName}" is now unassigned`
-      : `"${projectName}" has been assigned to ${newAssignee}`;
-    
-    toast({
-      title: "Project Reassigned",
-      description: message,
-    });
-  };
+      if (error) {
+        console.error('Error updating project assignment:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update project assignment",
+          variant: "destructive"
+        });
+        return;
+      }
 
-  const handleDomainMappingChange = (domain: string, newProjectId: string) => {
-    setProjects(prev => {
-      const updated = prev.map(project => {
-        // Remove the domain from any project that currently has it
-        if (project.domainAssociated === domain) {
-          return { ...project, domainAssociated: undefined };
-        }
-        // Assign the domain to the selected project
-        if (project.id === newProjectId) {
-          return { ...project, domainAssociated: domain };
-        }
-        return project;
+      setProjects(prev => {
+        const updated = prev.map(project => 
+          project.id === projectId 
+            ? { ...project, assignedTo: newAssignee }
+            : project
+        );
+        return updated;
       });
-      return updated;
-    });
 
-    const projectName = projects.find(p => p.id === newProjectId)?.name;
-    const message = newProjectId === "none" 
-      ? `Domain "${domain}" is now unmapped`
-      : `Domain "${domain}" has been mapped to "${projectName}"`;
-    
-    toast({
-      title: "Domain Mapping Updated",
-      description: message,
-    });
+      const projectName = projects.find(p => p.id === projectId)?.name;
+      const message = newAssignee === "Unassigned" 
+        ? `"${projectName}" is now unassigned`
+        : `"${projectName}" has been assigned to ${newAssignee}`;
+      
+      toast({
+        title: "Project Reassigned",
+        description: message,
+      });
+    } catch (error) {
+      console.error('Error updating project assignment:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update project assignment",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handlePriorityChange = (projectId: string, newPriority: 'High' | 'Medium' | 'Low') => {
-    setProjects(prev => {
-      const updated = prev.map(project => 
-        project.id === projectId 
-          ? { ...project, priority: newPriority }
-          : project
-      );
-      return updated;
-    });
+  const handleDomainMappingChange = async (domain: string, newProjectId: string) => {
+    try {
+      // First, remove the domain from any project that currently has it
+      const { error: clearError } = await supabase
+        .from('projects')
+        .update({ domain_associated: null })
+        .eq('domain_associated', domain);
 
-    const projectName = projects.find(p => p.id === projectId)?.name;
-    toast({
-      title: "Priority Updated",
-      description: `"${projectName}" priority set to ${newPriority}`,
-    });
+      if (clearError) {
+        console.error('Error clearing domain mapping:', clearError);
+        toast({
+          title: "Error",
+          description: "Failed to update domain mapping",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Then, assign the domain to the selected project (if not "none")
+      if (newProjectId !== "none") {
+        const { error: assignError } = await supabase
+          .from('projects')
+          .update({ domain_associated: domain })
+          .eq('id', newProjectId);
+
+        if (assignError) {
+          console.error('Error assigning domain mapping:', assignError);
+          toast({
+            title: "Error",
+            description: "Failed to update domain mapping",
+            variant: "destructive"
+          });
+          return;
+        }
+      }
+
+      // Update local state
+      setProjects(prev => {
+        const updated = prev.map(project => {
+          // Remove the domain from any project that currently has it
+          if (project.domainAssociated === domain) {
+            return { ...project, domainAssociated: undefined };
+          }
+          // Assign the domain to the selected project
+          if (project.id === newProjectId) {
+            return { ...project, domainAssociated: domain };
+          }
+          return project;
+        });
+        return updated;
+      });
+
+      const projectName = projects.find(p => p.id === newProjectId)?.name;
+      const message = newProjectId === "none" 
+        ? `Domain "${domain}" is now unmapped`
+        : `Domain "${domain}" has been mapped to "${projectName}"`;
+      
+      toast({
+        title: "Domain Mapping Updated",
+        description: message,
+      });
+    } catch (error) {
+      console.error('Error updating domain mapping:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update domain mapping",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handlePlatformChange = (projectId: string, newPlatform: 'Cursor' | 'Lovable' | 'V0' | 'Stitch' | 'Windsurf' | 'Clerk' | 'Codex' | 'Vercel' | 'Unknown') => {
-    setProjects(prev => {
-      const updated = prev.map(project => 
-        project.id === projectId 
-          ? { ...project, platform: newPlatform }
-          : project
-      );
-      return updated;
-    });
+  const handlePriorityChange = async (projectId: string, newPriority: 'High' | 'Medium' | 'Low') => {
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .update({ priority: newPriority })
+        .eq('id', projectId);
 
-    const projectName = projects.find(p => p.id === projectId)?.name;
-    toast({
-      title: "Platform Updated",
-      description: `"${projectName}" platform changed to ${newPlatform}`,
-    });
+      if (error) {
+        console.error('Error updating project priority:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update project priority",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      setProjects(prev => {
+        const updated = prev.map(project => 
+          project.id === projectId 
+            ? { ...project, priority: newPriority }
+            : project
+        );
+        return updated;
+      });
+
+      const projectName = projects.find(p => p.id === projectId)?.name;
+      toast({
+        title: "Priority Updated",
+        description: `"${projectName}" priority set to ${newPriority}`,
+      });
+    } catch (error) {
+      console.error('Error updating project priority:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update project priority",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handlePlatformChange = async (projectId: string, newPlatform: 'Cursor' | 'Lovable' | 'V0' | 'Stitch' | 'Windsurf' | 'Clerk' | 'Codex' | 'Vercel' | 'Unknown') => {
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .update({ platform: newPlatform })
+        .eq('id', projectId);
+
+      if (error) {
+        console.error('Error updating project platform:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update project platform",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      setProjects(prev => {
+        const updated = prev.map(project => 
+          project.id === projectId 
+            ? { ...project, platform: newPlatform }
+            : project
+        );
+        return updated;
+      });
+
+      const projectName = projects.find(p => p.id === projectId)?.name;
+      toast({
+        title: "Platform Updated",
+        description: `"${projectName}" platform changed to ${newPlatform}`,
+      });
+    } catch (error) {
+      console.error('Error updating project platform:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update project platform",
+        variant: "destructive"
+      });
+    }
   };
 
   const filteredProjects = projects.filter(project => {
@@ -419,26 +555,119 @@ const ProjectManager = () => {
   const activeProjects = projects.filter(p => p.isActive);
   const unassignedProjects = projects.filter(p => p.assignedTo === "Unassigned" && p.isActive);
 
-  const handleProjectUpdate = (updatedProject: Project) => {
-    setProjects(prev => prev.map(p => p.id === updatedProject.id ? updatedProject : p));
-    setEditingProject(null);
+  const handleProjectUpdate = async (updatedProject: Project) => {
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .update({
+          name: updatedProject.name,
+          description: updatedProject.description,
+          language: updatedProject.language,
+          visibility: updatedProject.visibility,
+          assigned_to: updatedProject.assignedTo,
+          platform: updatedProject.platform,
+          domain_associated: updatedProject.domainAssociated,
+          github_url: updatedProject.githubUrl,
+          is_active: updatedProject.isActive,
+          priority: updatedProject.priority
+        })
+        .eq('id', updatedProject.id);
+
+      if (error) {
+        console.error('Error updating project:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update project",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      setProjects(prev => prev.map(p => p.id === updatedProject.id ? updatedProject : p));
+      setEditingProject(null);
+      
+      toast({
+        title: "Project Updated",
+        description: `"${updatedProject.name}" has been updated successfully`,
+      });
+    } catch (error) {
+      console.error('Error updating project:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update project",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleAddNewProject = (projectData: Omit<Project, 'id' | 'lastUpdated'>) => {
-    const newProject: Project = {
-      ...projectData,
-      id: (projects.length + 1).toString(),
-      lastUpdated: 'just now'
-    };
+  const handleAddNewProject = async (projectData: Omit<Project, 'id' | 'lastUpdated'>) => {
+    try {
+      const { data, error } = await supabase
+        .from('projects')
+        .insert({
+          name: projectData.name,
+          description: projectData.description,
+          language: projectData.language,
+          visibility: projectData.visibility,
+          assigned_to: projectData.assignedTo,
+          platform: projectData.platform,
+          domain_associated: projectData.domainAssociated,
+          github_url: projectData.githubUrl,
+          is_active: projectData.isActive,
+          priority: projectData.priority
+        })
+        .select()
+        .single();
 
-    setProjects(prev => [newProject, ...prev]);
-    setShowAddDialog(false);
-    
-    toast({
-      title: "Project Added",
-      description: `"${newProject.name}" has been added successfully`,
-    });
+      if (error) {
+        console.error('Error adding project:', error);
+        toast({
+          title: "Error",
+          description: "Failed to add project",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const newProject: Project = {
+        id: data.id,
+        name: data.name,
+        description: data.description || '',
+        language: data.language,
+        visibility: data.visibility as 'Public' | 'Private',
+        lastUpdated: 'just now',
+        assignedTo: data.assigned_to,
+        platform: data.platform as 'Cursor' | 'Lovable' | 'V0' | 'Stitch' | 'Windsurf' | 'Clerk' | 'Codex' | 'Vercel' | 'Unknown',
+        domainAssociated: data.domain_associated || undefined,
+        githubUrl: data.github_url,
+        isActive: data.is_active,
+        priority: data.priority as 'High' | 'Medium' | 'Low'
+      };
+
+      setProjects(prev => [newProject, ...prev]);
+      setShowAddDialog(false);
+      
+      toast({
+        title: "Project Added",
+        description: `"${newProject.name}" has been added successfully`,
+      });
+    } catch (error) {
+      console.error('Error adding project:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add project",
+        variant: "destructive"
+      });
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-lg">Loading projects...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

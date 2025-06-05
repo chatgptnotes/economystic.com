@@ -18,13 +18,21 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
   const [conversationId, setConversationId] = useState<string | null>(null);
   const { toast } = useToast();
   const connectionAttempted = useRef(false);
+  const reconnectTimer = useRef<NodeJS.Timeout | null>(null);
 
   const conversation = useConversation({
     onConnect: () => {
-      console.log("Connected to ElevenLabs");
+      console.log("Successfully connected to ElevenLabs");
       setIsConnected(true);
       setIsConnecting(false);
       connectionAttempted.current = false;
+      
+      // Clear any reconnect timer
+      if (reconnectTimer.current) {
+        clearTimeout(reconnectTimer.current);
+        reconnectTimer.current = null;
+      }
+      
       toast({
         title: "Voice Chat Connected",
         description: "You can now speak with the AI about your search results",
@@ -36,6 +44,7 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
       setIsConnecting(false);
       setConversationId(null);
       connectionAttempted.current = false;
+      
       toast({
         title: "Voice Chat Disconnected",
         description: "Voice conversation has ended",
@@ -47,10 +56,12 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
     onError: (error) => {
       console.error("ElevenLabs error:", error);
       setIsConnecting(false);
+      setIsConnected(false);
       connectionAttempted.current = false;
+      
       toast({
         title: "Voice Chat Error",
-        description: "There was an issue with the voice chat connection",
+        description: `Connection failed: ${error.message || 'Unknown error'}`,
         variant: "destructive",
       });
     },
@@ -77,12 +88,29 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
       await navigator.mediaDevices.getUserMedia({ audio: true });
       return true;
     } catch (error) {
+      console.error("Microphone permission denied:", error);
       toast({
         title: "Microphone Access Required",
         description: "Please allow microphone access to use voice chat",
         variant: "destructive",
       });
       return false;
+    }
+  };
+
+  const getSignedUrl = async () => {
+    try {
+      console.log("Fetching signed URL for agent conversation...");
+      
+      // For now, try using the agent ID directly as ElevenLabs might support this
+      // If this doesn't work, we'll need the user to provide their ElevenLabs API key
+      const agentId = "agent_01jx0f5dmge7ntxth97awgnrbg";
+      
+      // Try direct agent ID approach first
+      return { agentId };
+    } catch (error) {
+      console.error("Failed to get signed URL:", error);
+      throw new Error("Failed to get conversation URL");
     }
   };
 
@@ -93,39 +121,66 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
       return;
     }
 
+    console.log("Starting voice chat connection process...");
+    
     const hasPermission = await requestMicrophonePermission();
-    if (!hasPermission) return;
+    if (!hasPermission) {
+      console.log("Microphone permission denied");
+      return;
+    }
 
     setIsConnecting(true);
     connectionAttempted.current = true;
 
     try {
-      console.log("Starting conversation with agent ID directly...");
+      const urlData = await getSignedUrl();
+      console.log("Got URL data:", urlData);
       
-      // Use agent ID directly instead of signed URL for simpler connection
-      const id = await conversation.startSession({
-        agentId: "agent_01jx0f5dmge7ntxth97awgnrbg"
-      });
+      let sessionId;
+      if (urlData.agentId) {
+        console.log("Starting session with agent ID:", urlData.agentId);
+        sessionId = await conversation.startSession({
+          agentId: urlData.agentId
+        });
+      } else if (urlData.signedUrl) {
+        console.log("Starting session with signed URL");
+        sessionId = await conversation.startSession({
+          signedUrl: urlData.signedUrl
+        });
+      } else {
+        throw new Error("No valid connection method available");
+      }
       
-      console.log("Session started with ID:", id);
-      setConversationId(id);
+      console.log("Session started successfully with ID:", sessionId);
+      setConversationId(sessionId);
+      
     } catch (error) {
       console.error("Failed to start conversation:", error);
       setIsConnecting(false);
       connectionAttempted.current = false;
+      
       toast({
         title: "Connection Failed",
-        description: "Unable to start voice chat. Please check your connection and try again.",
+        description: error.message || "Unable to start voice chat. Please try again.",
         variant: "destructive",
       });
     }
   };
 
   const endConversation = async () => {
+    console.log("Ending conversation...");
     try {
       setIsConnecting(false);
       connectionAttempted.current = false;
+      
+      // Clear any reconnect timer
+      if (reconnectTimer.current) {
+        clearTimeout(reconnectTimer.current);
+        reconnectTimer.current = null;
+      }
+      
       await conversation.endSession();
+      console.log("Conversation ended successfully");
     } catch (error) {
       console.error("Failed to end conversation:", error);
     }
@@ -134,11 +189,14 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
   // Clean up on unmount
   useEffect(() => {
     return () => {
+      if (reconnectTimer.current) {
+        clearTimeout(reconnectTimer.current);
+      }
       if (isConnected) {
         endConversation();
       }
     };
-  }, []);
+  }, [isConnected]);
 
   return (
     <Card className="w-full">
@@ -211,6 +269,15 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
               <li>• Ask for recommendations based on the data</li>
             </ul>
           </div>
+
+          {!isConnected && !isConnecting && (
+            <div className="p-3 bg-yellow-50 rounded-lg text-sm">
+              <p className="font-medium mb-1">⚠️ Note:</p>
+              <p className="text-yellow-800">
+                If you continue to experience connection issues, you may need to provide your ElevenLabs API key for authenticated access to the voice agent.
+              </p>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

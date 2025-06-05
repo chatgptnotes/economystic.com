@@ -78,20 +78,40 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
     }
   };
 
+  const generateSignedUrl = async () => {
+    try {
+      const response = await fetch("https://api.elevenlabs.io/v1/convai/conversation/get_signed_url", {
+        method: "GET",
+        headers: {
+          "xi-api-key": "sk_0a51fff5c88050733dcabe8dd4c62360fd55cc8041a4534d",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get signed URL: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.signed_url;
+    } catch (error) {
+      console.error("Failed to generate signed URL:", error);
+      throw error;
+    }
+  };
+
   const startConversation = async () => {
     const hasPermission = await requestMicrophonePermission();
     if (!hasPermission) return;
 
     try {
-      // Note: You'll need to replace this with your actual agent ID from ElevenLabs
-      const agentId = "your-agent-id-here"; // This needs to be configured
-      const id = await conversation.startSession({ agentId });
+      const signedUrl = await generateSignedUrl();
+      const id = await conversation.startSession({ url: signedUrl });
       setConversationId(id);
     } catch (error) {
       console.error("Failed to start conversation:", error);
       toast({
         title: "Connection Failed",
-        description: "Unable to start voice chat. Please check your ElevenLabs configuration.",
+        description: "Unable to start voice chat. Please check your connection and try again.",
         variant: "destructive",
       });
     }

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Mic, Phone, PhoneOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useConversation } from "@11labs/react";
 
 interface ElevenLabsVoiceChatProps {
   searchResults?: any;
@@ -16,9 +17,44 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
-  const [signedUrl, setSignedUrl] = useState<string | null>(null);
   const { toast } = useToast();
   const connectionAttempted = useRef(false);
+
+  const conversation = useConversation({
+    onConnect: () => {
+      console.log("ElevenLabs conversation connected");
+      setIsConnected(true);
+      setIsConnecting(false);
+      toast({
+        title: "Voice Chat Connected",
+        description: "You can now speak with the AI about your search results",
+      });
+    },
+    onDisconnect: () => {
+      console.log("ElevenLabs conversation disconnected");
+      setIsConnected(false);
+      setIsConnecting(false);
+      connectionAttempted.current = false;
+      toast({
+        title: "Voice Chat Disconnected",
+        description: "Voice conversation has ended",
+      });
+    },
+    onMessage: (message) => {
+      console.log("ElevenLabs message:", message);
+    },
+    onError: (error) => {
+      console.error("ElevenLabs error:", error);
+      setIsConnecting(false);
+      setIsConnected(false);
+      connectionAttempted.current = false;
+      toast({
+        title: "Voice Chat Error",
+        description: "Failed to connect to voice chat. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
 
   const requestMicrophonePermission = async () => {
     try {
@@ -65,14 +101,11 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
         throw new Error(error.message || 'Failed to start conversation');
       }
 
-      setIsConnected(true);
-      setIsConnecting(false);
       setConversationId(data.conversationId);
-      setSignedUrl(data.signedUrl);
       
-      toast({
-        title: "Voice Chat Ready",
-        description: "ElevenLabs conversation is ready. You can now speak about your search results.",
+      // Start the conversation using the signed URL
+      await conversation.startSession({
+        url: data.signedUrl,
       });
       
     } catch (error) {
@@ -91,6 +124,9 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
   const endConversation = async () => {
     console.log("Ending conversation...");
     try {
+      // End the ElevenLabs conversation
+      await conversation.endSession();
+      
       if (conversationId) {
         await supabase.functions.invoke('elevenlabs-end-conversation', {
           body: { conversationId },
@@ -100,13 +136,8 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
       setIsConnecting(false);
       setIsConnected(false);
       setConversationId(null);
-      setSignedUrl(null);
       connectionAttempted.current = false;
       
-      toast({
-        title: "Voice Chat Disconnected",
-        description: "Voice conversation has ended",
-      });
     } catch (error) {
       console.error("Failed to end conversation:", error);
     }
@@ -119,8 +150,13 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
           <Mic className="h-5 w-5" />
           <span>AI Voice Chat</span>
           <Badge variant={isConnected ? "default" : isConnecting ? "secondary" : "outline"}>
-            {isConnected ? "Ready" : isConnecting ? "Connecting..." : "Available"}
+            {isConnected ? "Connected" : isConnecting ? "Connecting..." : "Available"}
           </Badge>
+          {conversation.isSpeaking && (
+            <Badge variant="destructive" className="animate-pulse">
+              AI Speaking
+            </Badge>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -129,7 +165,7 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
             {isConnected && (
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span>ElevenLabs conversation ready - Use the signed URL to connect</span>
+                <span>Voice chat active - Speak naturally about your search results</span>
               </div>
             )}
             {isConnecting && (
@@ -139,7 +175,7 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
               </div>
             )}
             {!isConnected && !isConnecting && (
-              <p>Click "Start Voice Chat" to create an ElevenLabs conversation</p>
+              <p>Click "Start Voice Chat" to begin speaking with AI about your search results</p>
             )}
           </div>
 
@@ -168,15 +204,6 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
             </div>
           )}
 
-          {signedUrl && (
-            <div className="p-3 bg-blue-50 rounded-lg text-sm">
-              <p className="font-medium mb-1">🔗 ElevenLabs Connection:</p>
-              <p className="text-blue-800 break-all">
-                Signed URL ready for ElevenLabs SDK integration
-              </p>
-            </div>
-          )}
-
           <div className="p-3 bg-blue-50 rounded-lg text-sm">
             <p className="font-medium mb-1">💡 Voice Chat Tips:</p>
             <ul className="text-gray-600 space-y-1">
@@ -187,12 +214,14 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
             </ul>
           </div>
 
-          <div className="p-3 bg-green-50 rounded-lg text-sm">
-            <p className="font-medium mb-1">✅ ElevenLabs Integration:</p>
-            <p className="text-green-800">
-              Backend API configured with your ElevenLabs API key. Voice chat is ready to use.
-            </p>
-          </div>
+          {conversation.status === "connected" && (
+            <div className="p-3 bg-green-50 rounded-lg text-sm">
+              <p className="font-medium mb-1">✅ Voice Chat Active:</p>
+              <p className="text-green-800">
+                {conversation.isSpeaking ? "AI is speaking..." : "Listening for your voice..."}
+              </p>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

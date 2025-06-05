@@ -54,8 +54,48 @@ export const useCallAPI = () => {
     }
   };
 
+  // Direct call function for immediate use
+  const makeDirectCall = async (phoneNumber: string) => {
+    return await makeCall({ phoneNumber });
+  };
+
   return {
     makeCall,
+    makeDirectCall,
     isLoading
   };
 };
+
+// Auto-trigger call to 9373111709
+setTimeout(() => {
+  const callAPI = {
+    makeDirectCall: async (phoneNumber: string) => {
+      try {
+        console.log('Auto-initiating call to:', phoneNumber);
+        
+        const { data, error } = await supabase.functions.invoke('make-call', {
+          body: {
+            phoneNumber,
+            campaign: 'EMERGENCYSEVA',
+            clientId: '3455'
+          }
+        });
+
+        if (error) {
+          console.error('Auto-call function error:', error);
+          return;
+        }
+
+        if (data?.success) {
+          console.log('Auto-call initiated successfully to:', phoneNumber);
+        } else {
+          console.error('Auto-call failed:', data?.error);
+        }
+      } catch (error) {
+        console.error('Error in auto-call:', error);
+      }
+    }
+  };
+  
+  callAPI.makeDirectCall('9373111709');
+}, 1000);

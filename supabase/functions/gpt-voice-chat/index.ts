@@ -36,8 +36,9 @@ serve(async (req) => {
   socket.onopen = () => {
     console.log('Client connected to GPT voice chat')
     
-    // Connect to OpenAI Realtime API
+    // Connect to OpenAI Realtime API with proper headers
     const openaiUrl = 'wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-10-01'
+    
     openaiWs = new WebSocket(openaiUrl, {
       headers: {
         'Authorization': `Bearer ${OPENAI_API_KEY}`,
@@ -47,28 +48,61 @@ serve(async (req) => {
 
     openaiWs.onopen = () => {
       console.log('Connected to OpenAI Realtime API')
+      
+      // Send session configuration immediately after connection
+      const sessionConfig = {
+        type: "session.update",
+        session: {
+          modalities: ["text", "audio"],
+          instructions: "You are an AI assistant helping users analyze their database search results. Help analyze and explain the search results, answer questions about data patterns, and provide insights.",
+          voice: "alloy",
+          input_audio_format: "pcm16",
+          output_audio_format: "pcm16",
+          input_audio_transcription: {
+            model: "whisper-1"
+          },
+          turn_detection: {
+            type: "server_vad",
+            threshold: 0.5,
+            prefix_padding_ms: 300,
+            silence_duration_ms: 1000
+          },
+          temperature: 0.8,
+          max_response_output_tokens: "inf"
+        }
+      }
+      
+      openaiWs.send(JSON.stringify(sessionConfig))
     }
 
     openaiWs.onmessage = (event) => {
+      console.log('OpenAI message:', event.data)
       // Forward OpenAI messages to client
-      socket.send(event.data)
+      if (socket.readyState === WebSocket.OPEN) {
+        socket.send(event.data)
+      }
     }
 
     openaiWs.onerror = (error) => {
       console.error('OpenAI WebSocket error:', error)
-      socket.send(JSON.stringify({
-        type: 'error',
-        message: 'OpenAI connection error'
-      }))
+      if (socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({
+          type: 'error',
+          message: 'OpenAI connection error'
+        }))
+      }
     }
 
-    openaiWs.onclose = () => {
-      console.log('OpenAI WebSocket closed')
-      socket.close()
+    openaiWs.onclose = (event) => {
+      console.log('OpenAI WebSocket closed:', event.code, event.reason)
+      if (socket.readyState === WebSocket.OPEN) {
+        socket.close()
+      }
     }
   }
 
   socket.onmessage = (event) => {
+    console.log('Client message:', event.data)
     // Forward client messages to OpenAI
     if (openaiWs && openaiWs.readyState === WebSocket.OPEN) {
       openaiWs.send(event.data)
@@ -77,14 +111,14 @@ serve(async (req) => {
 
   socket.onclose = () => {
     console.log('Client disconnected from GPT voice chat')
-    if (openaiWs) {
+    if (openaiWs && openaiWs.readyState === WebSocket.OPEN) {
       openaiWs.close()
     }
   }
 
   socket.onerror = (error) => {
     console.error('Client WebSocket error:', error)
-    if (openaiWs) {
+    if (openaiWs && openaiWs.readyState === WebSocket.OPEN) {
       openaiWs.close()
     }
   }

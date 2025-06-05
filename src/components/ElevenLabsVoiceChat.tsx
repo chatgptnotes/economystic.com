@@ -61,7 +61,7 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
       
       toast({
         title: "Voice Chat Error",
-        description: `Connection failed: ${error.message || 'Unknown error'}`,
+        description: `Connection failed: ${error || 'Unknown error'}`,
         variant: "destructive",
       });
     },
@@ -98,22 +98,6 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
     }
   };
 
-  const getSignedUrl = async () => {
-    try {
-      console.log("Fetching signed URL for agent conversation...");
-      
-      // For now, try using the agent ID directly as ElevenLabs might support this
-      // If this doesn't work, we'll need the user to provide their ElevenLabs API key
-      const agentId = "agent_01jx0f5dmge7ntxth97awgnrbg";
-      
-      // Try direct agent ID approach first
-      return { agentId };
-    } catch (error) {
-      console.error("Failed to get signed URL:", error);
-      throw new Error("Failed to get conversation URL");
-    }
-  };
-
   const startConversation = async () => {
     // Prevent multiple simultaneous connection attempts
     if (isConnecting || isConnected || connectionAttempted.current) {
@@ -133,23 +117,13 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
     connectionAttempted.current = true;
 
     try {
-      const urlData = await getSignedUrl();
-      console.log("Got URL data:", urlData);
+      // Use the agent ID directly
+      const agentId = "agent_01jx0f5dmge7ntxth97awgnrbg";
+      console.log("Starting session with agent ID:", agentId);
       
-      let sessionId;
-      if (urlData.agentId) {
-        console.log("Starting session with agent ID:", urlData.agentId);
-        sessionId = await conversation.startSession({
-          agentId: urlData.agentId
-        });
-      } else if (urlData.signedUrl) {
-        console.log("Starting session with signed URL");
-        sessionId = await conversation.startSession({
-          signedUrl: urlData.signedUrl
-        });
-      } else {
-        throw new Error("No valid connection method available");
-      }
+      const sessionId = await conversation.startSession({
+        agentId: agentId
+      });
       
       console.log("Session started successfully with ID:", sessionId);
       setConversationId(sessionId);
@@ -161,7 +135,7 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
       
       toast({
         title: "Connection Failed",
-        description: error.message || "Unable to start voice chat. Please try again.",
+        description: "Unable to start voice chat. Please try again.",
         variant: "destructive",
       });
     }

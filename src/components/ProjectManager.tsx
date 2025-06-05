@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Github, Users, Code, Calendar, ExternalLink, FileText, Edit, Trash2, GripVertical } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ProjectFileManager from "./ProjectFileManager";
@@ -193,6 +194,23 @@ const ProjectManager = () => {
     });
   };
 
+  const handleAssignmentChange = (projectId: string, newAssignee: string) => {
+    setProjects(prev => {
+      const updated = prev.map(project => 
+        project.id === projectId 
+          ? { ...project, assignedTo: newAssignee }
+          : project
+      );
+      return updated;
+    });
+
+    const projectName = projects.find(p => p.id === projectId)?.name;
+    toast({
+      title: "Project Reassigned",
+      description: `"${projectName}" has been assigned to ${newAssignee}`,
+    });
+  };
+
   const filteredProjects = projects.filter(project => {
     const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          project.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -366,9 +384,27 @@ const ProjectManager = () => {
                         <Badge variant="outline">{project.language}</Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge className={getTeamMemberColor(project.assignedTo)}>
-                          {project.assignedTo}
-                        </Badge>
+                        <Select
+                          value={project.assignedTo}
+                          onValueChange={(value) => handleAssignmentChange(project.id, value)}
+                        >
+                          <SelectTrigger className="w-32">
+                            <SelectValue>
+                              <Badge className={getTeamMemberColor(project.assignedTo)}>
+                                {project.assignedTo}
+                              </Badge>
+                            </SelectValue>
+                          </SelectTrigger>
+                          <SelectContent>
+                            {teamMembers.map(member => (
+                              <SelectItem key={member} value={member}>
+                                <Badge className={getTeamMemberColor(member)}>
+                                  {member}
+                                </Badge>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </TableCell>
                       <TableCell>
                         <Badge className={getPlatformColor(project.platform)}>

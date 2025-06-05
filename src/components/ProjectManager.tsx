@@ -1,3 +1,7 @@
+<think>
+
+</think>
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -328,36 +332,36 @@ const ProjectManager = () => {
 
   const getTeamMemberColor = (member: string) => {
     if (member === "Unassigned") {
-      return "bg-gray-100 text-gray-600";
+      return "bg-gray-100 text-gray-600 border-gray-200";
     }
     const colors = {
-      "Bhupendra": "bg-blue-100 text-blue-800",
-      "Dinesh": "bg-green-100 text-green-800",
-      "Prathik": "bg-purple-100 text-purple-800",
-      "Pooja": "bg-pink-100 text-pink-800",
-      "Poonam": "bg-yellow-100 text-yellow-800",
-      "Monish": "bg-orange-100 text-orange-800",
-      "Aman": "bg-indigo-100 text-indigo-800",
-      "Priyanka": "bg-rose-100 text-rose-800"
+      "Bhupendra": "bg-blue-100 text-blue-800 border-blue-200",
+      "Dinesh": "bg-green-100 text-green-800 border-green-200",
+      "Prathik": "bg-purple-100 text-purple-800 border-purple-200",
+      "Pooja": "bg-pink-100 text-pink-800 border-pink-200",
+      "Poonam": "bg-yellow-100 text-yellow-800 border-yellow-200",
+      "Monish": "bg-orange-100 text-orange-800 border-orange-200",
+      "Aman": "bg-indigo-100 text-indigo-800 border-indigo-200",
+      "Priyanka": "bg-rose-100 text-rose-800 border-rose-200"
     };
-    return colors[member as keyof typeof colors] || "bg-gray-100 text-gray-800";
+    return colors[member as keyof typeof colors] || "bg-gray-100 text-gray-800 border-gray-200";
   };
 
   const getPlatformColor = (platform: string) => {
     const colors = {
-      "Lovable": "bg-purple-100 text-purple-800",
-      "Cursor": "bg-blue-100 text-blue-800",
-      "V0": "bg-green-100 text-green-800",
-      "Unknown": "bg-gray-100 text-gray-800"
+      "Lovable": "bg-purple-100 text-purple-800 border-purple-200",
+      "Cursor": "bg-blue-100 text-blue-800 border-blue-200",
+      "V0": "bg-green-100 text-green-800 border-green-200",
+      "Unknown": "bg-gray-100 text-gray-800 border-gray-200"
     };
-    return colors[platform as keyof typeof colors] || "bg-gray-100 text-gray-800";
+    return colors[platform as keyof typeof colors] || "bg-gray-100 text-gray-800 border-gray-200";
   };
 
   const getPriorityColor = (priority: string) => {
     const colors = {
-      'High': 'bg-red-100 text-red-800 border-red-200',
-      'Medium': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      'Low': 'bg-green-100 text-green-800 border-green-200'
+      'High': 'bg-red-50 text-red-700 border-red-200',
+      'Medium': 'bg-yellow-50 text-yellow-700 border-yellow-200',
+      'Low': 'bg-green-50 text-green-700 border-green-200'
     };
     return colors[priority as keyof typeof colors] || colors.Low;
   };
@@ -566,7 +570,7 @@ const ProjectManager = () => {
                         >
                           <SelectTrigger className="w-32">
                             <SelectValue>
-                              <Badge className={getPriorityColor(project.priority)} variant="outline">
+                              <Badge className={`${getPriorityColor(project.priority)} border`} variant="outline">
                                 <div className="flex items-center space-x-1">
                                   {getPriorityIcon(project.priority)}
                                   <span>{project.priority}</span>
@@ -576,28 +580,22 @@ const ProjectManager = () => {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="High">
-                              <Badge className={getPriorityColor('High')} variant="outline">
-                                <div className="flex items-center space-x-1">
-                                  <AlertCircle className="h-3 w-3" />
-                                  <span>High</span>
-                                </div>
-                              </Badge>
+                              <div className="flex items-center space-x-1">
+                                <AlertCircle className="h-3 w-3 text-red-600" />
+                                <span>High</span>
+                              </div>
                             </SelectItem>
                             <SelectItem value="Medium">
-                              <Badge className={getPriorityColor('Medium')} variant="outline">
-                                <div className="flex items-center space-x-1">
-                                  <Circle className="h-3 w-3" />
-                                  <span>Medium</span>
-                                </div>
-                              </Badge>
+                              <div className="flex items-center space-x-1">
+                                <Circle className="h-3 w-3 text-yellow-600" />
+                                <span>Medium</span>
+                              </div>
                             </SelectItem>
                             <SelectItem value="Low">
-                              <Badge className={getPriorityColor('Low')} variant="outline">
-                                <div className="flex items-center space-x-1">
-                                  <Minus className="h-3 w-3" />
-                                  <span>Low</span>
-                                </div>
-                              </Badge>
+                              <div className="flex items-center space-x-1">
+                                <Minus className="h-3 w-3 text-green-600" />
+                                <span>Low</span>
+                              </div>
                             </SelectItem>
                           </SelectContent>
                         </Select>
@@ -621,7 +619,7 @@ const ProjectManager = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline">{project.language}</Badge>
+                        <Badge variant="outline" className="border">{project.language}</Badge>
                       </TableCell>
                       <TableCell>
                         <Select
@@ -630,7 +628,7 @@ const ProjectManager = () => {
                         >
                           <SelectTrigger className="w-32">
                             <SelectValue>
-                              <Badge className={getTeamMemberColor(project.assignedTo)}>
+                              <Badge className={`${getTeamMemberColor(project.assignedTo)} border`} variant="outline">
                                 {project.assignedTo === "Unassigned" ? (
                                   <div className="flex items-center">
                                     <UserX className="h-3 w-3 mr-1" />
@@ -646,29 +644,25 @@ const ProjectManager = () => {
                             <SelectItem value="Unassigned">
                               <div className="flex items-center">
                                 <UserX className="h-3 w-3 mr-2" />
-                                <Badge className={getTeamMemberColor("Unassigned")}>
-                                  Unassigned
-                                </Badge>
+                                <span>Unassigned</span>
                               </div>
                             </SelectItem>
                             {teamMembers.map(member => (
                               <SelectItem key={member} value={member}>
-                                <Badge className={getTeamMemberColor(member)}>
-                                  {member}
-                                </Badge>
+                                {member}
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
                       </TableCell>
                       <TableCell>
-                        <Badge className={getPlatformColor(project.platform)}>
+                        <Badge className={`${getPlatformColor(project.platform)} border`} variant="outline">
                           {project.platform}
                         </Badge>
                       </TableCell>
                       <TableCell>
                         {project.domainAssociated ? (
-                          <Badge variant="outline">{project.domainAssociated}</Badge>
+                          <Badge variant="outline" className="border">{project.domainAssociated}</Badge>
                         ) : (
                           <span className="text-gray-400">-</span>
                         )}
@@ -816,8 +810,14 @@ const ProjectManager = () => {
                                         <GripVertical className="h-4 w-4 text-gray-400" />
                                       </div>
                                       <span className="truncate flex-1 font-medium">{project.name}</span>
+                                      <Badge className={`ml-2 ${getPriorityColor(project.priority)} border text-xs`} variant="outline">
+                                        <div className="flex items-center space-x-1">
+                                          {getPriorityIcon(project.priority)}
+                                          <span>{project.priority}</span>
+                                        </div>
+                                      </Badge>
                                     </div>
-                                    <Badge variant="outline" className="text-xs ml-2 flex-shrink-0">
+                                    <Badge variant="outline" className="text-xs ml-2 flex-shrink-0 border">
                                       {project.language}
                                     </Badge>
                                   </div>
@@ -843,7 +843,7 @@ const ProjectManager = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     <span>{platform}</span>
-                    <Badge className={getPlatformColor(platform)}>
+                    <Badge className={`${getPlatformColor(platform)} border`} variant="outline">
                       {count} projects
                     </Badge>
                   </CardTitle>
@@ -854,8 +854,14 @@ const ProjectManager = () => {
                       .filter(p => p.platform === platform)
                       .slice(0, 3)
                       .map((project) => (
-                        <div key={project.id} className="text-sm">
-                          <span className="truncate">{project.name}</span>
+                        <div key={project.id} className="flex items-center justify-between text-sm">
+                          <span className="truncate flex-1">{project.name}</span>
+                          <Badge className={`ml-2 ${getPriorityColor(project.priority)} border text-xs`} variant="outline">
+                            <div className="flex items-center space-x-1">
+                              {getPriorityIcon(project.priority)}
+                              <span>{project.priority}</span>
+                            </div>
+                          </Badge>
                         </div>
                       ))}
                     {count > 3 && (
@@ -914,7 +920,7 @@ const ProjectManager = () => {
                                 <SelectItem key={project.id} value={project.id}>
                                   <div className="flex items-center space-x-2">
                                     <span>{project.name}</span>
-                                    <Badge className={getTeamMemberColor(project.assignedTo)} variant="outline">
+                                    <Badge className={`${getTeamMemberColor(project.assignedTo)} border`} variant="outline">
                                       {project.assignedTo}
                                     </Badge>
                                   </div>
@@ -924,11 +930,17 @@ const ProjectManager = () => {
                         </Select>
                         {mappedProject && (
                           <div className="flex items-center space-x-2">
-                            <Badge className={getTeamMemberColor(mappedProject.assignedTo)}>
+                            <Badge className={`${getTeamMemberColor(mappedProject.assignedTo)} border`} variant="outline">
                               {mappedProject.assignedTo}
                             </Badge>
-                            <Badge className={getPlatformColor(mappedProject.platform)}>
+                            <Badge className={`${getPlatformColor(mappedProject.platform)} border`} variant="outline">
                               {mappedProject.platform}
+                            </Badge>
+                            <Badge className={`${getPriorityColor(mappedProject.priority)} border`} variant="outline">
+                              <div className="flex items-center space-x-1">
+                                {getPriorityIcon(mappedProject.priority)}
+                                <span>{mappedProject.priority}</span>
+                              </div>
                             </Badge>
                           </div>
                         )}

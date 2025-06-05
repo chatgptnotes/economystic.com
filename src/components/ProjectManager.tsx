@@ -16,6 +16,7 @@ import ProjectEditForm from "./ProjectEditForm";
 import AddProjectForm from "./AddProjectForm";
 import { DragDropContext, Droppable, Draggable, DropResult } from "react-beautiful-dnd";
 import { supabase } from "@/integrations/supabase/client";
+import { useUser } from "@clerk/clerk-react";
 
 interface Project {
   id: string;
@@ -34,8 +35,10 @@ interface Project {
 
 const ProjectManager = () => {
   const { toast } = useToast();
+  const { isSignedIn, isLoaded } = useUser();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [projectSearchTerm, setProjectSearchTerm] = useState("");
   const [domainSearchTerm, setDomainSearchTerm] = useState("");
@@ -63,22 +66,48 @@ const ProjectManager = () => {
   ];
 
   useEffect(() => {
-    loadProjects();
-  }, []);
+    console.log('ProjectManager: Auth state changed', { isLoaded, isSignedIn });
+    if (isLoaded) {
+      loadProjects();
+    }
+  }, [isLoaded, isSignedIn]);
 
   const loadProjects = async () => {
     try {
+      console.log('ProjectManager: Starting to load projects...');
       setLoading(true);
-      const { data, error } = await supabase
+      setError(null);
+
+      // Check if user is authenticated
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      console.log('ProjectManager: Session check', { session: !!session, sessionError });
+
+      if (sessionError) {
+        console.error('ProjectManager: Session error:', sessionError);
+        setError(`Authentication error: ${sessionError.message}`);
+        return;
+      }
+
+      if (!session) {
+        console.log('ProjectManager: No session found, user not authenticated');
+        setError('You must be logged in to view projects');
+        return;
+      }
+
+      console.log('ProjectManager: Fetching projects from Supabase...');
+      const { data, error: fetchError } = await supabase
         .from('projects')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error loading projects:', error);
+      console.log('ProjectManager: Supabase response', { data, error: fetchError, count: data?.length });
+
+      if (fetchError) {
+        console.error('ProjectManager: Error loading projects:', fetchError);
+        setError(`Failed to load projects: ${fetchError.message}`);
         toast({
           title: "Error",
-          description: "Failed to load projects from database",
+          description: `Failed to load projects: ${fetchError.message}`,
           variant: "destructive"
         });
         return;
@@ -99,12 +128,16 @@ const ProjectManager = () => {
         priority: project.priority as 'High' | 'Medium' | 'Low'
       }));
 
+      console.log('ProjectManager: Transformed projects:', transformedProjects);
       setProjects(transformedProjects);
+      setError(null);
     } catch (error) {
-      console.error('Error loading projects:', error);
+      console.error('ProjectManager: Exception while loading projects:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      setError(`Failed to load projects: ${errorMessage}`);
       toast({
         title: "Error",
-        description: "Failed to load projects",
+        description: `Failed to load projects: ${errorMessage}`,
         variant: "destructive"
       });
     } finally {
@@ -661,10 +694,47 @@ const ProjectManager = () => {
     }
   };
 
+  if (!isLoaded) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-lg">Loading authentication...</div>
+      </div>
+    );
+  }
+
+  if (!isSignedIn) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <h3 className="text-lg font-medium mb-2">Authentication Required</h3>
+          <p className="text-gray-600">Please log in to view your projects.</p>
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-lg">Loading projects...</div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="text-lg">Loading projects...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <h3 className="text-lg font-medium mb-2">Error Loading Projects</h3>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <Button onClick={loadProjects}>
+            Try Again
+          </Button>
+        </div>
       </div>
     );
   }

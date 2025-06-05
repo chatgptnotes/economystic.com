@@ -9,10 +9,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Search, Github, Users, Code, Calendar, ExternalLink, FileText, Edit, Trash2, GripVertical, UserX, AlertCircle, Circle, Minus } from "lucide-react";
+import { Search, Github, Users, Code, Calendar, ExternalLink, FileText, Edit, Trash2, GripVertical, UserX, AlertCircle, Circle, Minus, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ProjectFileManager from "./ProjectFileManager";
 import ProjectEditForm from "./ProjectEditForm";
+import AddProjectForm from "./AddProjectForm";
 import { DragDropContext, Droppable, Draggable, DropResult } from "react-beautiful-dnd";
 
 interface Project {
@@ -41,6 +42,7 @@ const ProjectManager = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [showInactive, setShowInactive] = useState(true);
+  const [showAddDialog, setShowAddDialog] = useState(false);
 
   const teamMembers = ["Bhupendra", "Dinesh", "Prathik", "Pooja", "Poonam", "Monish", "Aman", "Priyanka"];
 
@@ -422,11 +424,19 @@ const ProjectManager = () => {
     setEditingProject(null);
   };
 
-  const handleAddNewProject = () => {
-    // Placeholder for add new project functionality
+  const handleAddNewProject = (projectData: Omit<Project, 'id' | 'lastUpdated'>) => {
+    const newProject: Project = {
+      ...projectData,
+      id: (projects.length + 1).toString(),
+      lastUpdated: 'just now'
+    };
+
+    setProjects(prev => [newProject, ...prev]);
+    setShowAddDialog(false);
+    
     toast({
-      title: "Add New Project",
-      description: "This feature will be implemented soon",
+      title: "Project Added",
+      description: `"${newProject.name}" has been added successfully`,
     });
   };
 
@@ -437,10 +447,24 @@ const ProjectManager = () => {
           <h2 className="text-2xl font-bold">Project Management</h2>
           <p className="text-gray-600">Manage all your GitHub repositories and team assignments</p>
         </div>
-        <Button onClick={handleAddNewProject} className="flex items-center space-x-2">
-          <Github className="h-4 w-4" />
-          <span>Add New Project</span>
-        </Button>
+        <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+          <DialogTrigger asChild>
+            <Button className="flex items-center space-x-2">
+              <Plus className="h-4 w-4" />
+              <span>Add New Project</span>
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Add New Project</DialogTitle>
+            </DialogHeader>
+            <AddProjectForm
+              teamMembers={teamMembers}
+              onSave={handleAddNewProject}
+              onCancel={() => setShowAddDialog(false)}
+            />
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Search and Filter */}

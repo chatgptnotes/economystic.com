@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Mic, MicOff, Phone, PhoneOff } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 interface ElevenLabsVoiceChatProps {
@@ -14,13 +14,17 @@ interface ElevenLabsVoiceChatProps {
 
 const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChatProps) => {
   const [isConnected, setIsConnected] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const { toast } = useToast();
+  const connectionAttempted = useRef(false);
 
   const conversation = useConversation({
     onConnect: () => {
       console.log("Connected to ElevenLabs");
       setIsConnected(true);
+      setIsConnecting(false);
+      connectionAttempted.current = false;
       toast({
         title: "Voice Chat Connected",
         description: "You can now speak with the AI about your search results",
@@ -29,7 +33,9 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
     onDisconnect: () => {
       console.log("Disconnected from ElevenLabs");
       setIsConnected(false);
+      setIsConnecting(false);
       setConversationId(null);
+      connectionAttempted.current = false;
       toast({
         title: "Voice Chat Disconnected",
         description: "Voice conversation has ended",
@@ -40,6 +46,8 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
     },
     onError: (error) => {
       console.error("ElevenLabs error:", error);
+      setIsConnecting(false);
+      connectionAttempted.current = false;
       toast({
         title: "Voice Chat Error",
         description: "There was an issue with the voice chat connection",
@@ -78,46 +86,33 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
     }
   };
 
-  const getSignedUrl = async () => {
-    try {
-      const response = await fetch(
-        `https://api.elevenlabs.io/v1/convai/conversation/get_signed_url?agent_id=agent_01jx0f5dmge7ntxth97awgnrbg`,
-        {
-          method: "GET",
-          headers: {
-            "xi-api-key": "sk_0a51fff5c88050733dcabe8dd4c62360fd55cc8041a4534d",
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Failed to get signed URL: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      return data.signed_url;
-    } catch (error) {
-      console.error("Error getting signed URL:", error);
-      throw error;
-    }
-  };
-
   const startConversation = async () => {
+    // Prevent multiple simultaneous connection attempts
+    if (isConnecting || isConnected || connectionAttempted.current) {
+      console.log("Connection already in progress or established");
+      return;
+    }
+
     const hasPermission = await requestMicrophonePermission();
     if (!hasPermission) return;
 
+    setIsConnecting(true);
+    connectionAttempted.current = true;
+
     try {
-      // Get signed URL for the specific agent
-      const signedUrl = await getSignedUrl();
+      console.log("Starting conversation with agent ID directly...");
       
-      // Start session with the signed URL
+      // Use agent ID directly instead of signed URL for simpler connection
       const id = await conversation.startSession({
-        signedUrl: signedUrl
+        agentId: "agent_01jx0f5dmge7ntxth97awgnrbg"
       });
       
+      console.log("Session started with ID:", id);
       setConversationId(id);
     } catch (error) {
       console.error("Failed to start conversation:", error);
+      setIsConnecting(false);
+      connectionAttempted.current = false;
       toast({
         title: "Connection Failed",
         description: "Unable to start voice chat. Please check your connection and try again.",
@@ -128,11 +123,22 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
 
   const endConversation = async () => {
     try {
+      setIsConnecting(false);
+      connectionAttempted.current = false;
       await conversation.endSession();
     } catch (error) {
       console.error("Failed to end conversation:", error);
     }
   };
+
+  // Clean up on unmount
+  useEffect(() => {
+    return () => {
+      if (isConnected) {
+        endConversation();
+      }
+    };
+  }, []);
 
   return (
     <Card className="w-full">
@@ -140,8 +146,8 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
         <CardTitle className="flex items-center space-x-2">
           <Mic className="h-5 w-5" />
           <span>AI Voice Chat</span>
-          <Badge variant={isConnected ? "default" : "secondary"}>
-            {isConnected ? "Connected" : "Disconnected"}
+          <Badge variant={isConnected ? "default" : isConnecting ? "secondary" : "outline"}>
+            {isConnected ? "Connected" : isConnecting ? "Connecting..." : "Disconnected"}
           </Badge>
         </CardTitle>
       </CardHeader>
@@ -160,13 +166,19 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
                 <span>Listening... Speak to ask about your search results</span>
               </div>
             )}
-            {!isConnected && (
+            {isConnecting && (
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+                <span>Connecting to voice chat...</span>
+              </div>
+            )}
+            {!isConnected && !isConnecting && (
               <p>Click "Start Voice Chat" to begin talking with AI about your search results</p>
             )}
           </div>
 
           <div className="flex space-x-2">
-            {!isConnected ? (
+            {!isConnected && !isConnecting ? (
               <Button onClick={startConversation} className="flex items-center space-x-2">
                 <Phone className="h-4 w-4" />
                 <span>Start Voice Chat</span>
@@ -176,9 +188,10 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
                 onClick={endConversation} 
                 variant="destructive" 
                 className="flex items-center space-x-2"
+                disabled={isConnecting}
               >
                 <PhoneOff className="h-4 w-4" />
-                <span>End Voice Chat</span>
+                <span>{isConnecting ? "Connecting..." : "End Voice Chat"}</span>
               </Button>
             )}
           </div>

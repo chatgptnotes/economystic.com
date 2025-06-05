@@ -1,6 +1,3 @@
-<think>
-
-</think>
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -887,39 +884,44 @@ const ProjectManager = () => {
 
         <TabsContent value="platforms">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {Object.entries(projectsByPlatform).map(([platform, count]) => (
-              <Card key={platform}>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <span>{platform}</span>
-                    <Badge className={`${getPlatformColor(platform)} border`} variant="outline">
-                      {count} projects
-                    </Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {projects
-                      .filter(p => p.platform === platform && p.isActive)
-                      .slice(0, 3)
-                      .map((project) => (
-                        <div key={project.id} className="flex items-center justify-between text-sm">
-                          <span className="truncate flex-1">{project.name}</span>
-                          <Badge className={`ml-2 ${getPriorityColor(project.priority)} border text-xs`} variant="outline">
-                            <div className="flex items-center space-x-1">
-                              {getPriorityIcon(project.priority)}
-                              <span>{project.priority}</span>
-                            </div>
-                          </Badge>
-                        </div>
-                      ))}
-                    {count > 3 && (
-                      <p className="text-xs text-gray-500">+{count - 3} more</p>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            {['Lovable', 'Cursor', 'V0', 'Stitch', 'Windsurf', 'Clerk', 'Codex', 'Vercel', 'Unknown'].map((platform) => {
+              const count = projectsByPlatform[platform] || 0;
+              if (count === 0) return null;
+              
+              return (
+                <Card key={platform}>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <span>{platform}</span>
+                      <Badge className={`${getPlatformColor(platform)} border`} variant="outline">
+                        {count} projects
+                      </Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {projects
+                        .filter(p => p.platform === platform && p.isActive)
+                        .slice(0, 3)
+                        .map((project) => (
+                          <div key={project.id} className="flex items-center justify-between text-sm">
+                            <span className="truncate flex-1">{project.name}</span>
+                            <Badge className={`ml-2 ${getPriorityColor(project.priority)} border text-xs`} variant="outline">
+                              <div className="flex items-center space-x-1">
+                                {getPriorityIcon(project.priority)}
+                                <span>{project.priority}</span>
+                              </div>
+                            </Badge>
+                          </div>
+                        ))}
+                      {count > 3 && (
+                        <p className="text-xs text-gray-500">+{count - 3} more</p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </TabsContent>
 

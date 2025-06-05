@@ -900,7 +900,7 @@ const ProjectManager = () => {
                 <CardContent>
                   <div className="space-y-2">
                     {projects
-                      .filter(p => p.platform === platform)
+                      .filter(p => p.platform === platform && p.isActive)
                       .slice(0, 3)
                       .map((project) => (
                         <div key={project.id} className="flex items-center justify-between text-sm">

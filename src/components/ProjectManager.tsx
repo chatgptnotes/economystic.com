@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Search, Github, Users, Code, Calendar, ExternalLink, FileText, Edit, Trash2, GripVertical, UserX } from "lucide-react";
+import { Search, Github, Users, Code, Calendar, ExternalLink, FileText, Edit, Trash2, GripVertical, UserX, AlertCircle, Circle, Minus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ProjectFileManager from "./ProjectFileManager";
 import ProjectEditForm from "./ProjectEditForm";
@@ -28,6 +27,7 @@ interface Project {
   domainAssociated?: string;
   githubUrl: string;
   isActive: boolean;
+  priority: 'High' | 'Medium' | 'Low';
 }
 
 const ProjectManager = () => {
@@ -37,6 +37,7 @@ const ProjectManager = () => {
   const [projectSearchTerm, setProjectSearchTerm] = useState("");
   const [domainSearchTerm, setDomainSearchTerm] = useState("");
   const [selectedMember, setSelectedMember] = useState("all");
+  const [selectedPriority, setSelectedPriority] = useState("all");
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [showInactive, setShowInactive] = useState(true);
@@ -63,6 +64,11 @@ const ProjectManager = () => {
 
   const getRandomTeamMember = () => {
     return teamMembers[Math.floor(Math.random() * teamMembers.length)];
+  };
+
+  const getRandomPriority = (): 'High' | 'Medium' | 'Low' => {
+    const priorities: ('High' | 'Medium' | 'Low')[] = ['High', 'Medium', 'Low'];
+    return priorities[Math.floor(Math.random() * priorities.length)];
   };
 
   const detectPlatform = (name: string, description: string): 'Cursor' | 'Lovable' | 'V0' | 'Unknown' => {
@@ -164,7 +170,8 @@ const ProjectManager = () => {
       platform: detectPlatform(project.name, project.description),
       domainAssociated: findAssociatedDomain(project.name),
       githubUrl: `https://github.com/yourusername/${project.name}`,
-      isActive: Math.random() > 0.2 // 80% of projects are active by default
+      isActive: Math.random() > 0.2,
+      priority: getRandomPriority()
     }));
 
     setProjects(transformedProjects);
@@ -277,19 +284,41 @@ const ProjectManager = () => {
     });
   };
 
+  const handlePriorityChange = (projectId: string, newPriority: 'High' | 'Medium' | 'Low') => {
+    setProjects(prev => {
+      const updated = prev.map(project => 
+        project.id === projectId 
+          ? { ...project, priority: newPriority }
+          : project
+      );
+      return updated;
+    });
+
+    const projectName = projects.find(p => p.id === projectId)?.name;
+    toast({
+      title: "Priority Updated",
+      description: `"${projectName}" priority set to ${newPriority}`,
+    });
+  };
+
   const filteredProjects = projects.filter(project => {
-    // Combine both search terms - if user is typing in either search bar
     const combinedSearchTerm = searchTerm || projectSearchTerm;
     
-    // Search logic - check if the combined search term matches project name or description
     const matchesSearch = combinedSearchTerm === "" || 
                          project.name.toLowerCase().includes(combinedSearchTerm.toLowerCase()) ||
                          project.description.toLowerCase().includes(combinedSearchTerm.toLowerCase());
     
     const matchesMember = selectedMember === "all" || project.assignedTo === selectedMember;
+    const matchesPriority = selectedPriority === "all" || project.priority === selectedPriority;
     const matchesStatus = showInactive || project.isActive;
     
-    return matchesSearch && matchesMember && matchesStatus;
+    return matchesSearch && matchesMember && matchesPriority && matchesStatus;
+  });
+
+  // Sort projects by priority (High -> Medium -> Low)
+  const sortedProjects = [...filteredProjects].sort((a, b) => {
+    const priorityOrder = { 'High': 3, 'Medium': 2, 'Low': 1 };
+    return priorityOrder[b.priority] - priorityOrder[a.priority];
   });
 
   // Filter domains based on search term
@@ -322,6 +351,28 @@ const ProjectManager = () => {
       "Unknown": "bg-gray-100 text-gray-800"
     };
     return colors[platform as keyof typeof colors] || "bg-gray-100 text-gray-800";
+  };
+
+  const getPriorityColor = (priority: string) => {
+    const colors = {
+      'High': 'bg-red-100 text-red-800 border-red-200',
+      'Medium': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+      'Low': 'bg-green-100 text-green-800 border-green-200'
+    };
+    return colors[priority as keyof typeof colors] || colors.Low;
+  };
+
+  const getPriorityIcon = (priority: string) => {
+    switch (priority) {
+      case 'High':
+        return <AlertCircle className="h-3 w-3" />;
+      case 'Medium':
+        return <Circle className="h-3 w-3" />;
+      case 'Low':
+        return <Minus className="h-3 w-3" />;
+      default:
+        return <Minus className="h-3 w-3" />;
+    }
   };
 
   const projectsByMember = teamMembers.reduce((acc, member) => {
@@ -375,6 +426,16 @@ const ProjectManager = () => {
           ))}
           <option value="Unassigned">Unassigned</option>
         </select>
+        <select
+          className="px-4 py-2 border rounded-md"
+          value={selectedPriority}
+          onChange={(e) => setSelectedPriority(e.target.value)}
+        >
+          <option value="all">All Priorities</option>
+          <option value="High">High Priority</option>
+          <option value="Medium">Medium Priority</option>
+          <option value="Low">Low Priority</option>
+        </select>
         <div className="flex items-center space-x-2">
           <Switch
             id="show-inactive"
@@ -396,6 +457,18 @@ const ProjectManager = () => {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Active Projects</p>
                 <p className="text-2xl font-bold text-gray-900">{activeProjects.length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <AlertCircle className="h-8 w-8 text-red-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">High Priority</p>
+                <p className="text-2xl font-bold text-gray-900">{activeProjects.filter(p => p.priority === 'High').length}</p>
               </div>
             </div>
           </CardContent>
@@ -436,18 +509,6 @@ const ProjectManager = () => {
             </div>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <Calendar className="h-8 w-8 text-orange-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Recently Updated</p>
-                <p className="text-2xl font-bold text-gray-900">{activeProjects.filter(p => p.lastUpdated.includes('hours') || p.lastUpdated.includes('yesterday')).length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       <Tabs defaultValue="all" className="w-full">
@@ -462,7 +523,7 @@ const ProjectManager = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
-                <span>All Projects ({filteredProjects.length})</span>
+                <span>All Projects ({sortedProjects.length})</span>
                 <div className="relative w-80">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <Input
@@ -479,6 +540,7 @@ const ProjectManager = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Status</TableHead>
+                    <TableHead>Priority</TableHead>
                     <TableHead>Project Name</TableHead>
                     <TableHead>Language</TableHead>
                     <TableHead>Assigned To</TableHead>
@@ -489,13 +551,56 @@ const ProjectManager = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredProjects.map((project) => (
+                  {sortedProjects.map((project) => (
                     <TableRow key={project.id} className={!project.isActive ? "opacity-60" : ""}>
                       <TableCell>
                         <Switch
                           checked={project.isActive}
                           onCheckedChange={(checked) => handleProjectStatusToggle(project.id, checked)}
                         />
+                      </TableCell>
+                      <TableCell>
+                        <Select
+                          value={project.priority}
+                          onValueChange={(value: 'High' | 'Medium' | 'Low') => handlePriorityChange(project.id, value)}
+                        >
+                          <SelectTrigger className="w-32">
+                            <SelectValue>
+                              <Badge className={getPriorityColor(project.priority)} variant="outline">
+                                <div className="flex items-center space-x-1">
+                                  {getPriorityIcon(project.priority)}
+                                  <span>{project.priority}</span>
+                                </div>
+                              </Badge>
+                            </SelectValue>
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="High">
+                              <Badge className={getPriorityColor('High')} variant="outline">
+                                <div className="flex items-center space-x-1">
+                                  <AlertCircle className="h-3 w-3" />
+                                  <span>High</span>
+                                </div>
+                              </Badge>
+                            </SelectItem>
+                            <SelectItem value="Medium">
+                              <Badge className={getPriorityColor('Medium')} variant="outline">
+                                <div className="flex items-center space-x-1">
+                                  <Circle className="h-3 w-3" />
+                                  <span>Medium</span>
+                                </div>
+                              </Badge>
+                            </SelectItem>
+                            <SelectItem value="Low">
+                              <Badge className={getPriorityColor('Low')} variant="outline">
+                                <div className="flex items-center space-x-1">
+                                  <Minus className="h-3 w-3" />
+                                  <span>Low</span>
+                                </div>
+                              </Badge>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
                       </TableCell>
                       <TableCell>
                         <div>

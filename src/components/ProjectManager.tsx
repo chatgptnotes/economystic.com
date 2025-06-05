@@ -6,8 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Search, Github, Users, Code, Calendar, ExternalLink, FileText } from "lucide-react";
+import { Search, Github, Users, Code, Calendar, ExternalLink, FileText, Edit } from "lucide-react";
 import ProjectFileManager from "./ProjectFileManager";
+import ProjectEditForm from "./ProjectEditForm";
 
 interface Project {
   id: string;
@@ -27,6 +28,7 @@ const ProjectManager = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedMember, setSelectedMember] = useState("all");
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
 
   const teamMembers = ["Bhupendra", "Dinesh", "Prathik", "Pooja", "Poonam", "Monish"];
 
@@ -180,6 +182,11 @@ const ProjectManager = () => {
     acc[project.platform] = (acc[project.platform] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
+
+  const handleProjectUpdate = (updatedProject: Project) => {
+    setProjects(prev => prev.map(p => p.id === updatedProject.id ? updatedProject : p));
+    setEditingProject(null);
+  };
 
   return (
     <div className="space-y-6">
@@ -354,6 +361,30 @@ const ProjectManager = () => {
                                 <ProjectFileManager 
                                   projectId={selectedProject.id}
                                   projectName={selectedProject.name}
+                                />
+                              )}
+                            </DialogContent>
+                          </Dialog>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => setEditingProject(project)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-2xl">
+                              <DialogHeader>
+                                <DialogTitle>Edit Project - {project.name}</DialogTitle>
+                              </DialogHeader>
+                              {editingProject && (
+                                <ProjectEditForm 
+                                  project={editingProject}
+                                  teamMembers={teamMembers}
+                                  onSave={handleProjectUpdate}
+                                  onCancel={() => setEditingProject(null)}
                                 />
                               )}
                             </DialogContent>

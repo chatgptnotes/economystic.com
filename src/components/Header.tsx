@@ -33,11 +33,11 @@ const Header = () => {
           <div className="flex items-center space-x-4">
             <SignedIn>
               <nav className="flex items-center space-x-2">
-                <Link to="/">
+                <Link to="/dashboard">
                   <Button 
-                    variant={isActive("/") ? "default" : "ghost"} 
+                    variant={isActive("/dashboard") ? "default" : "ghost"} 
                     className={`flex items-center space-x-2 rounded-xl transition-all duration-200 ${
-                      isActive("/") 
+                      isActive("/dashboard") 
                         ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg hover:from-blue-600 hover:to-blue-700" 
                         : "hover:bg-blue-50 hover:text-blue-600"
                     }`}
@@ -116,7 +116,7 @@ const Header = () => {
             </SignedIn>
             
             <SignedOut>
-              <SignInButton fallbackRedirectUrl="/">
+              <SignInButton fallbackRedirectUrl="/dashboard">
                 <Button className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl shadow-lg hover:from-blue-600 hover:to-indigo-700 transition-all duration-200">
                   Sign In
                 </Button>

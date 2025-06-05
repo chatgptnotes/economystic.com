@@ -27,7 +27,7 @@ const Auth = () => {
           <CardContent>
             {isSignUp ? (
               <SignUp 
-                fallbackRedirectUrl="/"
+                fallbackRedirectUrl="/dashboard"
                 appearance={{
                   elements: {
                     formButtonPrimary: "bg-blue-600 hover:bg-blue-700",
@@ -37,7 +37,7 @@ const Auth = () => {
               />
             ) : (
               <SignIn 
-                fallbackRedirectUrl="/"
+                fallbackRedirectUrl="/dashboard"
                 appearance={{
                   elements: {
                     formButtonPrimary: "bg-blue-600 hover:bg-blue-700",

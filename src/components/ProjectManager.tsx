@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -252,6 +253,19 @@ const ProjectManager = () => {
     );
   };
 
+  // Type-safe handlers for Select components
+  const handlePriorityFilterChange = (value: string) => {
+    setPriorityFilter(value as ProjectPriority | 'all');
+  };
+
+  const handleStatusFilterChange = (value: string) => {
+    setStatusFilter(value as ProjectStatus | 'all');
+  };
+
+  const handleSortByChange = (value: string) => {
+    setSortBy(value as 'priority' | 'name' | 'status' | 'created');
+  };
+
   return (
     <div className="space-y-6">
       {/* Overview Cards */}
@@ -348,7 +362,7 @@ const ProjectManager = () => {
                     <Label htmlFor="priority" className="text-right">
                       Priority
                     </Label>
-                    <Select value={newProject.priority} onValueChange={(value: 'low' | 'medium' | 'high') => setNewProject({...newProject, priority: value})}>
+                    <Select value={newProject.priority} onValueChange={(value: string) => setNewProject({...newProject, priority: value as ProjectPriority})}>
                       <SelectTrigger className="col-span-3">
                         <SelectValue placeholder="Select priority" />
                       </SelectTrigger>
@@ -363,7 +377,7 @@ const ProjectManager = () => {
                     <Label htmlFor="status" className="text-right">
                       Status
                     </Label>
-                    <Select value={newProject.status} onValueChange={(value: 'planning' | 'active' | 'completed' | 'on-hold') => setNewProject({...newProject, status: value})}>
+                    <Select value={newProject.status} onValueChange={(value: string) => setNewProject({...newProject, status: value as ProjectStatus})}>
                       <SelectTrigger className="col-span-3">
                         <SelectValue placeholder="Select status" />
                       </SelectTrigger>
@@ -398,7 +412,7 @@ const ProjectManager = () => {
                 <div className="flex items-center gap-2">
                   <Filter className="h-4 w-4 text-gray-600" />
                   <Label className="text-sm font-medium">Priority:</Label>
-                  <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+                  <Select value={priorityFilter} onValueChange={handlePriorityFilterChange}>
                     <SelectTrigger className="w-32">
                       <SelectValue />
                     </SelectTrigger>
@@ -413,7 +427,7 @@ const ProjectManager = () => {
                 
                 <div className="flex items-center gap-2">
                   <Label className="text-sm font-medium">Status:</Label>
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
                     <SelectTrigger className="w-32">
                       <SelectValue />
                     </SelectTrigger>
@@ -430,7 +444,7 @@ const ProjectManager = () => {
                 <div className="flex items-center gap-2">
                   <SortAsc className="h-4 w-4 text-gray-600" />
                   <Label className="text-sm font-medium">Sort by:</Label>
-                  <Select value={sortBy} onValueChange={setSortBy}>
+                  <Select value={sortBy} onValueChange={handleSortByChange}>
                     <SelectTrigger className="w-32">
                       <SelectValue />
                     </SelectTrigger>

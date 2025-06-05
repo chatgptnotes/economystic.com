@@ -8,7 +8,7 @@ import { Search, ChevronDown, ChevronUp, Database, User, Phone, Calendar, FileTe
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import VoiceRecorder from "./VoiceRecorder";
-import ElevenLabsVoiceChat from "./ElevenLabsVoiceChat";
+import GPTVoiceChat from "./GPTVoiceChat";
 
 interface SearchResult {
   table: string;
@@ -229,9 +229,9 @@ const IntelligentSearch = () => {
         </CardContent>
       </Card>
 
-      {/* ElevenLabs Voice Chat - Show after search results */}
+      {/* GPT Voice Chat - Show after search results */}
       {searchResults && (
-        <ElevenLabsVoiceChat 
+        <GPTVoiceChat 
           searchResults={searchResults} 
           searchQuery={query}
         />

@@ -1,620 +1,963 @@
+<think>
 
-import { useState, useMemo } from "react";
+</think>
+
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Edit2, Trash2, Users, Globe, AlertCircle, Circle, Minus, Filter, SortAsc } from "lucide-react";
-import { toast } from "sonner";
-
-type ProjectPriority = 'high' | 'medium' | 'low';
-type ProjectStatus = 'planning' | 'active' | 'completed' | 'on-hold';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Search, Github, Users, Code, Calendar, ExternalLink, FileText, Edit, Trash2, GripVertical, UserX, AlertCircle, Circle, Minus } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import ProjectFileManager from "./ProjectFileManager";
+import ProjectEditForm from "./ProjectEditForm";
+import { DragDropContext, Droppable, Draggable, DropResult } from "react-beautiful-dnd";
 
 interface Project {
   id: string;
   name: string;
   description: string;
-  priority: ProjectPriority;
-  status: ProjectStatus;
-  team: string[];
-  platforms: string[];
-  progress: number;
-  created: Date;
+  language: string;
+  visibility: 'Public' | 'Private';
+  lastUpdated: string;
+  assignedTo: string;
+  platform: 'Cursor' | 'Lovable' | 'V0' | 'Unknown';
+  domainAssociated?: string;
+  githubUrl: string;
+  isActive: boolean;
+  priority: 'High' | 'Medium' | 'Low';
 }
 
 const ProjectManager = () => {
-  const [projects, setProjects] = useState<Project[]>([
-    {
-      id: '1',
-      name: 'Healthcare Analytics Dashboard',
-      description: 'Develop a comprehensive analytics dashboard for healthcare data visualization.',
-      priority: 'high',
-      status: 'active',
-      team: ['Alice', 'Bob', 'Charlie'],
-      platforms: ['Web', 'Mobile'],
-      progress: 75,
-      created: new Date('2023-01-15')
-    },
-    {
-      id: '2',
-      name: 'Patient Engagement App',
-      description: 'Create a mobile app to improve patient engagement and communication.',
-      priority: 'medium',
-      status: 'planning',
-      team: ['David', 'Eve'],
-      platforms: ['Mobile'],
-      progress: 20,
-      created: new Date('2023-02-01')
-    },
-    {
-      id: '3',
-      name: 'Telemedicine Platform',
-      description: 'Build a telemedicine platform for remote consultations and monitoring.',
-      priority: 'low',
-      status: 'completed',
-      team: ['Charlie', 'Frank'],
-      platforms: ['Web', 'Mobile'],
-      progress: 100,
-      created: new Date('2022-11-20')
-    },
-    {
-      id: '4',
-      name: 'AI-Powered Diagnosis Tool',
-      description: 'Develop an AI tool to assist doctors in diagnosing diseases more accurately.',
-      priority: 'high',
-      status: 'on-hold',
-      team: ['Alice', 'Grace'],
-      platforms: ['Web'],
-      progress: 50,
-      created: new Date('2022-12-01')
-    },
-    {
-      id: '5',
-      name: 'Electronic Health Records System',
-      description: 'Implement an electronic health records system for efficient data management.',
-      priority: 'medium',
-      status: 'active',
-      team: ['Bob', 'Frank'],
-      platforms: ['Web'],
-      progress: 60,
-      created: new Date('2023-02-15')
-    },
-    {
-      id: '6',
-      name: 'Remote Patient Monitoring System',
-      description: 'Create a system for remotely monitoring patients vital signs and health data.',
-      priority: 'low',
-      status: 'planning',
-      team: ['David', 'Grace'],
-      platforms: ['Mobile'],
-      progress: 10,
-      created: new Date('2023-03-01')
-    },
-    {
-      id: '7',
-      name: 'Predictive Analytics for Hospital Readmissions',
-      description: 'Use predictive analytics to identify patients at high risk of hospital readmission.',
-      priority: 'high',
-      status: 'completed',
-      team: ['Charlie', 'Eve'],
-      platforms: ['Web'],
-      progress: 100,
-      created: new Date('2023-01-01')
-    },
-    {
-      id: '8',
-      name: 'Smart Pharmacy Management System',
-      description: 'Develop a smart pharmacy management system for inventory and prescription tracking.',
-      priority: 'medium',
-      status: 'on-hold',
-      team: ['Alice', 'Frank'],
-      platforms: ['Web'],
-      progress: 40,
-      created: new Date('2022-12-15')
-    },
-    {
-      id: '9',
-      name: 'Mental Health Support Chatbot',
-      description: 'Create a chatbot to provide mental health support and resources to patients.',
-      priority: 'low',
-      status: 'active',
-      team: ['Bob', 'Grace'],
-      platforms: ['Mobile'],
-      progress: 70,
-      created: new Date('2023-03-15')
-    },
-    {
-      id: '10',
-      name: 'Clinical Trial Management System',
-      description: 'Build a system to manage clinical trials and track patient outcomes.',
-      priority: 'high',
-      status: 'planning',
-      team: ['David', 'Charlie'],
-      platforms: ['Web'],
-      progress: 5,
-      created: new Date('2023-04-01')
-    }
-  ]);
+  const { toast } = useToast();
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [projectSearchTerm, setProjectSearchTerm] = useState("");
+  const [domainSearchTerm, setDomainSearchTerm] = useState("");
+  const [selectedMember, setSelectedMember] = useState("all");
+  const [selectedPriority, setSelectedPriority] = useState("all");
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [showInactive, setShowInactive] = useState(true);
 
-  const [newProject, setNewProject] = useState<Omit<Project, 'id' | 'created'>>({
-    name: '',
-    description: '',
-    priority: 'medium',
-    status: 'planning',
-    team: [],
-    platforms: [],
-    progress: 0
-  });
+  const teamMembers = ["Bhupendra", "Dinesh", "Prathik", "Pooja", "Poonam", "Monish", "Aman", "Priyanka"];
 
-  const [priorityFilter, setPriorityFilter] = useState<ProjectPriority | 'all'>('all');
-  const [statusFilter, setStatusFilter] = useState<ProjectStatus | 'all'>('all');
-  const [sortBy, setSortBy] = useState<'priority' | 'name' | 'status' | 'created'>('priority');
+  // All available domains for mapping
+  const availableDomains = [
+    'anohra.com', 'hopesoftwares.com', 'gmcnagpuralumni.com', 'drmhope.com',
+    'modernmedicalentrepreneur.com', 'anohra.ai', 'drmurali.ai', 'yellowfevervaccines.com',
+    'economystic.ai', 'adamrit.ai', 'digihealthtwin.com', 'digihealthtwin.ai',
+    'rescueseva.com', 'onescanonelife.com', 'emergencyseva.ai', 'bachao.co',
+    'bachao.xyz', 'bachao.store', 'bachao.net', 'bachao.info', 'bachaomujhebachao.com',
+    'ayushmannagpurhospital.com', 'rseva.health', 'maharashtratv24.in', 'rescueseva.in',
+    'onescanonelife.in', 'instaaid.in', 'bachaobachao.in', 'mujhebachao.in',
+    'theayushmanhospital.com', 'hopefoundationtrust.in', 'hopehospital.in',
+    'anohra.in', 'adamrit.com', 'yellowfever.in', 'digihealthtwin.in',
+    'emergencyseva.in', 'ambufast.in'
+  ];
 
-  const filteredAndSortedProjects = useMemo(() => {
-    let filtered = [...projects];
+  useEffect(() => {
+    initializeProjects();
+  }, []);
 
-    if (priorityFilter !== 'all') {
-      filtered = filtered.filter(project => project.priority === priorityFilter);
-    }
-
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(project => project.status === statusFilter);
-    }
-
-    filtered.sort((a, b) => {
-      if (sortBy === 'priority') {
-        const priorityOrder = { high: 1, medium: 2, low: 3 };
-        return (priorityOrder[a.priority] || 4) - (priorityOrder[b.priority] || 4);
-      }
-      if (sortBy === 'name') {
-        return a.name.localeCompare(b.name);
-      }
-      if (sortBy === 'status') {
-        return a.status.localeCompare(b.status);
-      }
-      return a.created.getTime() - b.created.getTime();
-    });
-
-    return filtered;
-  }, [projects, priorityFilter, statusFilter, sortBy]);
-
-  const handleAddProject = () => {
-    if (!newProject.name || !newProject.description) {
-      toast.error('Please fill in all fields.');
-      return;
-    }
-
-    const newId = Math.random().toString(36).substring(7);
-    const createdDate = new Date();
-
-    const newProjectWithId: Project = {
-      id: newId,
-      name: newProject.name,
-      description: newProject.description,
-      priority: newProject.priority,
-      status: newProject.status,
-      team: [],
-      platforms: [],
-      progress: 0,
-      created: createdDate
-    };
-
-    setProjects([...projects, newProjectWithId]);
-    setNewProject({
-      name: '',
-      description: '',
-      priority: 'medium',
-      status: 'planning',
-      team: [],
-      platforms: [],
-      progress: 0
-    });
-
-    toast.success('Project added successfully!');
+  const getRandomTeamMember = () => {
+    return teamMembers[Math.floor(Math.random() * teamMembers.length)];
   };
 
-  const handleDeleteProject = (id: string) => {
-    setProjects(projects.filter(project => project.id !== id));
-    toast.success('Project deleted successfully!');
+  const getRandomPriority = (): 'High' | 'Medium' | 'Low' => {
+    const priorities: ('High' | 'Medium' | 'Low')[] = ['High', 'Medium', 'Low'];
+    return priorities[Math.floor(Math.random() * priorities.length)];
   };
 
-  const getPriorityBadge = (priority: Project['priority']) => {
-    const config = {
-      high: { 
-        color: 'bg-red-100 text-red-800 border-red-200 hover:bg-red-200',
-        icon: AlertCircle,
-        label: 'High'
-      },
-      medium: { 
-        color: 'bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200',
-        icon: Circle,
-        label: 'Medium'
-      },
-      low: { 
-        color: 'bg-green-100 text-green-800 border-green-200 hover:bg-green-200',
-        icon: Minus,
-        label: 'Low'
-      }
-    };
-    
-    const { color, icon: Icon, label } = config[priority];
-    
-    return (
-      <Badge variant="outline" className={`${color} flex items-center gap-1 px-2 py-1 font-medium border`}>
-        <Icon className="h-3 w-3" />
-        {label}
-      </Badge>
+  const detectPlatform = (name: string, description: string): 'Cursor' | 'Lovable' | 'V0' | 'Unknown' => {
+    const nameAndDesc = `${name} ${description}`.toLowerCase();
+    if (nameAndDesc.includes('lovable') || nameAndDesc.includes('spark')) return 'Lovable';
+    if (nameAndDesc.includes('v0') || nameAndDesc.includes('untitled')) return 'V0';
+    if (nameAndDesc.includes('cursor')) return 'Cursor';
+    return 'Unknown';
+  };
+
+  const findAssociatedDomain = (projectName: string): string | undefined => {
+    const domains = [
+      'anohra.com', 'hopesoftwares.com', 'gmcnagpuralumni.com', 'drmhope.com',
+      'modernmedicalentrepreneur.com', 'anohra.ai', 'drmurali.ai', 'yellowfevervaccines.com',
+      'economystic.ai', 'adamrit.ai', 'digihealthtwin.com', 'digihealthtwin.ai',
+      'rescueseva.com', 'onescanonelife.com', 'emergencyseva.ai', 'bachao.co',
+      'bachao.xyz', 'bachao.store', 'bachao.net', 'bachao.info', 'bachaomujhebachao.com',
+      'ayushmannagpurhospital.com', 'rseva.health', 'maharashtratv24.in', 'rescueseva.in',
+      'onescanonelife.in', 'instaaid.in', 'bachaobachao.in', 'mujhebachao.in',
+      'theayushmanhospital.com', 'hopefoundationtrust.in', 'hopehospital.in',
+      'anohra.in', 'adamrit.com', 'yellowfever.in', 'digihealthtwin.in',
+      'emergencyseva.in', 'ambufast.in'
+    ];
+
+    return domains.find(domain => 
+      projectName.toLowerCase().includes(domain.replace(/\.(com|ai|in|co|xyz|store|net|info|health)$/, '')) ||
+      projectName.toLowerCase().includes(domain.toLowerCase())
     );
   };
 
-  // Type-safe handlers for Select components
-  const handlePriorityFilterChange = (value: string) => {
-    setPriorityFilter(value as ProjectPriority | 'all');
+  const initializeProjects = () => {
+    const projectData = [
+      { name: "DrM_Hope_Multi-tenancy-04-06-2025", description: "DrM_Hope_Multi-tenancy 04/06/2025", language: "TypeScript", visibility: "Private" as const, lastUpdated: "6 hours ago" },
+      { name: "mern-machin-test", description: "mern-machin-test", language: "JavaScript", visibility: "Public" as const, lastUpdated: "yesterday" },
+      { name: "adamrit.in", description: "chatgptnotes/adamrit.in", language: "TypeScript", visibility: "Private" as const, lastUpdated: "2 days ago" },
+      { name: "raftaar-help", description: "", language: "Kotlin", visibility: "Public" as const, lastUpdated: "2 days ago" },
+      { name: "betserlife-sos-guardian", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "3 days ago" },
+      { name: "adamrit.com25-05-2025", description: "adamrit.con25/05/2025", language: "TypeScript", visibility: "Public" as const, lastUpdated: "last week" },
+      { name: "adamrit.com", description: "adamrit.com", language: "TypeScript", visibility: "Private" as const, lastUpdated: "last week" },
+      { name: "ambufast.in", description: "The Emergency Ambulance Service at Your Fingertips Get an ambulance within 15 minutes of your emergency call or QR scan", language: "TypeScript", visibility: "Private" as const, lastUpdated: "2 weeks ago" },
+      { name: "next", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "2 weeks ago" },
+      { name: "New_HMIS_Next_js_latest", description: "New_HMIS_Next_js_latest", language: "JavaScript", visibility: "Private" as const, lastUpdated: "2 weeks ago" },
+      { name: "CorporateBilling21-05-2025HMIS", description: "", language: "JavaScript", visibility: "Public" as const, lastUpdated: "2 weeks ago" },
+      { name: "drmhope.com-ESIC", description: "drmhope.com", language: "TypeScript", visibility: "Public" as const, lastUpdated: "2 weeks ago" },
+      { name: "drmhope.com", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "2 weeks ago" },
+      { name: "drmhope-multitenancy", description: "", language: "TypeScript", visibility: "Public" as const, lastUpdated: "3 weeks ago" },
+      { name: "rseva.health", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "3 weeks ago" },
+      { name: "New_HMIS_Next_js", description: "New_HMIS_Next_js", language: "TypeScript", visibility: "Public" as const, lastUpdated: "3 weeks ago" },
+      { name: "emergencyiosapp", description: "", language: "Swift", visibility: "Public" as const, lastUpdated: "3 weeks ago" },
+      { name: "v0-onescanonelife.com-13th-May", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "3 weeks ago" },
+      { name: "yellowfever13-05-2025server", description: "", language: "TypeScript", visibility: "Public" as const, lastUpdated: "3 weeks ago" },
+      { name: "v0-untitled-project", description: "", language: "TypeScript", visibility: "Public" as const, lastUpdated: "3 weeks ago" },
+      { name: "yellowfever.in2", description: "", language: "TypeScript", visibility: "Public" as const, lastUpdated: "3 weeks ago" },
+      { name: "maharashtratv24in8may2025", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "last month" },
+      { name: "ayushamnhospitalwebsitenextjs", description: "ayushamnhospitalwebsitenextjs", language: "HTML", visibility: "Public" as const, lastUpdated: "last month" },
+      { name: "yellowfever.in_5.4.2025_11-43-b0", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "May 5" },
+      { name: "yellowfever.in_5.4.2025_11-43", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "May 5" },
+      { name: "theayushmanhospital-laravel", description: "new SEO optimaize website", language: "Blade", visibility: "Public" as const, lastUpdated: "May 1" },
+      { name: "emergencyapp", description: "", language: "JavaScript", visibility: "Public" as const, lastUpdated: "May 1" },
+      { name: "HmisVersionUpdate30-04-2025", description: "", language: "JavaScript", visibility: "Public" as const, lastUpdated: "Apr 30" },
+      { name: "one-scan-one-life", description: "", language: "TypeScript", visibility: "Public" as const, lastUpdated: "Apr 29" },
+      { name: "demo.bachao.co-2--24-April-4.24-PM", description: "", language: "Blade", visibility: "Private" as const, lastUpdated: "Apr 24" },
+      { name: "hmis_raftaarlaravel_11", description: "", language: "Blade", visibility: "Private" as const, lastUpdated: "Apr 23" },
+      { name: "Rseva_laravel11_livewire3", description: "Rseva_laravel11_livewire3", language: "Blade", visibility: "Private" as const, lastUpdated: "Apr 23" },
+      { name: "Rsev-for-cursor", description: "we made for cursor !", language: "Blade", visibility: "Public" as const, lastUpdated: "Apr 22" },
+      { name: "lovable-raftaar-laravel-1page", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "Apr 22" },
+      { name: "lovable-start-for-ayushman-3rd-attempt-site", description: "", language: "EJS", visibility: "Private" as const, lastUpdated: "Apr 22" },
+      { name: "spark-the-beginning", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "Apr 21" },
+      { name: "ayushman-website-3rd-attempt", description: "", language: "EJS", visibility: "Private" as const, lastUpdated: "Apr 21" },
+      { name: "life-scan-harmony-project", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "Apr 21" },
+      { name: "newHope", description: "The repo is of the hopesoftwares.com", language: "PHP", visibility: "Public" as const, lastUpdated: "Apr 21" },
+      { name: "hopeproject", description: "All ondc related work of folders and file", language: "JavaScript", visibility: "Public" as const, lastUpdated: "Apr 21" },
+      { name: "hope", description: "Hospital management software built in 2013. used in Hope and Ayushman. has Chatgpt -summary code builtin. This has a user manual in wiki", language: "PHP", visibility: "Private" as const, lastUpdated: "Apr 21" },
+      { name: "RaftaarHealth", description: "RaftaarHealth", language: "JavaScript", visibility: "Public" as const, lastUpdated: "Apr 19" },
+      { name: "hopenew", description: "hope new software", language: "JavaScript", visibility: "Public" as const, lastUpdated: "Apr 17" },
+      { name: "hopesoftwares", description: "hospital HMIS project", language: "JavaScript", visibility: "Private" as const, lastUpdated: "Apr 17" },
+      { name: "HMIS", description: "", language: "JavaScript", visibility: "Private" as const, lastUpdated: "Apr 17" },
+      { name: "html-project", description: "A modern e-commerce website", language: "HTML", visibility: "Private" as const, lastUpdated: "Apr 16" },
+      { name: "Tracking", description: "driver tracking project", language: "PHP", visibility: "Public" as const, lastUpdated: "Apr 16" },
+      { name: "ayushman-hospital-muralisir-website", description: "ayushman-hospital-muralisir-website", language: "JavaScript", visibility: "Public" as const, lastUpdated: "Apr 16" },
+      { name: "ayushman-hospital", description: "Ayushman Nagpur Hospital website built with Next.js", language: "JavaScript", visibility: "Public" as const, lastUpdated: "Apr 15" },
+      { name: "ayushman-hospital-website", description: "", language: "JavaScript", visibility: "Public" as const, lastUpdated: "Apr 15" },
+      { name: "verification-logs", description: "Forked from ONDC-Official/verification-logs ONDC Pre-production issue & discussion board", language: "HTML", visibility: "Public" as const, lastUpdated: "Mar 12" },
+      { name: "emergencysevaondcapp", description: "All ondc related work of folders and file", language: "PHP", visibility: "Private" as const, lastUpdated: "Feb 27" },
+      { name: "RSEVA", description: "", language: "JavaScript", visibility: "Public" as const, lastUpdated: "Feb 25" },
+      { name: "adminemergencyseva", description: "The repo is of the admin.emergencyseva.in", language: "JavaScript", visibility: "Private" as const, lastUpdated: "Jan 15" },
+      { name: "ondc_demo", description: "", language: "JavaScript", visibility: "Private" as const, lastUpdated: "Nov 18, 2024" },
+      { name: "bachaobachaoin", description: "", language: "Blade", visibility: "Private" as const, lastUpdated: "Nov 7, 2024" },
+      { name: "public_html", description: "", language: "HTML", visibility: "Public" as const, lastUpdated: "Oct 8, 2024" },
+      { name: "DrM-Hope", description: "", language: "JavaScript", visibility: "Private" as const, lastUpdated: "Sep 27, 2024" },
+      { name: "demo2Hopesoftwares", description: "", language: "JavaScript", visibility: "Private" as const, lastUpdated: "Sep 27, 2024" },
+      { name: "vehicletracker", description: "Vehicle Tracking Code uploaded by Pratik", language: "PHP", visibility: "Private" as const, lastUpdated: "Jul 10, 2024" }
+    ];
+
+    const transformedProjects = projectData.map((project, index) => ({
+      id: (index + 1).toString(),
+      ...project,
+      assignedTo: getRandomTeamMember(),
+      platform: detectPlatform(project.name, project.description),
+      domainAssociated: findAssociatedDomain(project.name),
+      githubUrl: `https://github.com/yourusername/${project.name}`,
+      isActive: Math.random() > 0.2,
+      priority: getRandomPriority()
+    }));
+
+    setProjects(transformedProjects);
   };
 
-  const handleStatusFilterChange = (value: string) => {
-    setStatusFilter(value as ProjectStatus | 'all');
+  const handleDeleteProject = (projectId: string, projectName: string) => {
+    setProjects(prev => prev.filter(p => p.id !== projectId));
+    toast({
+      title: "Success",
+      description: `Project "${projectName}" has been deleted`,
+    });
   };
 
-  const handleSortByChange = (value: string) => {
-    setSortBy(value as 'priority' | 'name' | 'status' | 'created');
+  const handleProjectStatusToggle = (projectId: string, isActive: boolean) => {
+    setProjects(prev => prev.map(project => 
+      project.id === projectId 
+        ? { ...project, isActive }
+        : project
+    ));
+
+    const projectName = projects.find(p => p.id === projectId)?.name;
+    toast({
+      title: isActive ? "Project Activated" : "Project Deactivated",
+      description: `"${projectName}" has been marked as ${isActive ? 'active' : 'inactive'}`,
+    });
+  };
+
+  const handleDragEnd = (result: DropResult) => {
+    const { destination, source, draggableId } = result;
+
+    console.log('Drag result:', { destination, source, draggableId });
+
+    if (!destination) {
+      console.log('No destination, cancelling drag');
+      return;
+    }
+
+    if (destination.droppableId === source.droppableId && destination.index === source.index) {
+      console.log('Same position, no change needed');
+      return;
+    }
+
+    const newAssignedTo = destination.droppableId;
+    const projectId = draggableId;
+
+    console.log('Updating project assignment:', { projectId, newAssignedTo });
+
+    setProjects(prev => {
+      const updated = prev.map(project => 
+        project.id === projectId 
+          ? { ...project, assignedTo: newAssignedTo }
+          : project
+      );
+      console.log('Updated projects:', updated);
+      return updated;
+    });
+
+    const projectName = projects.find(p => p.id === projectId)?.name;
+    toast({
+      title: "Project Reassigned",
+      description: `"${projectName}" has been assigned to ${newAssignedTo}`,
+    });
+  };
+
+  const handleAssignmentChange = (projectId: string, newAssignee: string) => {
+    setProjects(prev => {
+      const updated = prev.map(project => 
+        project.id === projectId 
+          ? { ...project, assignedTo: newAssignee }
+          : project
+      );
+      return updated;
+    });
+
+    const projectName = projects.find(p => p.id === projectId)?.name;
+    const message = newAssignee === "Unassigned" 
+      ? `"${projectName}" is now unassigned`
+      : `"${projectName}" has been assigned to ${newAssignee}`;
+    
+    toast({
+      title: "Project Reassigned",
+      description: message,
+    });
+  };
+
+  const handleDomainMappingChange = (domain: string, newProjectId: string) => {
+    setProjects(prev => {
+      const updated = prev.map(project => {
+        // Remove the domain from any project that currently has it
+        if (project.domainAssociated === domain) {
+          return { ...project, domainAssociated: undefined };
+        }
+        // Assign the domain to the selected project
+        if (project.id === newProjectId) {
+          return { ...project, domainAssociated: domain };
+        }
+        return project;
+      });
+      return updated;
+    });
+
+    const projectName = projects.find(p => p.id === newProjectId)?.name;
+    const message = newProjectId === "none" 
+      ? `Domain "${domain}" is now unmapped`
+      : `Domain "${domain}" has been mapped to "${projectName}"`;
+    
+    toast({
+      title: "Domain Mapping Updated",
+      description: message,
+    });
+  };
+
+  const handlePriorityChange = (projectId: string, newPriority: 'High' | 'Medium' | 'Low') => {
+    setProjects(prev => {
+      const updated = prev.map(project => 
+        project.id === projectId 
+          ? { ...project, priority: newPriority }
+          : project
+      );
+      return updated;
+    });
+
+    const projectName = projects.find(p => p.id === projectId)?.name;
+    toast({
+      title: "Priority Updated",
+      description: `"${projectName}" priority set to ${newPriority}`,
+    });
+  };
+
+  const filteredProjects = projects.filter(project => {
+    const combinedSearchTerm = searchTerm || projectSearchTerm;
+    
+    const matchesSearch = combinedSearchTerm === "" || 
+                         project.name.toLowerCase().includes(combinedSearchTerm.toLowerCase()) ||
+                         project.description.toLowerCase().includes(combinedSearchTerm.toLowerCase());
+    
+    const matchesMember = selectedMember === "all" || project.assignedTo === selectedMember;
+    const matchesPriority = selectedPriority === "all" || project.priority === selectedPriority;
+    const matchesStatus = showInactive || project.isActive;
+    
+    return matchesSearch && matchesMember && matchesPriority && matchesStatus;
+  });
+
+  // Sort projects by priority (High -> Medium -> Low)
+  const sortedProjects = [...filteredProjects].sort((a, b) => {
+    const priorityOrder = { 'High': 3, 'Medium': 2, 'Low': 1 };
+    return priorityOrder[b.priority] - priorityOrder[a.priority];
+  });
+
+  // Filter domains based on search term
+  const filteredDomains = availableDomains.filter(domain =>
+    domain.toLowerCase().includes(domainSearchTerm.toLowerCase())
+  );
+
+  const getTeamMemberColor = (member: string) => {
+    if (member === "Unassigned") {
+      return "bg-gray-100 text-gray-600 border-gray-200";
+    }
+    const colors = {
+      "Bhupendra": "bg-blue-100 text-blue-800 border-blue-200",
+      "Dinesh": "bg-green-100 text-green-800 border-green-200",
+      "Prathik": "bg-purple-100 text-purple-800 border-purple-200",
+      "Pooja": "bg-pink-100 text-pink-800 border-pink-200",
+      "Poonam": "bg-yellow-100 text-yellow-800 border-yellow-200",
+      "Monish": "bg-orange-100 text-orange-800 border-orange-200",
+      "Aman": "bg-indigo-100 text-indigo-800 border-indigo-200",
+      "Priyanka": "bg-rose-100 text-rose-800 border-rose-200"
+    };
+    return colors[member as keyof typeof colors] || "bg-gray-100 text-gray-800 border-gray-200";
+  };
+
+  const getPlatformColor = (platform: string) => {
+    const colors = {
+      "Lovable": "bg-purple-100 text-purple-800 border-purple-200",
+      "Cursor": "bg-blue-100 text-blue-800 border-blue-200",
+      "V0": "bg-green-100 text-green-800 border-green-200",
+      "Unknown": "bg-gray-100 text-gray-800 border-gray-200"
+    };
+    return colors[platform as keyof typeof colors] || "bg-gray-100 text-gray-800 border-gray-200";
+  };
+
+  const getPriorityColor = (priority: string) => {
+    const colors = {
+      'High': 'bg-red-50 text-red-700 border-red-200',
+      'Medium': 'bg-yellow-50 text-yellow-700 border-yellow-200',
+      'Low': 'bg-green-50 text-green-700 border-green-200'
+    };
+    return colors[priority as keyof typeof colors] || colors.Low;
+  };
+
+  const getPriorityIcon = (priority: string) => {
+    switch (priority) {
+      case 'High':
+        return <AlertCircle className="h-3 w-3" />;
+      case 'Medium':
+        return <Circle className="h-3 w-3" />;
+      case 'Low':
+        return <Minus className="h-3 w-3" />;
+      default:
+        return <Minus className="h-3 w-3" />;
+    }
+  };
+
+  const projectsByMember = teamMembers.reduce((acc, member) => {
+    acc[member] = projects.filter(p => p.assignedTo === member && p.isActive).length;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const projectsByPlatform = projects.reduce((acc, project) => {
+    if (project.isActive) {
+      acc[project.platform] = (acc[project.platform] || 0) + 1;
+    }
+    return acc;
+  }, {} as Record<string, number>);
+
+  const activeProjects = projects.filter(p => p.isActive);
+  const unassignedProjects = projects.filter(p => p.assignedTo === "Unassigned" && p.isActive);
+
+  const handleProjectUpdate = (updatedProject: Project) => {
+    setProjects(prev => prev.map(p => p.id === updatedProject.id ? updatedProject : p));
+    setEditingProject(null);
   };
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold">Project Management</h2>
+          <p className="text-gray-600">Manage all your GitHub repositories and team assignments</p>
+        </div>
+      </div>
+
+      {/* Search and Filter */}
+      <div className="flex space-x-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Input
+            placeholder="Search projects..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        <select
+          className="px-4 py-2 border rounded-md"
+          value={selectedMember}
+          onChange={(e) => setSelectedMember(e.target.value)}
+        >
+          <option value="all">All Team Members</option>
+          {teamMembers.map(member => (
+            <option key={member} value={member}>{member}</option>
+          ))}
+          <option value="Unassigned">Unassigned</option>
+        </select>
+        <select
+          className="px-4 py-2 border rounded-md"
+          value={selectedPriority}
+          onChange={(e) => setSelectedPriority(e.target.value)}
+        >
+          <option value="all">All Priorities</option>
+          <option value="High">High Priority</option>
+          <option value="Medium">Medium Priority</option>
+          <option value="Low">Low Priority</option>
+        </select>
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="show-inactive"
+            checked={showInactive}
+            onCheckedChange={setShowInactive}
+          />
+          <label htmlFor="show-inactive" className="text-sm text-gray-600">
+            Show inactive projects
+          </label>
+        </div>
+      </div>
+
       {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-blue-700">Total Projects</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-900">{projects.length}</div>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-green-700">Active Projects</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-900">
-              {projects.filter(p => p.status === 'active').length}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <Github className="h-8 w-8 text-blue-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Active Projects</p>
+                <p className="text-2xl font-bold text-gray-900">{activeProjects.length}</p>
+              </div>
             </div>
           </CardContent>
         </Card>
-        
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-purple-700">Team Members</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-purple-900">
-              {new Set(projects.flatMap(p => p.team)).size}
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <AlertCircle className="h-8 w-8 text-red-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">High Priority</p>
+                <p className="text-2xl font-bold text-gray-900">{activeProjects.filter(p => p.priority === 'High').length}</p>
+              </div>
             </div>
           </CardContent>
         </Card>
-        
-        <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-red-700">High Priority</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-900">
-              {projects.filter(p => p.priority === 'high').length}
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <Users className="h-8 w-8 text-green-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Team Members</p>
+                <p className="text-2xl font-bold text-gray-900">{teamMembers.length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <UserX className="h-8 w-8 text-orange-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Unassigned</p>
+                <p className="text-2xl font-bold text-gray-900">{unassignedProjects.length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <Code className="h-8 w-8 text-purple-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Languages</p>
+                <p className="text-2xl font-bold text-gray-900">{new Set(activeProjects.map(p => p.language)).size}</p>
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Project Management Section */}
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle className="flex items-center">
-              <Plus className="h-5 w-5 mr-2 text-blue-600" />
-              Project Management
-            </CardTitle>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button className="bg-blue-600 hover:bg-blue-700">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Project
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>Add New Project</DialogTitle>
-                  <DialogDescription>
-                    Create a new project with team assignments and priorities.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="name" className="text-right">
-                      Name
-                    </Label>
-                    <Input
-                      id="name"
-                      value={newProject.name}
-                      onChange={(e) => setNewProject({...newProject, name: e.target.value})}
-                      className="col-span-3"
-                    />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="description" className="text-right">
-                      Description
-                    </Label>
-                    <Textarea
-                      id="description"
-                      value={newProject.description}
-                      onChange={(e) => setNewProject({...newProject, description: e.target.value})}
-                      className="col-span-3"
-                    />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="priority" className="text-right">
-                      Priority
-                    </Label>
-                    <Select value={newProject.priority} onValueChange={(value: string) => setNewProject({...newProject, priority: value as ProjectPriority})}>
-                      <SelectTrigger className="col-span-3">
-                        <SelectValue placeholder="Select priority" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="low">Low</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="high">High</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="status" className="text-right">
-                      Status
-                    </Label>
-                    <Select value={newProject.status} onValueChange={(value: string) => setNewProject({...newProject, status: value as ProjectStatus})}>
-                      <SelectTrigger className="col-span-3">
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="planning">Planning</SelectItem>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="completed">Completed</SelectItem>
-                        <SelectItem value="on-hold">On Hold</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button onClick={handleAddProject}>Add Project</Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="list" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="list">Project List</TabsTrigger>
-              <TabsTrigger value="team">Team View</TabsTrigger>
-              <TabsTrigger value="platforms">Platform View</TabsTrigger>
-              <TabsTrigger value="domains">Domain Mapping</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="list" className="mt-6">
-              {/* Filters and Sorting */}
-              <div className="flex flex-wrap gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <Filter className="h-4 w-4 text-gray-600" />
-                  <Label className="text-sm font-medium">Priority:</Label>
-                  <Select value={priorityFilter} onValueChange={handlePriorityFilterChange}>
-                    <SelectTrigger className="w-32">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All</SelectItem>
-                      <SelectItem value="high">High</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="low">Low</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <Label className="text-sm font-medium">Status:</Label>
-                  <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
-                    <SelectTrigger className="w-32">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All</SelectItem>
-                      <SelectItem value="planning">Planning</SelectItem>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                      <SelectItem value="on-hold">On Hold</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <SortAsc className="h-4 w-4 text-gray-600" />
-                  <Label className="text-sm font-medium">Sort by:</Label>
-                  <Select value={sortBy} onValueChange={handleSortByChange}>
-                    <SelectTrigger className="w-32">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="priority">Priority</SelectItem>
-                      <SelectItem value="name">Name</SelectItem>
-                      <SelectItem value="status">Status</SelectItem>
-                      <SelectItem value="created">Created</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+      <Tabs defaultValue="all" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="all">All Projects</TabsTrigger>
+          <TabsTrigger value="team">Team Overview</TabsTrigger>
+          <TabsTrigger value="platforms">By Platform</TabsTrigger>
+          <TabsTrigger value="domains">Domain Mapping</TabsTrigger>
+        </TabsList>
 
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Priority</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Team</TableHead>
-                      <TableHead>Progress</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredAndSortedProjects.map((project) => (
-                      <TableRow key={project.id}>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">{project.name}</div>
-                            <div className="text-sm text-gray-500">{project.description}</div>
-                          </div>
-                        </TableCell>
-                        <TableCell>{getPriorityBadge(project.priority)}</TableCell>
-                        <TableCell>
-                          <Badge variant={project.status === 'active' ? 'default' : 'secondary'}>
-                            {project.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-wrap gap-1">
-                            {project.team.map((member, index) => (
-                              <Badge key={index} variant="outline" className="text-xs">
-                                {member}
+        <TabsContent value="all">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span>All Projects ({sortedProjects.length})</span>
+                <div className="relative w-80">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    placeholder="Search in projects list..."
+                    value={projectSearchTerm}
+                    onChange={(e) => setProjectSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Priority</TableHead>
+                    <TableHead>Project Name</TableHead>
+                    <TableHead>Language</TableHead>
+                    <TableHead>Assigned To</TableHead>
+                    <TableHead>Platform</TableHead>
+                    <TableHead>Domain</TableHead>
+                    <TableHead>Last Updated</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {sortedProjects.map((project) => (
+                    <TableRow key={project.id} className={!project.isActive ? "opacity-60" : ""}>
+                      <TableCell>
+                        <Switch
+                          checked={project.isActive}
+                          onCheckedChange={(checked) => handleProjectStatusToggle(project.id, checked)}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Select
+                          value={project.priority}
+                          onValueChange={(value: 'High' | 'Medium' | 'Low') => handlePriorityChange(project.id, value)}
+                        >
+                          <SelectTrigger className="w-32">
+                            <SelectValue>
+                              <Badge className={`${getPriorityColor(project.priority)} border`} variant="outline">
+                                <div className="flex items-center space-x-1">
+                                  {getPriorityIcon(project.priority)}
+                                  <span>{project.priority}</span>
+                                </div>
                               </Badge>
-                            ))}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div 
-                              className="bg-blue-600 h-2 rounded-full" 
-                              style={{ width: `${project.progress}%` }}
-                            ></div>
-                          </div>
-                          <span className="text-xs text-gray-500">{project.progress}%</span>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex space-x-2">
-                            <Button variant="outline" size="sm">
-                              <Edit2 className="h-4 w-4" />
-                            </Button>
-                            <Button variant="outline" size="sm" onClick={() => handleDeleteProject(project.id)}>
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="team" className="mt-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {projects.map((project) => (
-                  <Card key={project.id}>
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between items-start">
-                        <CardTitle className="text-sm">{project.name}</CardTitle>
-                        {getPriorityBadge(project.priority)}
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        <div className="flex items-center">
-                          <Users className="h-4 w-4 mr-2 text-gray-500" />
-                          <span className="text-sm">Team: {project.team.join(', ')}</span>
-                        </div>
-                        <div className="text-sm text-gray-600">{project.description}</div>
-                        <Badge variant={project.status === 'active' ? 'default' : 'secondary'}>
-                          {project.status}
-                        </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="platforms" className="mt-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {projects.map((project) => (
-                  <Card key={project.id}>
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between items-start">
-                        <CardTitle className="text-sm">{project.name}</CardTitle>
-                        {getPriorityBadge(project.priority)}
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        <div className="text-sm text-gray-600">{project.description}</div>
-                        <div className="flex flex-wrap gap-2">
-                          {project.platforms.map((platform, index) => (
-                            <Badge key={index} variant="outline">
-                              {platform}
+                            </SelectValue>
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="High">
+                              <div className="flex items-center space-x-1">
+                                <AlertCircle className="h-3 w-3 text-red-600" />
+                                <span>High</span>
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="Medium">
+                              <div className="flex items-center space-x-1">
+                                <Circle className="h-3 w-3 text-yellow-600" />
+                                <span>Medium</span>
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="Low">
+                              <div className="flex items-center space-x-1">
+                                <Minus className="h-3 w-3 text-green-600" />
+                                <span>Low</span>
+                              </div>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <div className="flex items-center space-x-2">
+                            <h3 className="font-medium">{project.name}</h3>
+                            <Badge variant={project.visibility === 'Private' ? 'secondary' : 'default'}>
+                              {project.visibility}
                             </Badge>
-                          ))}
-                        </div>
-                        <Badge variant={project.status === 'active' ? 'default' : 'secondary'}>
-                          {project.status}
-                        </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="domains" className="mt-6">
-              <div className="space-y-4">
-                {projects.map((project) => (
-                  <Card key={project.id}>
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between items-start">
-                        <CardTitle className="text-sm">{project.name}</CardTitle>
-                        {getPriorityBadge(project.priority)}
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <Label className="text-sm font-medium">Platforms</Label>
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {project.platforms.map((platform, index) => (
-                              <Badge key={index} variant="outline" className="text-xs">
-                                {platform}
+                            {!project.isActive && (
+                              <Badge variant="outline" className="text-gray-500">
+                                Inactive
                               </Badge>
+                            )}
+                          </div>
+                          {project.description && (
+                            <p className="text-sm text-gray-500 mt-1">{project.description}</p>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="border">{project.language}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Select
+                          value={project.assignedTo}
+                          onValueChange={(value) => handleAssignmentChange(project.id, value)}
+                        >
+                          <SelectTrigger className="w-32">
+                            <SelectValue>
+                              <Badge className={`${getTeamMemberColor(project.assignedTo)} border`} variant="outline">
+                                {project.assignedTo === "Unassigned" ? (
+                                  <div className="flex items-center">
+                                    <UserX className="h-3 w-3 mr-1" />
+                                    Unassigned
+                                  </div>
+                                ) : (
+                                  project.assignedTo
+                                )}
+                              </Badge>
+                            </SelectValue>
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Unassigned">
+                              <div className="flex items-center">
+                                <UserX className="h-3 w-3 mr-2" />
+                                <span>Unassigned</span>
+                              </div>
+                            </SelectItem>
+                            {teamMembers.map(member => (
+                              <SelectItem key={member} value={member}>
+                                {member}
+                              </SelectItem>
                             ))}
-                          </div>
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={`${getPlatformColor(project.platform)} border`} variant="outline">
+                          {project.platform}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {project.domainAssociated ? (
+                          <Badge variant="outline" className="border">{project.domainAssociated}</Badge>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-sm text-gray-600">
+                        {project.lastUpdated}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex space-x-1">
+                          <Button variant="ghost" size="sm" asChild>
+                            <a href={project.githubUrl} target="_blank" rel="noopener noreferrer">
+                              <ExternalLink className="h-4 w-4" />
+                            </a>
+                          </Button>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => setSelectedProject(project)}
+                              >
+                                <FileText className="h-4 w-4" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-4xl">
+                              <DialogHeader>
+                                <DialogTitle>Project Documents - {project.name}</DialogTitle>
+                              </DialogHeader>
+                              {selectedProject && (
+                                <ProjectFileManager 
+                                  projectId={selectedProject.id}
+                                  projectName={selectedProject.name}
+                                />
+                              )}
+                            </DialogContent>
+                          </Dialog>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => setEditingProject(project)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-2xl">
+                              <DialogHeader>
+                                <DialogTitle>Edit Project - {project.name}</DialogTitle>
+                              </DialogHeader>
+                              {editingProject && (
+                                <ProjectEditForm 
+                                  project={editingProject}
+                                  teamMembers={teamMembers}
+                                  onSave={handleProjectUpdate}
+                                  onCancel={() => setEditingProject(null)}
+                                />
+                              )}
+                            </DialogContent>
+                          </Dialog>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Project</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete the project "{project.name}"? 
+                                  This action cannot be undone and will remove all associated data.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDeleteProject(project.id, project.name)}
+                                  className="bg-red-600 hover:bg-red-700"
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
-                        <div>
-                          <Label className="text-sm font-medium">Domains</Label>
-                          <div className="flex items-center mt-1">
-                            <Globe className="h-4 w-4 mr-2 text-gray-500" />
-                            <span className="text-sm text-gray-600">Configure domain mapping</span>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="team">
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {teamMembers.map((member) => {
+                const memberProjects = projects.filter(p => p.assignedTo === member);
+                
+                return (
+                  <Droppable droppableId={member} key={member} type="PROJECT">
+                    {(provided, snapshot) => (
+                      <Card 
+                        className={`transition-colors duration-200 ${snapshot.isDraggingOver ? 'bg-blue-50 border-blue-300' : ''}`}
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                      >
+                        <CardHeader>
+                          <CardTitle className="flex items-center justify-between">
+                            <span>{member}</span>
+                            <Badge className={getTeamMemberColor(member)}>
+                              {memberProjects.length} projects
+                            </Badge>
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="min-h-[200px]">
+                          <div className="space-y-2">
+                            {memberProjects.map((project, index) => (
+                              <Draggable 
+                                key={project.id} 
+                                draggableId={project.id} 
+                                index={index}
+                              >
+                                {(provided, snapshot) => (
+                                  <div
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    className={`flex items-center justify-between text-sm p-3 rounded-lg border transition-all duration-200 ${
+                                      snapshot.isDragging 
+                                        ? 'bg-blue-100 border-blue-300 shadow-lg rotate-2' 
+                                        : 'bg-gray-50 border-gray-200 hover:bg-gray-100 cursor-grab'
+                                    }`}
+                                  >
+                                    <div className="flex items-center flex-1 min-w-0">
+                                      <div 
+                                        {...provided.dragHandleProps}
+                                        className="mr-2 cursor-grab active:cursor-grabbing hover:text-blue-500"
+                                      >
+                                        <GripVertical className="h-4 w-4 text-gray-400" />
+                                      </div>
+                                      <span className="truncate flex-1 font-medium">{project.name}</span>
+                                      <Badge className={`ml-2 ${getPriorityColor(project.priority)} border text-xs`} variant="outline">
+                                        <div className="flex items-center space-x-1">
+                                          {getPriorityIcon(project.priority)}
+                                          <span>{project.priority}</span>
+                                        </div>
+                                      </Badge>
+                                    </div>
+                                    <Badge variant="outline" className="text-xs ml-2 flex-shrink-0 border">
+                                      {project.language}
+                                    </Badge>
+                                  </div>
+                                )}
+                              </Draggable>
+                            ))}
+                            {provided.placeholder}
                           </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </Droppable>
+                );
+              })}
+            </div>
+          </DragDropContext>
+        </TabsContent>
+
+        <TabsContent value="platforms">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {Object.entries(projectsByPlatform).map(([platform, count]) => (
+              <Card key={platform}>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span>{platform}</span>
+                    <Badge className={`${getPlatformColor(platform)} border`} variant="outline">
+                      {count} projects
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {projects
+                      .filter(p => p.platform === platform)
+                      .slice(0, 3)
+                      .map((project) => (
+                        <div key={project.id} className="flex items-center justify-between text-sm">
+                          <span className="truncate flex-1">{project.name}</span>
+                          <Badge className={`ml-2 ${getPriorityColor(project.priority)} border text-xs`} variant="outline">
+                            <div className="flex items-center space-x-1">
+                              {getPriorityIcon(project.priority)}
+                              <span>{project.priority}</span>
+                            </div>
+                          </Badge>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      ))}
+                    {count > 3 && (
+                      <p className="text-xs text-gray-500">+{count - 3} more</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="domains">
+          <Card>
+            <CardHeader>
+              <CardTitle>Domain to Project Mapping</CardTitle>
+              {/* Domain Search Bar */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  placeholder="Search domains..."
+                  value={domainSearchTerm}
+                  onChange={(e) => setDomainSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
               </div>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {filteredDomains.map((domain) => {
+                  const mappedProject = projects.find(p => p.domainAssociated === domain);
+                  
+                  return (
+                    <div key={domain} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex-1">
+                        <h3 className="font-medium">{domain}</h3>
+                        <p className="text-sm text-gray-600">
+                          {mappedProject ? mappedProject.name : 'No project mapped'}
+                        </p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Select
+                          value={mappedProject?.id || "none"}
+                          onValueChange={(value) => handleDomainMappingChange(domain, value)}
+                        >
+                          <SelectTrigger className="w-48">
+                            <SelectValue placeholder="Select project" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">
+                              <span className="text-gray-500">No mapping</span>
+                            </SelectItem>
+                            {projects
+                              .filter(p => p.isActive)
+                              .map((project) => (
+                                <SelectItem key={project.id} value={project.id}>
+                                  <div className="flex items-center space-x-2">
+                                    <span>{project.name}</span>
+                                    <Badge className={`${getTeamMemberColor(project.assignedTo)} border`} variant="outline">
+                                      {project.assignedTo}
+                                    </Badge>
+                                  </div>
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                        {mappedProject && (
+                          <div className="flex items-center space-x-2">
+                            <Badge className={`${getTeamMemberColor(mappedProject.assignedTo)} border`} variant="outline">
+                              {mappedProject.assignedTo}
+                            </Badge>
+                            <Badge className={`${getPlatformColor(mappedProject.platform)} border`} variant="outline">
+                              {mappedProject.platform}
+                            </Badge>
+                            <Badge className={`${getPriorityColor(mappedProject.priority)} border`} variant="outline">
+                              <div className="flex items-center space-x-1">
+                                {getPriorityIcon(mappedProject.priority)}
+                                <span>{mappedProject.priority}</span>
+                              </div>
+                            </Badge>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+                {filteredDomains.length === 0 && (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">No domains found matching your search.</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

@@ -35,16 +35,9 @@ const Index = () => {
         <DashboardStats />
         
         <div className="mt-12">
-          <Tabs defaultValue="projects" className="w-full">
+          <Tabs defaultValue="calls" className="w-full">
             <div className="mb-8">
               <TabsList className="grid w-full grid-cols-9 bg-white/70 backdrop-blur-sm border border-white/20 shadow-lg rounded-2xl p-2 h-auto">
-                <TabsTrigger 
-                  value="projects" 
-                  className="flex flex-col items-center space-y-2 py-4 px-3 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
-                >
-                  <FolderGit2 className="h-5 w-5" />
-                  <span className="text-xs font-medium">Project Manager</span>
-                </TabsTrigger>
                 <TabsTrigger 
                   value="calls" 
                   className="flex flex-col items-center space-y-2 py-4 px-3 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
@@ -88,6 +81,13 @@ const Index = () => {
                   <span className="text-xs font-medium">Domain Manager</span>
                 </TabsTrigger>
                 <TabsTrigger 
+                  value="projects" 
+                  className="flex flex-col items-center space-y-2 py-4 px-3 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
+                >
+                  <FolderGit2 className="h-5 w-5" />
+                  <span className="text-xs font-medium">Project Manager</span>
+                </TabsTrigger>
+                <TabsTrigger 
                   value="prompts" 
                   className="flex flex-col items-center space-y-2 py-4 px-3 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-500 data-[state=active]:to-teal-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
                 >
@@ -105,10 +105,6 @@ const Index = () => {
             </div>
             
             <div className="bg-white/60 backdrop-blur-sm rounded-3xl border border-white/20 shadow-xl p-8">
-              <TabsContent value="projects" className="mt-0">
-                <ProjectManager />
-              </TabsContent>
-              
               <TabsContent value="calls" className="mt-0">
                 <CallManager />
               </TabsContent>
@@ -131,6 +127,10 @@ const Index = () => {
               
               <TabsContent value="domains" className="mt-0">
                 <DomainManager />
+              </TabsContent>
+              
+              <TabsContent value="projects" className="mt-0">
+                <ProjectManager />
               </TabsContent>
               
               <TabsContent value="prompts" className="mt-0">

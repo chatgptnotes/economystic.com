@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,7 @@ const ProjectManager = () => {
   const { toast } = useToast();
   const [projects, setProjects] = useState<Project[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [projectSearchTerm, setProjectSearchTerm] = useState("");
   const [domainSearchTerm, setDomainSearchTerm] = useState("");
   const [selectedMember, setSelectedMember] = useState("all");
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -276,11 +278,13 @@ const ProjectManager = () => {
   };
 
   const filteredProjects = projects.filter(project => {
-    const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const generalSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          project.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const projectSpecificSearch = project.name.toLowerCase().includes(projectSearchTerm.toLowerCase()) ||
+                                 project.description.toLowerCase().includes(projectSearchTerm.toLowerCase());
     const matchesMember = selectedMember === "all" || project.assignedTo === selectedMember;
     const matchesStatus = showInactive || project.isActive;
-    return matchesSearch && matchesMember && matchesStatus;
+    return (generalSearch || projectSpecificSearch) && matchesMember && matchesStatus;
   });
 
   // Filter domains based on search term
@@ -452,7 +456,18 @@ const ProjectManager = () => {
         <TabsContent value="all">
           <Card>
             <CardHeader>
-              <CardTitle>All Projects ({filteredProjects.length})</CardTitle>
+              <CardTitle className="flex items-center justify-between">
+                <span>All Projects ({filteredProjects.length})</span>
+                <div className="relative w-80">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    placeholder="Search in projects list..."
+                    value={projectSearchTerm}
+                    onChange={(e) => setProjectSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <Table>

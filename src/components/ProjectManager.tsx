@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -423,6 +422,14 @@ const ProjectManager = () => {
     setEditingProject(null);
   };
 
+  const handleAddNewProject = () => {
+    // Placeholder for add new project functionality
+    toast({
+      title: "Add New Project",
+      description: "This feature will be implemented soon",
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -430,6 +437,10 @@ const ProjectManager = () => {
           <h2 className="text-2xl font-bold">Project Management</h2>
           <p className="text-gray-600">Manage all your GitHub repositories and team assignments</p>
         </div>
+        <Button onClick={handleAddNewProject} className="flex items-center space-x-2">
+          <Github className="h-4 w-4" />
+          <span>Add New Project</span>
+        </Button>
       </div>
 
       {/* Search and Filter */}

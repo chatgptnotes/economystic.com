@@ -278,13 +278,18 @@ const ProjectManager = () => {
   };
 
   const filteredProjects = projects.filter(project => {
-    const generalSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         project.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const projectSpecificSearch = project.name.toLowerCase().includes(projectSearchTerm.toLowerCase()) ||
-                                 project.description.toLowerCase().includes(projectSearchTerm.toLowerCase());
+    // Combine both search terms - if user is typing in either search bar
+    const combinedSearchTerm = searchTerm || projectSearchTerm;
+    
+    // Search logic - check if the combined search term matches project name or description
+    const matchesSearch = combinedSearchTerm === "" || 
+                         project.name.toLowerCase().includes(combinedSearchTerm.toLowerCase()) ||
+                         project.description.toLowerCase().includes(combinedSearchTerm.toLowerCase());
+    
     const matchesMember = selectedMember === "all" || project.assignedTo === selectedMember;
     const matchesStatus = showInactive || project.isActive;
-    return (generalSearch || projectSpecificSearch) && matchesMember && matchesStatus;
+    
+    return matchesSearch && matchesMember && matchesStatus;
   });
 
   // Filter domains based on search term

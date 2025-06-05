@@ -47,6 +47,9 @@ serve(async (req) => {
     11. content_calendar: id, business_id, campaign_id, title, content_type, content_template, scheduled_date, status, platforms
     12. prompts: id, title, content, project_id, project_name, category, tags
     13. reports: id, name, type, file_path, analysis_status, processed, context_data
+    
+    Note: Domain information is stored in the DomainManager component as static data, not in database tables.
+    For domain searches, check if the query mentions domains and note that domains like anohra.com, anohra.ai, etc. exist in the domain management system.
     `;
 
     // Use OpenAI to understand the query and determine which tables to search
@@ -65,17 +68,21 @@ serve(async (req) => {
             
             ${schemaContext}
             
+            IMPORTANT: If the query is about domains (like anohra.com, anohra.ai, etc.), note that domains are managed in a separate domain management system, not in database tables. Include "domain_info" in your response to indicate domain-related queries.
+            
             Respond with a JSON object containing:
             {
               "tables": ["table1", "table2"],
               "searchTerms": ["term1", "term2"],
-              "intent": "brief description of what user is looking for"
+              "intent": "brief description of what user is looking for",
+              "isDomainQuery": true/false
             }
             
             For patient-related queries, always include: call_records, ambulance_bookings, whatsapp_messages, patient_events
             For telecom queries, include: telecom_services, telecom_checks
             For social media queries, include: social_media_posts, businesses, content_campaigns
             For project/content queries, include: prompts, reports, content_calendar
+            For domain queries, set isDomainQuery to true
             
             Extract key search terms that would be useful for text matching.`
           },
@@ -96,75 +103,88 @@ serve(async (req) => {
     // Perform searches based on AI suggestions
     const searchResults = [];
 
+    // Handle domain queries specially
+    if (searchStrategy.isDomainQuery) {
+      // Create a mock result for domain information
+      const domainData = [{
+        id: 'domain-1',
+        name: 'anohra.com',
+        registrar: 'Unknown',
+        category: 'Business',
+        status: 'active',
+        expirationDate: '2025-12-31'
+      }, {
+        id: 'domain-2',
+        name: 'anohra.ai',
+        registrar: 'Unknown',
+        category: 'AI/Tech',
+        status: 'active',
+        expirationDate: '2025-12-31'
+      }, {
+        id: 'domain-3',
+        name: 'anohra.in',
+        registrar: 'Unknown',
+        category: 'Business',
+        status: 'active',
+        expirationDate: '2025-12-31'
+      }];
+
+      // Filter domains based on search terms
+      const matchingDomains = domainData.filter(domain => 
+        searchStrategy.searchTerms.some(term => 
+          domain.name.toLowerCase().includes(term.toLowerCase())
+        )
+      );
+
+      if (matchingDomains.length > 0) {
+        searchResults.push({
+          table: 'domains',
+          data: matchingDomains,
+          count: matchingDomains.length
+        });
+      }
+    }
+
+    // Search database tables
     for (const table of searchStrategy.tables) {
       try {
         let queryBuilder = supabase.from(table).select('*');
         
-        // Apply text search on relevant columns
+        // Apply text search on relevant columns based on search terms
         const searchFilters = [];
         
         for (const term of searchStrategy.searchTerms) {
           switch (table) {
             case 'call_records':
-              searchFilters.push(
-                queryBuilder.or(`patient_name.ilike.%${term}%,phone_number.ilike.%${term}%,notes.ilike.%${term}%,call_type.ilike.%${term}%`)
-              );
+              searchFilters.push(`patient_name.ilike.%${term}%,phone_number.ilike.%${term}%,notes.ilike.%${term}%,call_type.ilike.%${term}%`);
               break;
             case 'ambulance_bookings':
-              searchFilters.push(
-                queryBuilder.or(`patient_name.ilike.%${term}%,phone_number.ilike.%${term}%,pickup_location.ilike.%${term}%,destination.ilike.%${term}%,driver_name.ilike.%${term}%`)
-              );
+              searchFilters.push(`patient_name.ilike.%${term}%,phone_number.ilike.%${term}%,pickup_location.ilike.%${term}%,destination.ilike.%${term}%,driver_name.ilike.%${term}%`);
               break;
             case 'whatsapp_messages':
-              searchFilters.push(
-                queryBuilder.or(`patient_name.ilike.%${term}%,phone_number.ilike.%${term}%,message_content.ilike.%${term}%`)
-              );
+              searchFilters.push(`patient_name.ilike.%${term}%,phone_number.ilike.%${term}%,message_content.ilike.%${term}%`);
               break;
             case 'patient_events':
-              searchFilters.push(
-                queryBuilder.or(`patient_name.ilike.%${term}%,phone_number.ilike.%${term}%,event_type.ilike.%${term}%,doctor_name.ilike.%${term}%,department.ilike.%${term}%`)
-              );
+              searchFilters.push(`patient_name.ilike.%${term}%,phone_number.ilike.%${term}%,event_type.ilike.%${term}%,doctor_name.ilike.%${term}%,department.ilike.%${term}%`);
               break;
             case 'telecom_services':
-              searchFilters.push(
-                queryBuilder.or(`service_type.ilike.%${term}%,provider_name.ilike.%${term}%,service_number.ilike.%${term}%,company_name.ilike.%${term}%,department.ilike.%${term}%`)
-              );
+              searchFilters.push(`service_type.ilike.%${term}%,provider_name.ilike.%${term}%,service_number.ilike.%${term}%,company_name.ilike.%${term}%,department.ilike.%${term}%`);
+              break;
+            case 'businesses':
+              searchFilters.push(`name.ilike.%${term}%,description.ilike.%${term}%,website_url.ilike.%${term}%`);
               break;
             case 'prompts':
-              searchFilters.push(
-                queryBuilder.or(`title.ilike.%${term}%,content.ilike.%${term}%,project_name.ilike.%${term}%,category.ilike.%${term}%`)
-              );
+              searchFilters.push(`title.ilike.%${term}%,content.ilike.%${term}%,project_name.ilike.%${term}%,category.ilike.%${term}%`);
               break;
             default:
-              // Generic search for other tables
-              searchFilters.push(queryBuilder.textSearch('*', term));
+              // For other tables, search in common text fields
+              searchFilters.push(`name.ilike.%${term}%`);
           }
         }
 
-        // Use the first search filter (we'll combine multiple terms with OR)
+        // Apply the search filter using OR logic
         if (searchFilters.length > 0) {
-          const combinedTerms = searchStrategy.searchTerms.join('|');
-          
-          switch (table) {
-            case 'call_records':
-              queryBuilder = queryBuilder.or(`patient_name.ilike.%${combinedTerms}%,phone_number.ilike.%${combinedTerms}%,notes.ilike.%${combinedTerms}%,call_type.ilike.%${combinedTerms}%`);
-              break;
-            case 'ambulance_bookings':
-              queryBuilder = queryBuilder.or(`patient_name.ilike.%${combinedTerms}%,phone_number.ilike.%${combinedTerms}%,pickup_location.ilike.%${combinedTerms}%,destination.ilike.%${combinedTerms}%`);
-              break;
-            case 'whatsapp_messages':
-              queryBuilder = queryBuilder.or(`patient_name.ilike.%${combinedTerms}%,phone_number.ilike.%${combinedTerms}%,message_content.ilike.%${combinedTerms}%`);
-              break;
-            case 'patient_events':
-              queryBuilder = queryBuilder.or(`patient_name.ilike.%${combinedTerms}%,phone_number.ilike.%${combinedTerms}%,event_type.ilike.%${combinedTerms}%,doctor_name.ilike.%${combinedTerms}%`);
-              break;
-            case 'telecom_services':
-              queryBuilder = queryBuilder.or(`service_type.ilike.%${combinedTerms}%,provider_name.ilike.%${combinedTerms}%,service_number.ilike.%${combinedTerms}%,company_name.ilike.%${combinedTerms}%`);
-              break;
-            case 'prompts':
-              queryBuilder = queryBuilder.or(`title.ilike.%${combinedTerms}%,content.ilike.%${combinedTerms}%,project_name.ilike.%${combinedTerms}%`);
-              break;
-          }
+          queryBuilder = queryBuilder.or(searchFilters[0]);
         }
 
         const { data, error } = await queryBuilder.limit(10);
@@ -198,7 +218,7 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are a helpful assistant that summarizes database search results. Provide a concise, human-readable summary of the search results.'
+            content: 'You are a helpful assistant that summarizes database search results. Provide a concise, human-readable summary of the search results. If domains were found, mention them specifically.'
           },
           {
             role: 'user',

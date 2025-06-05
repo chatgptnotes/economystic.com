@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Search, ChevronDown, ChevronUp, Database, User, Phone, Calendar, FileText } from "lucide-react";
+import { Search, ChevronDown, ChevronUp, Database, User, Phone, Calendar, FileText, Globe } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -84,6 +84,8 @@ const IntelligentSearch = () => {
 
   const getTableIcon = (tableName: string) => {
     switch (tableName) {
+      case 'domains':
+        return <Globe className="h-4 w-4" />;
       case 'call_records':
       case 'whatsapp_messages':
         return <Phone className="h-4 w-4" />;
@@ -102,6 +104,7 @@ const IntelligentSearch = () => {
   };
 
   const formatTableName = (tableName: string) => {
+    if (tableName === 'domains') return 'Domain Management';
     return tableName.split('_').map(word => 
       word.charAt(0).toUpperCase() + word.slice(1)
     ).join(' ');
@@ -110,6 +113,14 @@ const IntelligentSearch = () => {
   const renderRecordCard = (record: any, tableName: string) => {
     const getDisplayFields = () => {
       switch (tableName) {
+        case 'domains':
+          return [
+            { label: 'Domain', value: record.name },
+            { label: 'Category', value: record.category },
+            { label: 'Status', value: record.status },
+            { label: 'Registrar', value: record.registrar },
+            { label: 'Expires', value: new Date(record.expirationDate).toLocaleDateString() }
+          ];
         case 'call_records':
           return [
             { label: 'Patient', value: record.patient_name },
@@ -133,6 +144,12 @@ const IntelligentSearch = () => {
             { label: 'Doctor', value: record.doctor_name },
             { label: 'Department', value: record.department },
             { label: 'Date', value: new Date(record.event_date).toLocaleDateString() }
+          ];
+        case 'businesses':
+          return [
+            { label: 'Name', value: record.name },
+            { label: 'Description', value: record.description },
+            { label: 'Website', value: record.website_url }
           ];
         case 'prompts':
           return [
@@ -177,7 +194,7 @@ const IntelligentSearch = () => {
         <CardContent>
           <div className="flex space-x-2">
             <Input
-              placeholder="Search across all data... (e.g., 'find all patients from last week', 'telecom services for cardiology', 'WhatsApp messages from John')"
+              placeholder="Search across all data... (e.g., 'find all patients from last week', 'telecom services for cardiology', 'do we have domain anohra.com')"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}

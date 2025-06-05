@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +7,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Search, ChevronDown, ChevronUp, Database, User, Phone, Calendar, FileText, Globe } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import VoiceRecorder from "./VoiceRecorder";
 
 interface SearchResult {
   table: string;
@@ -70,6 +70,16 @@ const IntelligentSearch = () => {
     } finally {
       setIsSearching(false);
     }
+  };
+
+  const handleVoiceTranscription = (text: string) => {
+    setQuery(text);
+    // Automatically search after voice input
+    setTimeout(() => {
+      if (text.trim()) {
+        handleSearch();
+      }
+    }, 500);
   };
 
   const toggleTable = (tableName: string) => {
@@ -200,6 +210,10 @@ const IntelligentSearch = () => {
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
               className="flex-1"
             />
+            <VoiceRecorder 
+              onTranscription={handleVoiceTranscription}
+              isSearching={isSearching}
+            />
             <Button 
               onClick={handleSearch} 
               disabled={isSearching}
@@ -208,6 +222,9 @@ const IntelligentSearch = () => {
               {isSearching ? "Searching..." : "Search"}
             </Button>
           </div>
+          <p className="text-sm text-gray-500 mt-2">
+            💡 Try voice search: Click the microphone icon and speak your query
+          </p>
         </CardContent>
       </Card>
 

@@ -6,7 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Search, Github, Users, Code, Calendar, ExternalLink, FileText, Edit } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Search, Github, Users, Code, Calendar, ExternalLink, FileText, Edit, Trash2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import ProjectFileManager from "./ProjectFileManager";
 import ProjectEditForm from "./ProjectEditForm";
 
@@ -24,6 +26,7 @@ interface Project {
 }
 
 const ProjectManager = () => {
+  const { toast } = useToast();
   const [projects, setProjects] = useState<Project[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedMember, setSelectedMember] = useState("all");
@@ -142,6 +145,14 @@ const ProjectManager = () => {
     }));
 
     setProjects(transformedProjects);
+  };
+
+  const handleDeleteProject = (projectId: string, projectName: string) => {
+    setProjects(prev => prev.filter(p => p.id !== projectId));
+    toast({
+      title: "Success",
+      description: `Project "${projectName}" has been deleted`,
+    });
   };
 
   const filteredProjects = projects.filter(project => {
@@ -389,6 +400,35 @@ const ProjectManager = () => {
                               )}
                             </DialogContent>
                           </Dialog>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Project</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete the project "{project.name}"? 
+                                  This action cannot be undone and will remove all associated data.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDeleteProject(project.id, project.name)}
+                                  className="bg-red-600 hover:bg-red-700"
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
                       </TableCell>
                     </TableRow>

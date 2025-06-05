@@ -159,22 +159,32 @@ const ProjectManager = () => {
   const handleDragEnd = (result: DropResult) => {
     const { destination, source, draggableId } = result;
 
+    console.log('Drag result:', { destination, source, draggableId });
+
     if (!destination) {
+      console.log('No destination, cancelling drag');
       return;
     }
 
     if (destination.droppableId === source.droppableId && destination.index === source.index) {
+      console.log('Same position, no change needed');
       return;
     }
 
     const newAssignedTo = destination.droppableId;
     const projectId = draggableId;
 
-    setProjects(prev => prev.map(project => 
-      project.id === projectId 
-        ? { ...project, assignedTo: newAssignedTo }
-        : project
-    ));
+    console.log('Updating project assignment:', { projectId, newAssignedTo });
+
+    setProjects(prev => {
+      const updated = prev.map(project => 
+        project.id === projectId 
+          ? { ...project, assignedTo: newAssignedTo }
+          : project
+      );
+      console.log('Updated projects:', updated);
+      return updated;
+    });
 
     const projectName = projects.find(p => p.id === projectId)?.name;
     toast({
@@ -470,27 +480,28 @@ const ProjectManager = () => {
         <TabsContent value="team">
           <DragDropContext onDragEnd={handleDragEnd}>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {teamMembers.map((member) => (
-                <Droppable droppableId={member} key={member}>
-                  {(provided, snapshot) => (
-                    <Card 
-                      className={`transition-colors duration-200 ${snapshot.isDraggingOver ? 'bg-blue-50 border-blue-300' : ''}`}
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}
-                    >
-                      <CardHeader>
-                        <CardTitle className="flex items-center justify-between">
-                          <span>{member}</span>
-                          <Badge className={getTeamMemberColor(member)}>
-                            {projectsByMember[member]} projects
-                          </Badge>
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="min-h-[200px]">
-                        <div className="space-y-2">
-                          {projects
-                            .filter(p => p.assignedTo === member)
-                            .map((project, index) => (
+              {teamMembers.map((member) => {
+                const memberProjects = projects.filter(p => p.assignedTo === member);
+                
+                return (
+                  <Droppable droppableId={member} key={member}>
+                    {(provided, snapshot) => (
+                      <Card 
+                        className={`transition-colors duration-200 ${snapshot.isDraggingOver ? 'bg-blue-50 border-blue-300' : ''}`}
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                      >
+                        <CardHeader>
+                          <CardTitle className="flex items-center justify-between">
+                            <span>{member}</span>
+                            <Badge className={getTeamMemberColor(member)}>
+                              {memberProjects.length} projects
+                            </Badge>
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="min-h-[200px]">
+                          <div className="space-y-2">
+                            {memberProjects.map((project, index) => (
                               <Draggable key={project.id} draggableId={project.id} index={index}>
                                 {(provided, snapshot) => (
                                   <div
@@ -518,13 +529,14 @@ const ProjectManager = () => {
                                 )}
                               </Draggable>
                             ))}
-                          {provided.placeholder}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-                </Droppable>
-              ))}
+                            {provided.placeholder}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </Droppable>
+                );
+              })}
             </div>
           </DragDropContext>
         </TabsContent>

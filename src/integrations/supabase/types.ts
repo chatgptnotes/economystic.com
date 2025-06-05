@@ -814,6 +814,110 @@ export type Database = {
           },
         ]
       }
+      telecom_checks: {
+        Row: {
+          action_taken: string | null
+          check_date: string
+          check_time: string
+          checked_by: string
+          created_at: string
+          id: string
+          issues_found: string | null
+          notes: string | null
+          response_time_seconds: number | null
+          service_id: string | null
+          status: string
+        }
+        Insert: {
+          action_taken?: string | null
+          check_date: string
+          check_time?: string
+          checked_by: string
+          created_at?: string
+          id?: string
+          issues_found?: string | null
+          notes?: string | null
+          response_time_seconds?: number | null
+          service_id?: string | null
+          status: string
+        }
+        Update: {
+          action_taken?: string | null
+          check_date?: string
+          check_time?: string
+          checked_by?: string
+          created_at?: string
+          id?: string
+          issues_found?: string | null
+          notes?: string | null
+          response_time_seconds?: number | null
+          service_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "telecom_checks_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "telecom_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      telecom_services: {
+        Row: {
+          assigned_to: string | null
+          bill_due_date: string | null
+          company_name: string
+          contract_end_date: string | null
+          contract_start_date: string | null
+          created_at: string
+          department: string | null
+          id: string
+          is_active: boolean | null
+          monthly_cost: number | null
+          notes: string | null
+          provider_name: string
+          service_number: string
+          service_type: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          bill_due_date?: string | null
+          company_name: string
+          contract_end_date?: string | null
+          contract_start_date?: string | null
+          created_at?: string
+          department?: string | null
+          id?: string
+          is_active?: boolean | null
+          monthly_cost?: number | null
+          notes?: string | null
+          provider_name: string
+          service_number: string
+          service_type: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          bill_due_date?: string | null
+          company_name?: string
+          contract_end_date?: string | null
+          contract_start_date?: string | null
+          created_at?: string
+          department?: string | null
+          id?: string
+          is_active?: boolean | null
+          monthly_cost?: number | null
+          notes?: string | null
+          provider_name?: string
+          service_number?: string
+          service_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       whatsapp_messages: {
         Row: {
           created_at: string

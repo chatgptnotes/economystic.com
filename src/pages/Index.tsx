@@ -10,8 +10,9 @@ import SocialMediaDashboard from "@/components/SocialMediaDashboard";
 import DomainManager from "@/components/DomainManager";
 import ProjectManager from "@/components/ProjectManager";
 import PromptManager from "@/components/PromptManager";
+import TelecomManager from "@/components/TelecomManager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Phone, Users, MessageSquare, BarChart3, Share2, Globe, FolderGit2, FileText } from "lucide-react";
+import { Phone, Users, MessageSquare, BarChart3, Share2, Globe, FolderGit2, FileText, Wifi } from "lucide-react";
 
 const Index = () => {
   return (
@@ -22,7 +23,7 @@ const Index = () => {
         <DashboardStats />
         
         <Tabs defaultValue="calls" className="w-full">
-          <TabsList className="grid w-full grid-cols-8 mb-6">
+          <TabsList className="grid w-full grid-cols-9 mb-6">
             <TabsTrigger value="calls" className="flex items-center space-x-2">
               <Phone className="h-4 w-4" />
               <span>Call Management</span>
@@ -34,6 +35,10 @@ const Index = () => {
             <TabsTrigger value="whatsapp" className="flex items-center space-x-2">
               <MessageSquare className="h-4 w-4" />
               <span>WhatsApp Tracker</span>
+            </TabsTrigger>
+            <TabsTrigger value="telecom" className="flex items-center space-x-2">
+              <Wifi className="h-4 w-4" />
+              <span>Telecom Infrastructure</span>
             </TabsTrigger>
             <TabsTrigger value="social" className="flex items-center space-x-2">
               <Share2 className="h-4 w-4" />
@@ -67,6 +72,10 @@ const Index = () => {
           
           <TabsContent value="whatsapp">
             <WhatsAppTracker />
+          </TabsContent>
+          
+          <TabsContent value="telecom">
+            <TelecomManager />
           </TabsContent>
           
           <TabsContent value="social">

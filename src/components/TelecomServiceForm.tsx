@@ -28,6 +28,9 @@ const TelecomServiceForm = ({ onClose, onSuccess }: TelecomServiceFormProps) => 
     bill_due_date: "",
     contract_start_date: "",
     contract_end_date: "",
+    wifi_password: "",
+    contact_person: "",
+    contact_phone: "",
     notes: ""
   });
 
@@ -43,7 +46,10 @@ const TelecomServiceForm = ({ onClose, onSuccess }: TelecomServiceFormProps) => 
           monthly_cost: formData.monthly_cost ? parseFloat(formData.monthly_cost) : null,
           bill_due_date: formData.bill_due_date || null,
           contract_start_date: formData.contract_start_date || null,
-          contract_end_date: formData.contract_end_date || null
+          contract_end_date: formData.contract_end_date || null,
+          wifi_password: formData.wifi_password || null,
+          contact_person: formData.contact_person || null,
+          contact_phone: formData.contact_phone || null
         }]);
 
       if (error) throw error;
@@ -71,7 +77,7 @@ const TelecomServiceForm = ({ onClose, onSuccess }: TelecomServiceFormProps) => 
   };
 
   return (
-    <Card className="max-w-2xl mx-auto">
+    <Card className="max-w-4xl mx-auto">
       <CardHeader>
         <CardTitle>Add New Telecom Service</CardTitle>
       </CardHeader>
@@ -148,6 +154,41 @@ const TelecomServiceForm = ({ onClose, onSuccess }: TelecomServiceFormProps) => 
                 value={formData.assigned_to}
                 onChange={(e) => handleInputChange('assigned_to', e.target.value)}
                 placeholder="Person responsible"
+              />
+            </div>
+          </div>
+
+          {formData.service_type === 'wifi' && (
+            <div>
+              <Label htmlFor="wifi_password">WiFi Password</Label>
+              <Input
+                id="wifi_password"
+                type="password"
+                value={formData.wifi_password}
+                onChange={(e) => handleInputChange('wifi_password', e.target.value)}
+                placeholder="WiFi network password"
+              />
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="contact_person">Contact Person (for issues)</Label>
+              <Input
+                id="contact_person"
+                value={formData.contact_person}
+                onChange={(e) => handleInputChange('contact_person', e.target.value)}
+                placeholder="Person to contact if service is faulty"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="contact_phone">Contact Phone</Label>
+              <Input
+                id="contact_phone"
+                value={formData.contact_phone}
+                onChange={(e) => handleInputChange('contact_phone', e.target.value)}
+                placeholder="Phone number of contact person"
               />
             </div>
           </div>

@@ -869,6 +869,8 @@ export type Database = {
           assigned_to: string | null
           bill_due_date: string | null
           company_name: string
+          contact_person: string | null
+          contact_phone: string | null
           contract_end_date: string | null
           contract_start_date: string | null
           created_at: string
@@ -881,11 +883,14 @@ export type Database = {
           service_number: string
           service_type: string
           updated_at: string
+          wifi_password: string | null
         }
         Insert: {
           assigned_to?: string | null
           bill_due_date?: string | null
           company_name: string
+          contact_person?: string | null
+          contact_phone?: string | null
           contract_end_date?: string | null
           contract_start_date?: string | null
           created_at?: string
@@ -898,11 +903,14 @@ export type Database = {
           service_number: string
           service_type: string
           updated_at?: string
+          wifi_password?: string | null
         }
         Update: {
           assigned_to?: string | null
           bill_due_date?: string | null
           company_name?: string
+          contact_person?: string | null
+          contact_phone?: string | null
           contract_end_date?: string | null
           contract_start_date?: string | null
           created_at?: string
@@ -915,6 +923,7 @@ export type Database = {
           service_number?: string
           service_type?: string
           updated_at?: string
+          wifi_password?: string | null
         }
         Relationships: []
       }

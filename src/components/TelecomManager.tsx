@@ -1,10 +1,9 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Phone, Wifi, Globe, Calendar, CheckCircle, XCircle, AlertTriangle, Plus } from "lucide-react";
+import { Phone, Wifi, Globe, Calendar, CheckCircle, XCircle, AlertTriangle, Plus, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import TelecomServiceForm from "./TelecomServiceForm";
@@ -20,6 +19,9 @@ interface TelecomService {
   assigned_to: string;
   monthly_cost: number;
   bill_due_date: string;
+  wifi_password: string;
+  contact_person: string;
+  contact_phone: string;
   is_active: boolean;
   notes: string;
 }
@@ -37,6 +39,7 @@ const TelecomManager = () => {
   const [showServiceForm, setShowServiceForm] = useState(false);
   const [showCheckForm, setShowCheckForm] = useState<string | null>(null);
   const [filterType, setFilterType] = useState<string>("all");
+  const [showPasswords, setShowPasswords] = useState<{ [key: string]: boolean }>({});
 
   const { data: services = [], refetch: refetchServices } = useQuery({
     queryKey: ['telecom-services'],
@@ -76,6 +79,13 @@ const TelecomManager = () => {
       return data || [];
     }
   });
+
+  const togglePasswordVisibility = (serviceId: string) => {
+    setShowPasswords(prev => ({
+      ...prev,
+      [serviceId]: !prev[serviceId]
+    }));
+  };
 
   const getServiceIcon = (type: string) => {
     switch (type) {
@@ -217,77 +227,111 @@ const TelecomManager = () => {
         </CardHeader>
         
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Service</TableHead>
-                <TableHead>Provider</TableHead>
-                <TableHead>Company</TableHead>
-                <TableHead>Department</TableHead>
-                <TableHead>Assigned To</TableHead>
-                <TableHead>Monthly Cost</TableHead>
-                <TableHead>Bill Due</TableHead>
-                <TableHead>Last Check</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredServices.map((service: TelecomService) => {
-                const lastCheck = getLastCheckStatus(service.id);
-                const daysUntilDue = getDaysUntilDue(service.bill_due_date);
-                
-                return (
-                  <TableRow key={service.id}>
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        {getServiceIcon(service.service_type)}
-                        <div>
-                          <p className="font-medium">{service.service_number}</p>
-                          <Badge className={getServiceTypeColor(service.service_type)}>
-                            {service.service_type.replace("_", " ")}
-                          </Badge>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>{service.provider_name}</TableCell>
-                    <TableCell>{service.company_name}</TableCell>
-                    <TableCell>{service.department}</TableCell>
-                    <TableCell>{service.assigned_to}</TableCell>
-                    <TableCell>₹{service.monthly_cost?.toLocaleString()}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <span>{new Date(service.bill_due_date).toLocaleDateString()}</span>
-                        {daysUntilDue <= 7 && daysUntilDue >= 0 && (
-                          <Badge variant="destructive">
-                            {daysUntilDue === 0 ? "Due Today" : `${daysUntilDue} days`}
-                          </Badge>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {lastCheck ? (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Service</TableHead>
+                  <TableHead>Provider</TableHead>
+                  <TableHead>Company</TableHead>
+                  <TableHead>Department</TableHead>
+                  <TableHead>Assigned To</TableHead>
+                  <TableHead>WiFi Password</TableHead>
+                  <TableHead>Contact Person</TableHead>
+                  <TableHead>Monthly Cost</TableHead>
+                  <TableHead>Bill Due</TableHead>
+                  <TableHead>Last Check</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredServices.map((service: TelecomService) => {
+                  const lastCheck = getLastCheckStatus(service.id);
+                  const daysUntilDue = getDaysUntilDue(service.bill_due_date);
+                  
+                  return (
+                    <TableRow key={service.id}>
+                      <TableCell>
                         <div className="flex items-center space-x-2">
-                          {getStatusIcon(lastCheck.status)}
-                          <span className="text-sm">{lastCheck.checked_by}</span>
+                          {getServiceIcon(service.service_type)}
+                          <div>
+                            <p className="font-medium">{service.service_number}</p>
+                            <Badge className={getServiceTypeColor(service.service_type)}>
+                              {service.service_type.replace("_", " ")}
+                            </Badge>
+                          </div>
                         </div>
-                      ) : (
-                        <span className="text-sm text-gray-500">Not checked today</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setShowCheckForm(service.id)}
-                      >
-                        Check Now
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+                      </TableCell>
+                      <TableCell>{service.provider_name}</TableCell>
+                      <TableCell>{service.company_name}</TableCell>
+                      <TableCell>{service.department}</TableCell>
+                      <TableCell>{service.assigned_to}</TableCell>
+                      <TableCell>
+                        {service.service_type === 'wifi' && service.wifi_password ? (
+                          <div className="flex items-center space-x-2">
+                            <span className="font-mono text-sm">
+                              {showPasswords[service.id] ? service.wifi_password : '••••••••'}
+                            </span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => togglePasswordVisibility(service.id)}
+                            >
+                              {showPasswords[service.id] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </Button>
+                          </div>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {service.contact_person ? (
+                          <div>
+                            <p className="font-medium text-sm">{service.contact_person}</p>
+                            {service.contact_phone && (
+                              <p className="text-xs text-gray-500">{service.contact_phone}</p>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>₹{service.monthly_cost?.toLocaleString()}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          <span>{new Date(service.bill_due_date).toLocaleDateString()}</span>
+                          {daysUntilDue <= 7 && daysUntilDue >= 0 && (
+                            <Badge variant="destructive">
+                              {daysUntilDue === 0 ? "Due Today" : `${daysUntilDue} days`}
+                            </Badge>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {lastCheck ? (
+                          <div className="flex items-center space-x-2">
+                            {getStatusIcon(lastCheck.status)}
+                            <span className="text-sm">{lastCheck.checked_by}</span>
+                          </div>
+                        ) : (
+                          <span className="text-sm text-gray-500">Not checked today</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setShowCheckForm(service.id)}
+                        >
+                          Check Now
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
 

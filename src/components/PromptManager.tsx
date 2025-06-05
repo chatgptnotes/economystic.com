@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,21 +9,22 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "@/components/ui/label";
 import { Search, Plus, Copy, Edit, Trash2, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface Prompt {
   id: string;
   title: string;
   content: string;
-  projectId: string;
-  projectName: string;
+  project_id: string;
+  project_name: string;
   category: 'development' | 'design' | 'testing' | 'documentation' | 'general';
-  createdBy: string;
-  createdAt: string;
+  created_by: string;
+  created_at: string;
   tags: string[];
 }
 
 const PromptManager = () => {
-  const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProject, setSelectedProject] = useState("all");
@@ -31,12 +32,13 @@ const PromptManager = () => {
   const [newPrompt, setNewPrompt] = useState({
     title: '',
     content: '',
-    projectId: '',
-    projectName: '',
+    project_id: '',
+    project_name: '',
     category: 'general' as const,
     tags: ''
   });
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Mock project data - this would come from your ProjectManager in a real implementation
   const projects = [
@@ -48,10 +50,94 @@ const PromptManager = () => {
   ];
 
   const categories = ['development', 'design', 'testing', 'documentation', 'general'];
-  const teamMembers = ["Bhupendra", "Dinesh", "Prathik", "Pooja", "Poonam", "Monish"];
+
+  // Fetch prompts from Supabase
+  const { data: prompts = [], isLoading } = useQuery({
+    queryKey: ['prompts'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('prompts')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data as Prompt[];
+    }
+  });
+
+  // Add prompt mutation
+  const addPromptMutation = useMutation({
+    mutationFn: async (promptData: {
+      title: string;
+      content: string;
+      project_id: string;
+      project_name: string;
+      category: string;
+      tags: string[];
+    }) => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) throw new Error('User not authenticated');
+
+      const { data, error } = await supabase
+        .from('prompts')
+        .insert([{
+          ...promptData,
+          created_by: userData.user.id
+        }])
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['prompts'] });
+      setNewPrompt({ title: '', content: '', project_id: '', project_name: '', category: 'general', tags: '' });
+      setIsDialogOpen(false);
+      toast({
+        title: "Prompt Added",
+        description: "Your prompt has been successfully added to the team library",
+      });
+    },
+    onError: (error) => {
+      console.error('Error adding prompt:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add prompt. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Delete prompt mutation
+  const deletePromptMutation = useMutation({
+    mutationFn: async (promptId: string) => {
+      const { error } = await supabase
+        .from('prompts')
+        .delete()
+        .eq('id', promptId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['prompts'] });
+      toast({
+        title: "Prompt Deleted",
+        description: "Prompt has been removed from the team library",
+      });
+    },
+    onError: (error) => {
+      console.error('Error deleting prompt:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete prompt. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
 
   const addPrompt = () => {
-    if (!newPrompt.title.trim() || !newPrompt.content.trim() || !newPrompt.projectId) {
+    if (!newPrompt.title.trim() || !newPrompt.content.trim() || !newPrompt.project_id) {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
@@ -60,28 +146,16 @@ const PromptManager = () => {
       return;
     }
 
-    const selectedProject = projects.find(p => p.id === newPrompt.projectId);
+    const selectedProject = projects.find(p => p.id === newPrompt.project_id);
     const tags = newPrompt.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
 
-    const prompt: Prompt = {
-      id: Date.now().toString(),
+    addPromptMutation.mutate({
       title: newPrompt.title,
       content: newPrompt.content,
-      projectId: newPrompt.projectId,
-      projectName: selectedProject?.name || '',
+      project_id: newPrompt.project_id,
+      project_name: selectedProject?.name || '',
       category: newPrompt.category,
-      createdBy: teamMembers[Math.floor(Math.random() * teamMembers.length)],
-      createdAt: new Date().toISOString(),
       tags
-    };
-
-    setPrompts(prev => [...prev, prompt]);
-    setNewPrompt({ title: '', content: '', projectId: '', projectName: '', category: 'general', tags: '' });
-    setIsDialogOpen(false);
-
-    toast({
-      title: "Prompt Added",
-      description: `"${prompt.title}" has been added to ${selectedProject?.name}`,
     });
   };
 
@@ -94,18 +168,14 @@ const PromptManager = () => {
   };
 
   const deletePrompt = (promptId: string) => {
-    setPrompts(prev => prev.filter(p => p.id !== promptId));
-    toast({
-      title: "Prompt Deleted",
-      description: "Prompt has been removed",
-    });
+    deletePromptMutation.mutate(promptId);
   };
 
   const filteredPrompts = prompts.filter(prompt => {
     const matchesSearch = prompt.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          prompt.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          prompt.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesProject = selectedProject === "all" || prompt.projectId === selectedProject;
+    const matchesProject = selectedProject === "all" || prompt.project_id === selectedProject;
     const matchesCategory = selectedCategory === "all" || prompt.category === selectedCategory;
     return matchesSearch && matchesProject && matchesCategory;
   });
@@ -120,6 +190,14 @@ const PromptManager = () => {
     };
     return colors[category as keyof typeof colors] || colors.general;
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <div className="text-gray-500">Loading prompts...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -155,8 +233,8 @@ const PromptManager = () => {
                 <select
                   id="promptProject"
                   className="w-full px-3 py-2 border rounded-md"
-                  value={newPrompt.projectId}
-                  onChange={(e) => setNewPrompt(prev => ({ ...prev, projectId: e.target.value }))}
+                  value={newPrompt.project_id}
+                  onChange={(e) => setNewPrompt(prev => ({ ...prev, project_id: e.target.value }))}
                 >
                   <option value="">Select a project</option>
                   {projects.map(project => (
@@ -206,8 +284,11 @@ const PromptManager = () => {
                 <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button onClick={addPrompt}>
-                  Add Prompt
+                <Button 
+                  onClick={addPrompt}
+                  disabled={addPromptMutation.isPending}
+                >
+                  {addPromptMutation.isPending ? 'Adding...' : 'Add Prompt'}
                 </Button>
               </div>
             </div>
@@ -269,7 +350,7 @@ const PromptManager = () => {
                     <CardTitle className="text-lg mb-2">{prompt.title}</CardTitle>
                     <div className="flex flex-wrap gap-2 mb-2">
                       <Badge variant="outline" className="text-xs">
-                        {prompt.projectName}
+                        {prompt.project_name}
                       </Badge>
                       <Badge className={getCategoryColor(prompt.category)}>
                         {prompt.category}
@@ -297,7 +378,7 @@ const PromptManager = () => {
                   )}
                   
                   <div className="text-xs text-gray-500">
-                    Created by {prompt.createdBy} • {new Date(prompt.createdAt).toLocaleDateString()}
+                    Created • {new Date(prompt.created_at).toLocaleDateString()}
                   </div>
                   
                   <div className="flex justify-between">
@@ -314,6 +395,7 @@ const PromptManager = () => {
                       size="sm"
                       onClick={() => deletePrompt(prompt.id)}
                       className="text-red-600 hover:text-red-700"
+                      disabled={deletePromptMutation.isPending}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>

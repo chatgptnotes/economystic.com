@@ -16,7 +16,7 @@ interface Project {
   visibility: 'Public' | 'Private';
   lastUpdated: string;
   assignedTo: string;
-  platform: 'Cursor' | 'Lovable' | 'V0' | 'Unknown';
+  platform: 'Cursor' | 'Lovable' | 'V0' | 'Stitch' | 'Windsurf' | 'Clerk' | 'Codex' | 'Vercel' | 'Unknown';
   domainAssociated?: string;
   githubUrl: string;
 }
@@ -169,6 +169,11 @@ const ProjectEditForm = ({ project, teamMembers, onSave, onCancel }: ProjectEdit
               <SelectItem value="Lovable">Lovable</SelectItem>
               <SelectItem value="Cursor">Cursor</SelectItem>
               <SelectItem value="V0">V0</SelectItem>
+              <SelectItem value="Stitch">Stitch</SelectItem>
+              <SelectItem value="Windsurf">Windsurf</SelectItem>
+              <SelectItem value="Clerk">Clerk</SelectItem>
+              <SelectItem value="Codex">Codex</SelectItem>
+              <SelectItem value="Vercel">Vercel</SelectItem>
               <SelectItem value="Unknown">Unknown</SelectItem>
             </SelectContent>
           </Select>

@@ -20,13 +20,21 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
   const { toast } = useToast();
   const connectionAttempted = useRef(false);
   const connectionInProgress = useRef(false);
+  const connectionTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const conversation = useConversation({
     onConnect: () => {
-      console.log("ElevenLabs conversation connected");
+      console.log("ElevenLabs conversation connected successfully");
       setIsConnected(true);
       setIsConnecting(false);
       connectionInProgress.current = false;
+      
+      // Clear any connection timeout
+      if (connectionTimeout.current) {
+        clearTimeout(connectionTimeout.current);
+        connectionTimeout.current = null;
+      }
+      
       toast({
         title: "Voice Chat Connected",
         description: "You can now speak with the AI about your search results",
@@ -38,23 +46,37 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
       setIsConnecting(false);
       connectionAttempted.current = false;
       connectionInProgress.current = false;
+      
+      // Clear any connection timeout
+      if (connectionTimeout.current) {
+        clearTimeout(connectionTimeout.current);
+        connectionTimeout.current = null;
+      }
+      
       toast({
         title: "Voice Chat Disconnected",
         description: "Voice conversation has ended",
       });
     },
     onMessage: (message) => {
-      console.log("ElevenLabs message:", message);
+      console.log("ElevenLabs message received:", message);
     },
     onError: (error) => {
-      console.error("ElevenLabs error:", error);
+      console.error("ElevenLabs connection error:", error);
       setIsConnecting(false);
       setIsConnected(false);
       connectionAttempted.current = false;
       connectionInProgress.current = false;
+      
+      // Clear any connection timeout
+      if (connectionTimeout.current) {
+        clearTimeout(connectionTimeout.current);
+        connectionTimeout.current = null;
+      }
+      
       toast({
         title: "Voice Chat Error",
-        description: "Failed to connect to voice chat. Please try again.",
+        description: `Connection failed: ${error.message || 'Unknown error'}`,
         variant: "destructive",
       });
     },
@@ -62,7 +84,9 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
 
   const requestMicrophonePermission = async () => {
     try {
-      await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Stop the stream immediately as we just needed permission
+      stream.getTracks().forEach(track => track.stop());
       return true;
     } catch (error) {
       console.error("Microphone permission denied:", error);
@@ -95,6 +119,19 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
     connectionAttempted.current = true;
     connectionInProgress.current = true;
 
+    // Set a timeout to handle stuck connections
+    connectionTimeout.current = setTimeout(() => {
+      console.log("Connection timeout - resetting state");
+      setIsConnecting(false);
+      connectionAttempted.current = false;
+      connectionInProgress.current = false;
+      toast({
+        title: "Connection Timeout",
+        description: "Connection attempt timed out. Please try again.",
+        variant: "destructive",
+      });
+    }, 30000); // 30 second timeout
+
     try {
       // Create conversation with ElevenLabs via our Edge Function
       const { data, error } = await supabase.functions.invoke('elevenlabs-start-conversation', {
@@ -112,21 +149,48 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
       console.log("Search context:", data.searchContext);
       setConversationId(data.conversationId);
       
-      // Build the context prompt for the agent
-      let contextPrompt = "";
-      if (data.searchContext && data.searchContext.contextPrompt) {
-        contextPrompt = data.searchContext.contextPrompt;
+      // Build a more focused context prompt
+      let contextPrompt = `You are an AI assistant helping users analyze their database search results. 
+
+IMPORTANT INSTRUCTIONS:
+- Focus on the user's search query: "${searchQuery}"
+- Help analyze and explain the search results provided
+- Answer questions about the data patterns, insights, and recommendations
+- Be conversational and helpful
+- Do not mention ElevenLabs or voice technology unless specifically asked
+
+SEARCH CONTEXT:`;
+
+      if (searchResults && searchResults.results && searchResults.results.length > 0) {
+        contextPrompt += `\n\nThe user searched for: "${searchQuery}"\nResults found: ${searchResults.totalResults} records across ${searchResults.results.length} tables\n\n`;
+        
+        // Add key findings
+        searchResults.results.forEach((result: any) => {
+          contextPrompt += `Table: ${result.table} (${result.count} records)\n`;
+          if (result.data && result.data.length > 0) {
+            contextPrompt += `Sample data: ${JSON.stringify(result.data[0])}\n`;
+          }
+        });
+        
+        if (searchResults.summary) {
+          contextPrompt += `\nSummary: ${searchResults.summary}`;
+        }
+      } else {
+        contextPrompt += `\n\nNo results were found for: "${searchQuery}"\nHelp the user understand why there might be no results and suggest alternative search approaches.`;
       }
       
-      // Start the conversation using the signed URL with context
+      // Start the conversation with improved configuration
       await conversation.startSession({
         signedUrl: data.signedUrl,
         overrides: {
           agent: {
             prompt: {
-              prompt: contextPrompt || `You are an AI assistant helping users analyze their database search results. The user searched for: "${searchQuery}". Help them understand and analyze their data.`
+              prompt: contextPrompt
             },
-            firstMessage: `Hello! I can help you analyze your search results for "${searchQuery}". What would you like to know about your data?`
+            firstMessage: searchResults && searchResults.totalResults > 0 
+              ? `Hello! I can help you analyze your search results for "${searchQuery}". I found ${searchResults.totalResults} results. What would you like to know about your data?`
+              : `Hello! I see you searched for "${searchQuery}" but no results were found. I can help you understand why and suggest better search approaches. What would you like to explore?`,
+            language: "en"
           }
         }
       });
@@ -137,9 +201,15 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
       connectionAttempted.current = false;
       connectionInProgress.current = false;
       
+      // Clear timeout on error
+      if (connectionTimeout.current) {
+        clearTimeout(connectionTimeout.current);
+        connectionTimeout.current = null;
+      }
+      
       toast({
         title: "Connection Failed",
-        description: "Unable to start voice chat. Please check your API key configuration.",
+        description: `Unable to start voice chat: ${error.message}`,
         variant: "destructive",
       });
     }
@@ -148,10 +218,10 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
   const endConversation = async () => {
     console.log("Ending conversation...");
     
-    // Prevent multiple end attempts
-    if (!isConnected && !isConnecting) {
-      console.log("No active conversation to end");
-      return;
+    // Clear any timeout
+    if (connectionTimeout.current) {
+      clearTimeout(connectionTimeout.current);
+      connectionTimeout.current = null;
     }
 
     try {
@@ -164,15 +234,10 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
         });
       }
       
-      setIsConnecting(false);
-      setIsConnected(false);
-      setConversationId(null);
-      connectionAttempted.current = false;
-      connectionInProgress.current = false;
-      
     } catch (error) {
       console.error("Failed to end conversation:", error);
-      // Force reset connection state even if ending fails
+    } finally {
+      // Always reset state regardless of errors
       setIsConnecting(false);
       setIsConnected(false);
       setConversationId(null);
@@ -184,6 +249,9 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
   // Reset connection state when component unmounts
   useEffect(() => {
     return () => {
+      if (connectionTimeout.current) {
+        clearTimeout(connectionTimeout.current);
+      }
       if (isConnected || isConnecting) {
         endConversation();
       }

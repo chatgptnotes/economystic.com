@@ -3,9 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Phone, Wifi, Globe, Calendar, CheckCircle, XCircle, AlertTriangle, Plus, Eye, EyeOff } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Phone, Wifi, Globe, Calendar, CheckCircle, XCircle, AlertTriangle, Plus, Eye, EyeOff, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 import TelecomServiceForm from "./TelecomServiceForm";
 import TelecomCheckForm from "./TelecomCheckForm";
 
@@ -36,6 +38,7 @@ interface TelecomCheck {
 }
 
 const TelecomManager = () => {
+  const { toast } = useToast();
   const [showServiceForm, setShowServiceForm] = useState(false);
   const [showCheckForm, setShowCheckForm] = useState<string | null>(null);
   const [filterType, setFilterType] = useState<string>("all");
@@ -79,6 +82,41 @@ const TelecomManager = () => {
       return data || [];
     }
   });
+
+  const handleDeleteService = async (serviceId: string, serviceName: string) => {
+    try {
+      console.log('Deleting telecom service:', serviceId);
+      
+      const { error } = await supabase
+        .from('telecom_services')
+        .delete()
+        .eq('id', serviceId);
+
+      if (error) {
+        console.error('Error deleting telecom service:', error);
+        toast({
+          title: "Error",
+          description: "Failed to delete service",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Success",
+        description: `Service "${serviceName}" has been deleted`,
+      });
+      
+      refetchServices();
+    } catch (error) {
+      console.error('Error deleting telecom service:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete service",
+        variant: "destructive",
+      });
+    }
+  };
 
   const togglePasswordVisibility = (serviceId: string) => {
     setShowPasswords(prev => ({
@@ -318,13 +356,44 @@ const TelecomManager = () => {
                         )}
                       </TableCell>
                       <TableCell>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setShowCheckForm(service.id)}
-                        >
-                          Check Now
-                        </Button>
+                        <div className="flex space-x-1">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setShowCheckForm(service.id)}
+                          >
+                            Check Now
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Service</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete the service "{service.service_number}" 
+                                  for {service.company_name}? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDeleteService(service.id, service.service_number)}
+                                  className="bg-red-600 hover:bg-red-700"
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );

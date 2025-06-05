@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -96,7 +95,7 @@ const ProjectManager = () => {
       { name: "yellowfever13-05-2025server", description: "", language: "TypeScript", visibility: "Public" as const, lastUpdated: "3 weeks ago" },
       { name: "v0-untitled-project", description: "", language: "TypeScript", visibility: "Public" as const, lastUpdated: "3 weeks ago" },
       { name: "yellowfever.in2", description: "", language: "TypeScript", visibility: "Public" as const, lastUpdated: "3 weeks ago" },
-      { name: "maharashtratratv24in8may2025", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "last month" },
+      { name: "maharashtratv24in8may2025", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "last month" },
       { name: "ayushamnhospitalwebsitenextjs", description: "ayushamnhospitalwebsitenextjs", language: "HTML", visibility: "Public" as const, lastUpdated: "last month" },
       { name: "yellowfever.in_5.4.2025_11-43-b0", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "May 5" },
       { name: "yellowfever.in_5.4.2025_11-43", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "May 5" },
@@ -507,7 +506,6 @@ const ProjectManager = () => {
                                 key={project.id} 
                                 draggableId={project.id} 
                                 index={index}
-                                type="PROJECT"
                               >
                                 {(provided, snapshot) => (
                                   <div

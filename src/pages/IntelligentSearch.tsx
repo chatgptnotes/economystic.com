@@ -1,8 +1,6 @@
 
 import Header from "@/components/Header";
 import IntelligentSearch from "@/components/IntelligentSearch";
-import SesameVoiceAI from "@/components/SesameVoiceAI";
-import ResembleVoiceAI from "@/components/ResembleVoiceAI";
 
 const IntelligentSearchPage = () => {
   return (
@@ -18,28 +16,7 @@ const IntelligentSearchPage = () => {
               Search across all your data using natural language powered by AI
             </p>
           </div>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <div>
-              <IntelligentSearch />
-            </div>
-            <div>
-              <SesameVoiceAI 
-                onTranscription={(text) => {
-                  console.log('Sesame transcription:', text);
-                }}
-                onResponse={(response) => {
-                  console.log('Sesame AI response:', response);
-                }}
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div>
-              <ResembleVoiceAI />
-            </div>
-          </div>
+          <IntelligentSearch />
         </div>
       </main>
     </div>

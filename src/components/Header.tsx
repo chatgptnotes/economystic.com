@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Activity, FileText, Table, Home } from "lucide-react";
+import { Activity, FileText, Table, Home, Search } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 const Header = () => {
@@ -30,6 +30,16 @@ const Header = () => {
               >
                 <Home className="h-4 w-4" />
                 <span>Dashboard</span>
+              </Button>
+            </Link>
+            
+            <Link to="/intelligent-search">
+              <Button 
+                variant={isActive("/intelligent-search") ? "default" : "ghost"} 
+                className="flex items-center space-x-2"
+              >
+                <Search className="h-4 w-4" />
+                <span>AI Search</span>
               </Button>
             </Link>
             

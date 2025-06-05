@@ -18,6 +18,7 @@ import SocialMediaManagement from "./pages/SocialMediaManagement";
 import DomainManagement from "./pages/DomainManagement";
 import ProjectManagement from "./pages/ProjectManagement";
 import PromptManagement from "./pages/PromptManagement";
+import IntelligentSearchPage from "./pages/IntelligentSearch";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/intelligent-search" element={<IntelligentSearchPage />} />
           <Route path="/reports" element={<ReportsPage />} />
           <Route path="/data-tables" element={<DataTables />} />
           <Route path="/total-calls" element={<TotalCalls />} />

@@ -78,8 +78,12 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
     }
   };
 
-  const generateSignedUrl = async () => {
+  const startConversation = async () => {
+    const hasPermission = await requestMicrophonePermission();
+    if (!hasPermission) return;
+
     try {
+      // Generate signed URL for conversation
       const response = await fetch("https://api.elevenlabs.io/v1/convai/conversation/get_signed_url", {
         method: "GET",
         headers: {
@@ -92,20 +96,12 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
       }
 
       const data = await response.json();
-      return data.signed_url;
-    } catch (error) {
-      console.error("Failed to generate signed URL:", error);
-      throw error;
-    }
-  };
-
-  const startConversation = async () => {
-    const hasPermission = await requestMicrophonePermission();
-    if (!hasPermission) return;
-
-    try {
-      const signedUrl = await generateSignedUrl();
-      const id = await conversation.startSession({ url: signedUrl });
+      
+      // Start session with the signed URL using the correct parameter name
+      const id = await conversation.startSession({
+        signedUrl: data.signed_url
+      });
+      
       setConversationId(id);
     } catch (error) {
       console.error("Failed to start conversation:", error);

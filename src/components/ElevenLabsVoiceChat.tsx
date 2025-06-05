@@ -78,14 +78,41 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
     }
   };
 
+  const getSignedUrl = async () => {
+    try {
+      const response = await fetch(
+        `https://api.elevenlabs.io/v1/convai/conversation/get_signed_url?agent_id=agent_01jx0f5dmge7ntxth97awgnrbg`,
+        {
+          method: "GET",
+          headers: {
+            "xi-api-key": "sk_0a51fff5c88050733dcabe8dd4c62360fd55cc8041a4534d",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to get signed URL: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return data.signed_url;
+    } catch (error) {
+      console.error("Error getting signed URL:", error);
+      throw error;
+    }
+  };
+
   const startConversation = async () => {
     const hasPermission = await requestMicrophonePermission();
     if (!hasPermission) return;
 
     try {
-      // Start session with the agent ID directly
+      // Get signed URL for the specific agent
+      const signedUrl = await getSignedUrl();
+      
+      // Start session with the signed URL
       const id = await conversation.startSession({
-        agentId: "agent_01jx0f5dmge7ntxth97awgnrbg"
+        signedUrl: signedUrl
       });
       
       setConversationId(id);

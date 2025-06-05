@@ -1,6 +1,3 @@
-<think>
-
-</think>
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -419,27 +416,29 @@ const ProjectManager = () => {
             className="pl-10"
           />
         </div>
-        <select
-          className="px-4 py-2 border rounded-md"
-          value={selectedMember}
-          onChange={(e) => setSelectedMember(e.target.value)}
-        >
-          <option value="all">All Team Members</option>
-          {teamMembers.map(member => (
-            <option key={member} value={member}>{member}</option>
-          ))}
-          <option value="Unassigned">Unassigned</option>
-        </select>
-        <select
-          className="px-4 py-2 border rounded-md"
-          value={selectedPriority}
-          onChange={(e) => setSelectedPriority(e.target.value)}
-        >
-          <option value="all">All Priorities</option>
-          <option value="High">High Priority</option>
-          <option value="Medium">Medium Priority</option>
-          <option value="Low">Low Priority</option>
-        </select>
+        <Select value={selectedMember} onValueChange={setSelectedMember}>
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="All Team Members" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Team Members</SelectItem>
+            {teamMembers.map(member => (
+              <SelectItem key={member} value={member}>{member}</SelectItem>
+            ))}
+            <SelectItem value="Unassigned">Unassigned</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={selectedPriority} onValueChange={setSelectedPriority}>
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="All Priorities" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Priorities</SelectItem>
+            <SelectItem value="High">High Priority</SelectItem>
+            <SelectItem value="Medium">Medium Priority</SelectItem>
+            <SelectItem value="Low">Low Priority</SelectItem>
+          </SelectContent>
+        </Select>
         <div className="flex items-center space-x-2">
           <Switch
             id="show-inactive"

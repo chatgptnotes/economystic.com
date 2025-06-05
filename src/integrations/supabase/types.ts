@@ -596,57 +596,6 @@ export type Database = {
           },
         ]
       }
-      projects: {
-        Row: {
-          assigned_to: string
-          created_at: string
-          description: string | null
-          domain_associated: string | null
-          github_url: string
-          id: string
-          is_active: boolean
-          language: string
-          last_updated: string
-          name: string
-          platform: string
-          priority: string
-          updated_at: string
-          visibility: string
-        }
-        Insert: {
-          assigned_to?: string
-          created_at?: string
-          description?: string | null
-          domain_associated?: string | null
-          github_url: string
-          id?: string
-          is_active?: boolean
-          language: string
-          last_updated?: string
-          name: string
-          platform: string
-          priority: string
-          updated_at?: string
-          visibility: string
-        }
-        Update: {
-          assigned_to?: string
-          created_at?: string
-          description?: string | null
-          domain_associated?: string | null
-          github_url?: string
-          id?: string
-          is_active?: boolean
-          language?: string
-          last_updated?: string
-          name?: string
-          platform?: string
-          priority?: string
-          updated_at?: string
-          visibility?: string
-        }
-        Relationships: []
-      }
       prompts: {
         Row: {
           category: string
@@ -970,7 +919,6 @@ export type Database = {
           contract_end_date: string | null
           contract_start_date: string | null
           created_at: string
-          current_holder: string | null
           department: string | null
           id: string
           is_active: boolean | null
@@ -991,7 +939,6 @@ export type Database = {
           contract_end_date?: string | null
           contract_start_date?: string | null
           created_at?: string
-          current_holder?: string | null
           department?: string | null
           id?: string
           is_active?: boolean | null
@@ -1012,7 +959,6 @@ export type Database = {
           contract_end_date?: string | null
           contract_start_date?: string | null
           created_at?: string
-          current_holder?: string | null
           department?: string | null
           id?: string
           is_active?: boolean | null

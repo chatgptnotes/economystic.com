@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -26,7 +27,6 @@ interface TelecomService {
   contact_phone: string;
   is_active: boolean;
   notes: string;
-  current_holder?: string;
 }
 
 interface TelecomCheck {
@@ -285,7 +285,6 @@ const TelecomManager = () => {
                   <TableHead>Company</TableHead>
                   <TableHead>Department</TableHead>
                   <TableHead>Assigned To</TableHead>
-                  <TableHead>Current Holder</TableHead>
                   <TableHead>WiFi Password</TableHead>
                   <TableHead>Contact Person</TableHead>
                   <TableHead>Monthly Cost</TableHead>
@@ -316,13 +315,6 @@ const TelecomManager = () => {
                       <TableCell>{service.company_name}</TableCell>
                       <TableCell>{service.department}</TableCell>
                       <TableCell>{service.assigned_to}</TableCell>
-                      <TableCell>
-                        {service.current_holder ? (
-                          <span className="font-medium text-blue-600">{service.current_holder}</span>
-                        ) : (
-                          <span className="text-gray-400">-</span>
-                        )}
-                      </TableCell>
                       <TableCell>
                         {service.service_type === 'wifi' && service.wifi_password ? (
                           <div className="flex items-center space-x-2">

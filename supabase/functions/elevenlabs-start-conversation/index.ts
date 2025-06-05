@@ -22,6 +22,25 @@ serve(async (req) => {
     // Create a conversation with ElevenLabs
     const agentId = 'agent_01jx0f5dmge7ntxth97awgnrbg'
     
+    // Build context from search results
+    let searchContext = ""
+    if (searchResults && searchResults.results) {
+      searchContext = `Based on the user's search query: "${searchQuery}"\n\nHere are the search results from their database:\n\n`
+      
+      searchResults.results.forEach((result: any) => {
+        searchContext += `Table: ${result.table} (${result.count} results)\n`
+        result.data.forEach((record: any, index: number) => {
+          if (index < 3) { // Limit to first 3 records per table to avoid overwhelming the context
+            searchContext += `- ${JSON.stringify(record)}\n`
+          }
+        })
+        searchContext += '\n'
+      })
+      
+      searchContext += `Summary: ${searchResults.summary}\n\n`
+      searchContext += "You are an AI assistant helping the user understand and analyze their database search results. Answer questions about this data, provide insights, and help with analysis. Do not mention ElevenLabs unless specifically asked about it."
+    }
+
     const response = await fetch(`https://api.elevenlabs.io/v1/convai/conversation/get_signed_url?agent_id=${agentId}`, {
       method: 'GET',
       headers: {
@@ -41,13 +60,16 @@ serve(async (req) => {
     // Generate a conversation ID for tracking
     const conversationId = `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
+    console.log('Search context being passed:', searchContext)
+
     return new Response(
       JSON.stringify({
         conversationId,
         signedUrl: data.signed_url,
         searchContext: {
           query: searchQuery,
-          results: searchResults
+          results: searchResults,
+          contextPrompt: searchContext
         }
       }),
       {

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -102,11 +101,26 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
       }
 
       console.log("Received signed URL from edge function:", data.signedUrl);
+      console.log("Search context:", data.searchContext);
       setConversationId(data.conversationId);
       
-      // Start the conversation using the signed URL with correct parameter structure
+      // Build the context prompt for the agent
+      let contextPrompt = "";
+      if (data.searchContext && data.searchContext.contextPrompt) {
+        contextPrompt = data.searchContext.contextPrompt;
+      }
+      
+      // Start the conversation using the signed URL with context
       await conversation.startSession({
         signedUrl: data.signedUrl,
+        overrides: {
+          agent: {
+            prompt: {
+              prompt: contextPrompt || `You are an AI assistant helping users analyze their database search results. The user searched for: "${searchQuery}". Help them understand and analyze their data.`
+            },
+            firstMessage: `Hello! I can help you analyze your search results for "${searchQuery}". What would you like to know about your data?`
+          }
+        }
       });
       
     } catch (error) {
@@ -166,17 +180,17 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
             {isConnected && (
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span>Voice chat active - Speak naturally about your search results</span>
+                <span>Voice chat active - Ask about your search results: "{searchQuery}"</span>
               </div>
             )}
             {isConnecting && (
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
-                <span>Connecting to ElevenLabs voice chat...</span>
+                <span>Connecting to AI voice chat...</span>
               </div>
             )}
             {!isConnected && !isConnecting && (
-              <p>Click "Start Voice Chat" to begin speaking with AI about your search results</p>
+              <p>Click "Start Voice Chat" to begin discussing your search results with AI</p>
             )}
           </div>
 
@@ -215,6 +229,15 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
             </ul>
           </div>
 
+          {searchResults && (
+            <div className="p-3 bg-green-50 rounded-lg text-sm">
+              <p className="font-medium mb-1">📊 Current Search Context:</p>
+              <p className="text-green-800">
+                Query: "{searchQuery}" ({searchResults.totalResults} results found)
+              </p>
+            </div>
+          )}
+
           {conversation.status === "connected" && (
             <div className="p-3 bg-green-50 rounded-lg text-sm">
               <p className="font-medium mb-1">✅ Voice Chat Active:</p>
@@ -227,6 +250,38 @@ const ElevenLabsVoiceChat = ({ searchResults, searchQuery }: ElevenLabsVoiceChat
       </CardContent>
     </Card>
   );
+};
+
+const requestMicrophonePermission = async () => {
+  try {
+    await navigator.mediaDevices.getUserMedia({ audio: true });
+    return true;
+  } catch (error) {
+    console.error("Microphone permission denied:", error);
+    return false;
+  }
+};
+
+const endConversation = async () => {
+  console.log("Ending conversation...");
+  try {
+    // End the ElevenLabs conversation
+    await conversation.endSession();
+    
+    if (conversationId) {
+      await supabase.functions.invoke('elevenlabs-end-conversation', {
+        body: { conversationId },
+      });
+    }
+    
+    setIsConnecting(false);
+    setIsConnected(false);
+    setConversationId(null);
+    connectionAttempted.current = false;
+    
+  } catch (error) {
+    console.error("Failed to end conversation:", error);
+  }
 };
 
 export default ElevenLabsVoiceChat;

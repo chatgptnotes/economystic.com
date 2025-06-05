@@ -36,29 +36,18 @@ const UserRoleManager = () => {
 
   const fetchUserRoles = async () => {
     try {
-      // Fetch user roles first
       const { data: rolesData, error: rolesError } = await supabase
         .from('user_roles')
-        .select('*');
+        .select('*')
+        .order('created_at', { ascending: false });
 
       if (rolesError) {
         throw rolesError;
       }
 
-      // For each role, try to get the user email by making individual queries
-      // Since we can't directly query auth.users through the API
-      const rolesWithEmails = await Promise.all(
-        (rolesData || []).map(async (role) => {
-          // We'll store the email when we assign roles, but for existing roles
-          // we might not have it. We'll just show the user_id for now.
-          return {
-            ...role,
-            user_email: 'Unknown' // We'll show user_id or handle this differently
-          };
-        })
-      );
-
-      setUserRoles(rolesWithEmails);
+      // For now, we'll show user IDs since we can't easily fetch user emails from the client
+      // The actual user emails will be populated when we assign roles
+      setUserRoles(rolesData || []);
     } catch (error) {
       console.error('Error fetching user roles:', error);
       toast({
@@ -83,23 +72,34 @@ const UserRoleManager = () => {
 
     setIsAssigning(true);
     try {
-      // Since we can't directly query auth.users from the client,
-      // we'll use a different approach. We'll create a simplified version
-      // that requires manual user ID input or we handle this server-side.
-      
-      // For now, let's assume the user provides the user ID directly
-      // or we implement this differently
-      toast({
-        title: "Info",
-        description: "User role assignment requires admin privileges. Please contact an administrator.",
-        variant: "default",
+      const { data, error } = await supabase.functions.invoke('assign-user-role', {
+        body: {
+          email: newUserEmail,
+          role: newUserRole
+        }
       });
 
+      if (error) {
+        throw error;
+      }
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      toast({
+        title: "Success",
+        description: `Role ${newUserRole} assigned to ${newUserEmail}`,
+      });
+
+      setNewUserEmail("");
+      setNewUserRole("");
+      fetchUserRoles();
     } catch (error) {
       console.error('Error assigning role:', error);
       toast({
         title: "Error",
-        description: "Failed to assign role",
+        description: error instanceof Error ? error.message : "Failed to assign role",
         variant: "destructive",
       });
     } finally {
@@ -194,7 +194,7 @@ const UserRoleManager = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>User ID</TableHead>
+                <TableHead>User Email</TableHead>
                 <TableHead>Role</TableHead>
                 <TableHead>Assigned Date</TableHead>
                 <TableHead>Actions</TableHead>
@@ -203,8 +203,8 @@ const UserRoleManager = () => {
             <TableBody>
               {userRoles.map((userRole) => (
                 <TableRow key={userRole.id}>
-                  <TableCell className="font-medium font-mono text-sm">
-                    {userRole.user_id.substring(0, 8)}...
+                  <TableCell className="font-medium">
+                    {userRole.user_email || `User ID: ${userRole.user_id.substring(0, 8)}...`}
                   </TableCell>
                   <TableCell>
                     <Badge className={getRoleBadgeColor(userRole.role)}>

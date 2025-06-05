@@ -10,14 +10,14 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface CallRecord {
   id: string;
-  patient_name: string;
-  phone_number: string;
-  call_type: string;
-  call_status: "pending" | "completed" | "follow-up";
-  call_duration: number;
-  call_time: string;
-  call_direction: string;
-  notes: string;
+  patient_name: string | null;
+  phone_number: string | null;
+  call_type: string | null;
+  call_status: string | null;
+  call_duration: number | null;
+  call_time: string | null;
+  call_direction: string | null;
+  notes: string | null;
 }
 
 const CallManager = () => {
@@ -67,12 +67,13 @@ const CallManager = () => {
     };
   }, []);
 
-  const handleMakeCall = async (phoneNumber: string, patientName: string) => {
-    console.log(`Initiating call to ${patientName} at ${phoneNumber}`);
+  const handleMakeCall = async (phoneNumber: string | null, patientName: string | null) => {
+    if (!phoneNumber) return;
+    console.log(`Initiating call to ${patientName || 'Unknown'} at ${phoneNumber}`);
     await makeCall({ phoneNumber });
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string | null) => {
     switch (status?.toLowerCase()) {
       case "completed": return "bg-green-100 text-green-800";
       case "missed": case "failed": return "bg-red-100 text-red-800";
@@ -81,13 +82,14 @@ const CallManager = () => {
     }
   };
 
-  const getPriorityColor = (duration: number) => {
+  const getPriorityColor = (duration: number | null) => {
+    if (!duration) return "bg-gray-100 text-gray-800";
     if (duration > 300) return "bg-green-100 text-green-800"; // long calls
     if (duration > 60) return "bg-orange-100 text-orange-800"; // medium calls
     return "bg-red-100 text-red-800"; // short calls
   };
 
-  const getCallTypeIcon = (callType: string) => {
+  const getCallTypeIcon = (callType: string | null) => {
     const type = callType?.toLowerCase() || '';
     if (type.includes('ambulance')) return <Ambulance className="h-4 w-4" />;
     if (type.includes('patient')) return <User className="h-4 w-4" />;
@@ -104,14 +106,14 @@ const CallManager = () => {
     );
   };
 
-  const formatDuration = (duration: number) => {
+  const formatDuration = (duration: number | null) => {
     if (!duration || duration === 0) return "0:00";
     const minutes = Math.floor(duration / 60);
     const seconds = duration % 60;
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  const formatCallTime = (callTime: string) => {
+  const formatCallTime = (callTime: string | null) => {
     if (!callTime) return "N/A";
     try {
       return new Date(callTime).toLocaleTimeString('en-US', { 

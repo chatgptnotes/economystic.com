@@ -8,6 +8,28 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Helper function to clean and parse JSON from OpenAI response
+function parseOpenAIResponse(content: string) {
+  try {
+    // Remove markdown code blocks if present
+    const cleanedContent = content
+      .replace(/```json\s*/g, '')
+      .replace(/```\s*/g, '')
+      .trim();
+    
+    return JSON.parse(cleanedContent);
+  } catch (error) {
+    console.error('Failed to parse OpenAI response:', content);
+    // Fallback response
+    return {
+      tables: [],
+      searchTerms: ["anohra"],
+      intent: "searching for domain information",
+      isDomainQuery: true
+    };
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -70,7 +92,7 @@ serve(async (req) => {
             
             IMPORTANT: If the query is about domains (like anohra.com, anohra.ai, etc.), note that domains are managed in a separate domain management system, not in database tables. Include "domain_info" in your response to indicate domain-related queries.
             
-            Respond with a JSON object containing:
+            Respond with ONLY a valid JSON object (no markdown formatting) containing:
             {
               "tables": ["table1", "table2"],
               "searchTerms": ["term1", "term2"],
@@ -96,7 +118,7 @@ serve(async (req) => {
     });
 
     const aiData = await aiResponse.json();
-    const searchStrategy = JSON.parse(aiData.choices[0].message.content);
+    const searchStrategy = parseOpenAIResponse(aiData.choices[0].message.content);
 
     console.log('Search strategy:', searchStrategy);
 
@@ -151,40 +173,43 @@ serve(async (req) => {
         let queryBuilder = supabase.from(table).select('*');
         
         // Apply text search on relevant columns based on search terms
-        const searchFilters = [];
+        let hasFilters = false;
         
         for (const term of searchStrategy.searchTerms) {
+          let searchFilter = '';
+          
           switch (table) {
             case 'call_records':
-              searchFilters.push(`patient_name.ilike.%${term}%,phone_number.ilike.%${term}%,notes.ilike.%${term}%,call_type.ilike.%${term}%`);
+              searchFilter = `patient_name.ilike.%${term}%,phone_number.ilike.%${term}%,notes.ilike.%${term}%,call_type.ilike.%${term}%`;
               break;
             case 'ambulance_bookings':
-              searchFilters.push(`patient_name.ilike.%${term}%,phone_number.ilike.%${term}%,pickup_location.ilike.%${term}%,destination.ilike.%${term}%,driver_name.ilike.%${term}%`);
+              searchFilter = `patient_name.ilike.%${term}%,phone_number.ilike.%${term}%,pickup_location.ilike.%${term}%,destination.ilike.%${term}%,driver_name.ilike.%${term}%`;
               break;
             case 'whatsapp_messages':
-              searchFilters.push(`patient_name.ilike.%${term}%,phone_number.ilike.%${term}%,message_content.ilike.%${term}%`);
+              searchFilter = `patient_name.ilike.%${term}%,phone_number.ilike.%${term}%,message_content.ilike.%${term}%`;
               break;
             case 'patient_events':
-              searchFilters.push(`patient_name.ilike.%${term}%,phone_number.ilike.%${term}%,event_type.ilike.%${term}%,doctor_name.ilike.%${term}%,department.ilike.%${term}%`);
+              searchFilter = `patient_name.ilike.%${term}%,phone_number.ilike.%${term}%,event_type.ilike.%${term}%,doctor_name.ilike.%${term}%,department.ilike.%${term}%`;
               break;
             case 'telecom_services':
-              searchFilters.push(`service_type.ilike.%${term}%,provider_name.ilike.%${term}%,service_number.ilike.%${term}%,company_name.ilike.%${term}%,department.ilike.%${term}%`);
+              searchFilter = `service_type.ilike.%${term}%,provider_name.ilike.%${term}%,service_number.ilike.%${term}%,company_name.ilike.%${term}%,department.ilike.%${term}%`;
               break;
             case 'businesses':
-              searchFilters.push(`name.ilike.%${term}%,description.ilike.%${term}%,website_url.ilike.%${term}%`);
+              searchFilter = `name.ilike.%${term}%,description.ilike.%${term}%,website_url.ilike.%${term}%`;
               break;
             case 'prompts':
-              searchFilters.push(`title.ilike.%${term}%,content.ilike.%${term}%,project_name.ilike.%${term}%,category.ilike.%${term}%`);
+              searchFilter = `title.ilike.%${term}%,content.ilike.%${term}%,project_name.ilike.%${term}%,category.ilike.%${term}%`;
               break;
             default:
-              // For other tables, search in common text fields
-              searchFilters.push(`name.ilike.%${term}%`);
+              // Skip unknown tables
+              continue;
           }
-        }
 
-        // Apply the search filter using OR logic
-        if (searchFilters.length > 0) {
-          queryBuilder = queryBuilder.or(searchFilters[0]);
+          if (searchFilter && !hasFilters) {
+            queryBuilder = queryBuilder.or(searchFilter);
+            hasFilters = true;
+            break; // Only apply the first matching search term to avoid conflicts
+          }
         }
 
         const { data, error } = await queryBuilder.limit(10);

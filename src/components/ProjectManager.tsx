@@ -11,10 +11,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Search, Github, Users, Code, Calendar, ExternalLink, FileText, Edit, Trash2, GripVertical, UserX, AlertCircle, Circle, Minus, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import ProjectFileManager from "./ProjectFileManager";
 import ProjectEditForm from "./ProjectEditForm";
 import AddProjectForm from "./AddProjectForm";
-import { DragDropContext, Droppable, Draggable, DropResult } from "react-beautiful-dnd";
+import { DragDropContext as DragDropContextRaw, Droppable as DroppableRaw, Draggable as DraggableRaw, DropResult } from "react-beautiful-dnd";
+import type { DraggableProvided, DraggableStateSnapshot, DroppableProvided, DroppableStateSnapshot } from "react-beautiful-dnd";
+
+// Workaround for react-beautiful-dnd TypeScript issues
+const DragDropContext = DragDropContextRaw as any;
+const Droppable = DroppableRaw as any;
+const Draggable = DraggableRaw as any;
 
 interface Project {
   id: string;
@@ -22,17 +30,18 @@ interface Project {
   description: string;
   language: string;
   visibility: 'Public' | 'Private';
-  lastUpdated: string;
-  assignedTo: string;
+  last_updated: string;
+  assigned_to: string;
   platform: 'Cursor' | 'Lovable' | 'V0' | 'Stitch' | 'Windsurf' | 'Clerk' | 'Codex' | 'Vercel' | 'Unknown';
-  domainAssociated?: string;
-  githubUrl: string;
-  isActive: boolean;
+  domain_associated?: string;
+  github_url: string;
+  is_active: boolean;
   priority: 'High' | 'Medium' | 'Low';
 }
 
 const ProjectManager = () => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [projects, setProjects] = useState<Project[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [projectSearchTerm, setProjectSearchTerm] = useState("");
@@ -60,9 +69,120 @@ const ProjectManager = () => {
     'emergencyseva.in', 'ambufast.in'
   ];
 
+  // Fetch projects from Supabase
+  const { data: projectsData = [], isLoading } = useQuery({
+    queryKey: ['projects'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('projects')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data as Project[];
+    }
+  });
+
+  // Add project mutation
+  const addProjectMutation = useMutation({
+    mutationFn: async (projectData: Omit<Project, 'id' | 'last_updated'>) => {
+      const { data, error } = await supabase
+        .from('projects')
+        .insert([{
+          ...projectData,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          last_updated: new Date().toISOString()
+        }])
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      setShowAddDialog(false);
+      toast({
+        title: "Project Added",
+        description: "Project has been added successfully",
+      });
+    },
+    onError: (error) => {
+      console.error('Error adding project:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add project. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Update project mutation
+  const updateProjectMutation = useMutation({
+    mutationFn: async (project: Project) => {
+      const { data, error } = await supabase
+        .from('projects')
+        .update({
+          ...project,
+          updated_at: new Date().toISOString(),
+          last_updated: new Date().toISOString()
+        })
+        .eq('id', project.id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      setEditingProject(null);
+      toast({
+        title: "Project Updated",
+        description: "Project has been updated successfully",
+      });
+    },
+    onError: (error) => {
+      console.error('Error updating project:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update project. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Delete project mutation
+  const deleteProjectMutation = useMutation({
+    mutationFn: async (projectId: string) => {
+      const { error } = await supabase
+        .from('projects')
+        .delete()
+        .eq('id', projectId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      toast({
+        title: "Project Deleted",
+        description: "Project has been deleted successfully",
+      });
+    },
+    onError: (error) => {
+      console.error('Error deleting project:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete project. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
   useEffect(() => {
-    initializeProjects();
-  }, []);
+    setProjects(projectsData);
+  }, [projectsData]);
 
   const getRandomTeamMember = () => {
     return teamMembers[Math.floor(Math.random() * teamMembers.length)];
@@ -106,223 +226,78 @@ const ProjectManager = () => {
     );
   };
 
-  const initializeProjects = () => {
-    const projectData = [
-      { name: "DrM_Hope_Multi-tenancy-04-06-2025", description: "DrM_Hope_Multi-tenancy 04/06/2025", language: "TypeScript", visibility: "Private" as const, lastUpdated: "6 hours ago" },
-      { name: "mern-machin-test", description: "mern-machin-test", language: "JavaScript", visibility: "Public" as const, lastUpdated: "yesterday" },
-      { name: "adamrit.in", description: "chatgptnotes/adamrit.in", language: "TypeScript", visibility: "Private" as const, lastUpdated: "2 days ago" },
-      { name: "raftaar-help", description: "", language: "Kotlin", visibility: "Public" as const, lastUpdated: "2 days ago" },
-      { name: "betserlife-sos-guardian", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "3 days ago" },
-      { name: "adamrit.com25-05-2025", description: "adamrit.con25/05/2025", language: "TypeScript", visibility: "Public" as const, lastUpdated: "last week" },
-      { name: "adamrit.com", description: "adamrit.com", language: "TypeScript", visibility: "Private" as const, lastUpdated: "last week" },
-      { name: "ambufast.in", description: "The Emergency Ambulance Service at Your Fingertips Get an ambulance within 15 minutes of your emergency call or QR scan", language: "TypeScript", visibility: "Private" as const, lastUpdated: "2 weeks ago" },
-      { name: "next", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "2 weeks ago" },
-      { name: "New_HMIS_Next_js_latest", description: "New_HMIS_Next_js_latest", language: "JavaScript", visibility: "Private" as const, lastUpdated: "2 weeks ago" },
-      { name: "CorporateBilling21-05-2025HMIS", description: "", language: "JavaScript", visibility: "Public" as const, lastUpdated: "2 weeks ago" },
-      { name: "drmhope.com-ESIC", description: "drmhope.com", language: "TypeScript", visibility: "Public" as const, lastUpdated: "2 weeks ago" },
-      { name: "drmhope.com", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "2 weeks ago" },
-      { name: "drmhope-multitenancy", description: "", language: "TypeScript", visibility: "Public" as const, lastUpdated: "3 weeks ago" },
-      { name: "rseva.health", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "3 weeks ago" },
-      { name: "New_HMIS_Next_js", description: "New_HMIS_Next_js", language: "TypeScript", visibility: "Public" as const, lastUpdated: "3 weeks ago" },
-      { name: "emergencyiosapp", description: "", language: "Swift", visibility: "Public" as const, lastUpdated: "3 weeks ago" },
-      { name: "v0-onescanonelife.com-13th-May", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "3 weeks ago" },
-      { name: "yellowfever13-05-2025server", description: "", language: "TypeScript", visibility: "Public" as const, lastUpdated: "3 weeks ago" },
-      { name: "v0-untitled-project", description: "", language: "TypeScript", visibility: "Public" as const, lastUpdated: "3 weeks ago" },
-      { name: "yellowfever.in2", description: "", language: "TypeScript", visibility: "Public" as const, lastUpdated: "3 weeks ago" },
-      { name: "maharashtratv24in8may2025", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "last month" },
-      { name: "ayushamnhospitalwebsitenextjs", description: "ayushamnhospitalwebsitenextjs", language: "HTML", visibility: "Public" as const, lastUpdated: "last month" },
-      { name: "yellowfever.in_5.4.2025_11-43-b0", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "May 5" },
-      { name: "yellowfever.in_5.4.2025_11-43", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "May 5" },
-      { name: "theayushmanhospital-laravel", description: "new SEO optimaize website", language: "Blade", visibility: "Public" as const, lastUpdated: "May 1" },
-      { name: "emergencyapp", description: "", language: "JavaScript", visibility: "Public" as const, lastUpdated: "May 1" },
-      { name: "HmisVersionUpdate30-04-2025", description: "", language: "JavaScript", visibility: "Public" as const, lastUpdated: "Apr 30" },
-      { name: "one-scan-one-life", description: "", language: "TypeScript", visibility: "Public" as const, lastUpdated: "Apr 29" },
-      { name: "demo.bachao.co-2--24-April-4.24-PM", description: "", language: "Blade", visibility: "Private" as const, lastUpdated: "Apr 24" },
-      { name: "hmis_raftaarlaravel_11", description: "", language: "Blade", visibility: "Private" as const, lastUpdated: "Apr 23" },
-      { name: "Rseva_laravel11_livewire3", description: "Rseva_laravel11_livewire3", language: "Blade", visibility: "Private" as const, lastUpdated: "Apr 23" },
-      { name: "Rsev-for-cursor", description: "we made for cursor !", language: "Blade", visibility: "Public" as const, lastUpdated: "Apr 22" },
-      { name: "lovable-raftaar-laravel-1page", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "Apr 22" },
-      { name: "lovable-start-for-ayushman-3rd-attempt-site", description: "", language: "EJS", visibility: "Private" as const, lastUpdated: "Apr 22" },
-      { name: "spark-the-beginning", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "Apr 21" },
-      { name: "ayushman-website-3rd-attempt", description: "", language: "EJS", visibility: "Private" as const, lastUpdated: "Apr 21" },
-      { name: "life-scan-harmony-project", description: "", language: "TypeScript", visibility: "Private" as const, lastUpdated: "Apr 21" },
-      { name: "newHope", description: "The repo is of the hopesoftwares.com", language: "PHP", visibility: "Public" as const, lastUpdated: "Apr 21" },
-      { name: "hopeproject", description: "All ondc related work of folders and file", language: "JavaScript", visibility: "Public" as const, lastUpdated: "Apr 21" },
-      { name: "hope", description: "Hospital management software built in 2013. used in Hope and Ayushman. has Chatgpt -summary code builtin. This has a user manual in wiki", language: "PHP", visibility: "Private" as const, lastUpdated: "Apr 21" },
-      { name: "RaftaarHealth", description: "RaftaarHealth", language: "JavaScript", visibility: "Public" as const, lastUpdated: "Apr 19" },
-      { name: "hopenew", description: "hope new software", language: "JavaScript", visibility: "Public" as const, lastUpdated: "Apr 17" },
-      { name: "hopesoftwares", description: "hospital HMIS project", language: "JavaScript", visibility: "Private" as const, lastUpdated: "Apr 17" },
-      { name: "HMIS", description: "", language: "JavaScript", visibility: "Private" as const, lastUpdated: "Apr 17" },
-      { name: "html-project", description: "A modern e-commerce website", language: "HTML", visibility: "Private" as const, lastUpdated: "Apr 16" },
-      { name: "Tracking", description: "driver tracking project", language: "PHP", visibility: "Public" as const, lastUpdated: "Apr 16" },
-      { name: "ayushman-hospital-muralisir-website", description: "ayushman-hospital-muralisir-website", language: "JavaScript", visibility: "Public" as const, lastUpdated: "Apr 16" },
-      { name: "ayushman-hospital", description: "Ayushman Nagpur Hospital website built with Next.js", language: "JavaScript", visibility: "Public" as const, lastUpdated: "Apr 15" },
-      { name: "ayushman-hospital-website", description: "", language: "JavaScript", visibility: "Public" as const, lastUpdated: "Apr 15" },
-      { name: "verification-logs", description: "Forked from ONDC-Official/verification-logs ONDC Pre-production issue & discussion board", language: "HTML", visibility: "Public" as const, lastUpdated: "Mar 12" },
-      { name: "emergencysevaondcapp", description: "All ondc related work of folders and file", language: "PHP", visibility: "Private" as const, lastUpdated: "Feb 27" },
-      { name: "RSEVA", description: "", language: "JavaScript", visibility: "Public" as const, lastUpdated: "Feb 25" },
-      { name: "adminemergencyseva", description: "The repo is of the admin.emergencyseva.in", language: "JavaScript", visibility: "Private" as const, lastUpdated: "Jan 15" },
-      { name: "ondc_demo", description: "", language: "JavaScript", visibility: "Private" as const, lastUpdated: "Nov 18, 2024" },
-      { name: "bachaobachaoin", description: "", language: "Blade", visibility: "Private" as const, lastUpdated: "Nov 7, 2024" },
-      { name: "public_html", description: "", language: "HTML", visibility: "Public" as const, lastUpdated: "Oct 8, 2024" },
-      { name: "DrM-Hope", description: "", language: "JavaScript", visibility: "Private" as const, lastUpdated: "Sep 27, 2024" },
-      { name: "demo2Hopesoftwares", description: "", language: "JavaScript", visibility: "Private" as const, lastUpdated: "Sep 27, 2024" },
-      { name: "vehicletracker", description: "Vehicle Tracking Code uploaded by Pratik", language: "PHP", visibility: "Private" as const, lastUpdated: "Jul 10, 2024" }
-    ];
-
-    const transformedProjects = projectData.map((project, index) => ({
-      id: (index + 1).toString(),
-      ...project,
-      assignedTo: getRandomTeamMember(),
-      platform: detectPlatform(project.name, project.description),
-      domainAssociated: findAssociatedDomain(project.name),
-      githubUrl: `https://github.com/yourusername/${project.name}`,
-      isActive: Math.random() > 0.2,
-      priority: getRandomPriority()
-    }));
-
-    setProjects(transformedProjects);
-  };
-
   const handleDeleteProject = (projectId: string, projectName: string) => {
-    setProjects(prev => prev.filter(p => p.id !== projectId));
-    toast({
-      title: "Success",
-      description: `Project "${projectName}" has been deleted`,
-    });
+    deleteProjectMutation.mutate(projectId);
   };
 
   const handleProjectStatusToggle = (projectId: string, isActive: boolean) => {
-    setProjects(prev => prev.map(project => 
-      project.id === projectId 
-        ? { ...project, isActive }
-        : project
-    ));
-
-    const projectName = projects.find(p => p.id === projectId)?.name;
-    toast({
-      title: isActive ? "Project Activated" : "Project Deactivated",
-      description: `"${projectName}" has been marked as ${isActive ? 'active' : 'inactive'}`,
-    });
+    const project = projects.find(p => p.id === projectId);
+    if (project) {
+      updateProjectMutation.mutate({ ...project, is_active: isActive });
+    }
   };
 
   const handleDragEnd = (result: DropResult) => {
     const { destination, source, draggableId } = result;
 
-    console.log('Drag result:', { destination, source, draggableId });
-
-    if (!destination) {
-      console.log('No destination, cancelling drag');
-      return;
-    }
+    if (!destination) return;
 
     if (destination.droppableId === source.droppableId && destination.index === source.index) {
-      console.log('Same position, no change needed');
       return;
     }
 
     const newAssignedTo = destination.droppableId;
     const projectId = draggableId;
+    const project = projects.find(p => p.id === projectId);
 
-    console.log('Updating project assignment:', { projectId, newAssignedTo });
-
-    setProjects(prev => {
-      const updated = prev.map(project => 
-        project.id === projectId 
-          ? { ...project, assignedTo: newAssignedTo }
-          : project
-      );
-      console.log('Updated projects:', updated);
-      return updated;
-    });
-
-    const projectName = projects.find(p => p.id === projectId)?.name;
-    toast({
-      title: "Project Reassigned",
-      description: `"${projectName}" has been assigned to ${newAssignedTo}`,
-    });
+    if (project) {
+      updateProjectMutation.mutate({ ...project, assigned_to: newAssignedTo });
+    }
   };
 
   const handleAssignmentChange = (projectId: string, newAssignee: string) => {
-    setProjects(prev => {
-      const updated = prev.map(project => 
-        project.id === projectId 
-          ? { ...project, assignedTo: newAssignee }
-          : project
-      );
-      return updated;
-    });
-
-    const projectName = projects.find(p => p.id === projectId)?.name;
-    const message = newAssignee === "Unassigned" 
-      ? `"${projectName}" is now unassigned`
-      : `"${projectName}" has been assigned to ${newAssignee}`;
-    
-    toast({
-      title: "Project Reassigned",
-      description: message,
-    });
+    const project = projects.find(p => p.id === projectId);
+    if (project) {
+      updateProjectMutation.mutate({ ...project, assigned_to: newAssignee });
+    }
   };
 
   const handleDomainMappingChange = (domain: string, newProjectId: string) => {
-    setProjects(prev => {
-      const updated = prev.map(project => {
-        // Remove the domain from any project that currently has it
-        if (project.domainAssociated === domain) {
-          return { ...project, domainAssociated: undefined };
-        }
-        // Assign the domain to the selected project
-        if (project.id === newProjectId) {
-          return { ...project, domainAssociated: domain };
-        }
-        return project;
-      });
-      return updated;
-    });
+    // Remove domain from any project that currently has it
+    const projectWithDomain = projects.find(p => p.domain_associated === domain);
+    if (projectWithDomain) {
+      updateProjectMutation.mutate({ ...projectWithDomain, domain_associated: undefined });
+    }
 
-    const projectName = projects.find(p => p.id === newProjectId)?.name;
-    const message = newProjectId === "none" 
-      ? `Domain "${domain}" is now unmapped`
-      : `Domain "${domain}" has been mapped to "${projectName}"`;
-    
-    toast({
-      title: "Domain Mapping Updated",
-      description: message,
-    });
+    // Assign domain to new project
+    if (newProjectId !== "none") {
+      const project = projects.find(p => p.id === newProjectId);
+      if (project) {
+        updateProjectMutation.mutate({ ...project, domain_associated: domain });
+      }
+    }
   };
 
   const handlePriorityChange = (projectId: string, newPriority: 'High' | 'Medium' | 'Low') => {
-    setProjects(prev => {
-      const updated = prev.map(project => 
-        project.id === projectId 
-          ? { ...project, priority: newPriority }
-          : project
-      );
-      return updated;
-    });
-
-    const projectName = projects.find(p => p.id === projectId)?.name;
-    toast({
-      title: "Priority Updated",
-      description: `"${projectName}" priority set to ${newPriority}`,
-    });
+    const project = projects.find(p => p.id === projectId);
+    if (project) {
+      updateProjectMutation.mutate({ ...project, priority: newPriority });
+    }
   };
 
   const handlePlatformChange = (projectId: string, newPlatform: 'Cursor' | 'Lovable' | 'V0' | 'Stitch' | 'Windsurf' | 'Clerk' | 'Codex' | 'Vercel' | 'Unknown') => {
-    setProjects(prev => {
-      const updated = prev.map(project => 
-        project.id === projectId 
-          ? { ...project, platform: newPlatform }
-          : project
-      );
-      return updated;
-    });
+    const project = projects.find(p => p.id === projectId);
+    if (project) {
+      updateProjectMutation.mutate({ ...project, platform: newPlatform });
+    }
+  };
 
-    const projectName = projects.find(p => p.id === projectId)?.name;
-    toast({
-      title: "Platform Updated",
-      description: `"${projectName}" platform changed to ${newPlatform}`,
-    });
+  const handleProjectUpdate = (updatedProject: Project) => {
+    updateProjectMutation.mutate(updatedProject);
+  };
+
+  const handleAddNewProject = (projectData: Omit<Project, 'id' | 'last_updated'>) => {
+    addProjectMutation.mutate(projectData);
   };
 
   const filteredProjects = projects.filter(project => {
@@ -332,9 +307,9 @@ const ProjectManager = () => {
                          project.name.toLowerCase().includes(combinedSearchTerm.toLowerCase()) ||
                          project.description.toLowerCase().includes(combinedSearchTerm.toLowerCase());
     
-    const matchesMember = selectedMember === "all" || project.assignedTo === selectedMember;
+    const matchesMember = selectedMember === "all" || project.assigned_to === selectedMember;
     const matchesPriority = selectedPriority === "all" || project.priority === selectedPriority;
-    const matchesStatus = showInactive || project.isActive;
+    const matchesStatus = showInactive || project.is_active;
     
     return matchesSearch && matchesMember && matchesPriority && matchesStatus;
   });
@@ -405,40 +380,19 @@ const ProjectManager = () => {
   };
 
   const projectsByMember = teamMembers.reduce((acc, member) => {
-    acc[member] = projects.filter(p => p.assignedTo === member && p.isActive).length;
+    acc[member] = projects.filter(p => p.assigned_to === member && p.is_active).length;
     return acc;
   }, {} as Record<string, number>);
 
   const projectsByPlatform = projects.reduce((acc, project) => {
-    if (project.isActive) {
+    if (project.is_active) {
       acc[project.platform] = (acc[project.platform] || 0) + 1;
     }
     return acc;
   }, {} as Record<string, number>);
 
-  const activeProjects = projects.filter(p => p.isActive);
-  const unassignedProjects = projects.filter(p => p.assignedTo === "Unassigned" && p.isActive);
-
-  const handleProjectUpdate = (updatedProject: Project) => {
-    setProjects(prev => prev.map(p => p.id === updatedProject.id ? updatedProject : p));
-    setEditingProject(null);
-  };
-
-  const handleAddNewProject = (projectData: Omit<Project, 'id' | 'lastUpdated'>) => {
-    const newProject: Project = {
-      ...projectData,
-      id: (projects.length + 1).toString(),
-      lastUpdated: 'just now'
-    };
-
-    setProjects(prev => [newProject, ...prev]);
-    setShowAddDialog(false);
-    
-    toast({
-      title: "Project Added",
-      description: `"${newProject.name}" has been added successfully`,
-    });
-  };
+  const activeProjects = projects.filter(p => p.is_active);
+  const unassignedProjects = projects.filter(p => p.assigned_to === "Unassigned" && p.is_active);
 
   return (
     <div className="space-y-6">
@@ -617,10 +571,10 @@ const ProjectManager = () => {
                 </TableHeader>
                 <TableBody>
                   {sortedProjects.map((project) => (
-                    <TableRow key={project.id} className={!project.isActive ? "opacity-60" : ""}>
+                    <TableRow key={project.id} className={!project.is_active ? "opacity-60" : ""}>
                       <TableCell>
                         <Switch
-                          checked={project.isActive}
+                          checked={project.is_active}
                           onCheckedChange={(checked) => handleProjectStatusToggle(project.id, checked)}
                         />
                       </TableCell>
@@ -668,7 +622,7 @@ const ProjectManager = () => {
                             <Badge variant={project.visibility === 'Private' ? 'secondary' : 'default'}>
                               {project.visibility}
                             </Badge>
-                            {!project.isActive && (
+                            {!project.is_active && (
                               <Badge variant="outline" className="text-gray-500">
                                 Inactive
                               </Badge>
@@ -684,19 +638,19 @@ const ProjectManager = () => {
                       </TableCell>
                       <TableCell>
                         <Select
-                          value={project.assignedTo}
+                          value={project.assigned_to}
                           onValueChange={(value) => handleAssignmentChange(project.id, value)}
                         >
                           <SelectTrigger className="w-32">
                             <SelectValue>
-                              <Badge className={`${getTeamMemberColor(project.assignedTo)} border`} variant="outline">
-                                {project.assignedTo === "Unassigned" ? (
+                              <Badge className={`${getTeamMemberColor(project.assigned_to)} border`} variant="outline">
+                                {project.assigned_to === "Unassigned" ? (
                                   <div className="flex items-center">
                                     <UserX className="h-3 w-3 mr-1" />
                                     Unassigned
                                   </div>
                                 ) : (
-                                  project.assignedTo
+                                  project.assigned_to
                                 )}
                               </Badge>
                             </SelectValue>
@@ -742,19 +696,19 @@ const ProjectManager = () => {
                         </Select>
                       </TableCell>
                       <TableCell>
-                        {project.domainAssociated ? (
-                          <Badge variant="outline" className="border">{project.domainAssociated}</Badge>
+                        {project.domain_associated ? (
+                          <Badge variant="outline" className="border">{project.domain_associated}</Badge>
                         ) : (
                           <span className="text-gray-400">-</span>
                         )}
                       </TableCell>
                       <TableCell className="text-sm text-gray-600">
-                        {project.lastUpdated}
+                        {project.last_updated}
                       </TableCell>
                       <TableCell>
                         <div className="flex space-x-1">
                           <Button variant="ghost" size="sm" asChild>
-                            <a href={project.githubUrl} target="_blank" rel="noopener noreferrer">
+                            <a href={project.github_url} target="_blank" rel="noopener noreferrer">
                               <ExternalLink className="h-4 w-4" />
                             </a>
                           </Button>
@@ -847,7 +801,7 @@ const ProjectManager = () => {
           <DragDropContext onDragEnd={handleDragEnd}>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {teamMembers.map((member) => {
-                const memberProjects = projects.filter(p => p.assignedTo === member);
+                const memberProjects = projects.filter(p => p.assigned_to === member);
                 
                 return (
                   <Droppable droppableId={member} key={member} type="PROJECT">
@@ -936,7 +890,7 @@ const ProjectManager = () => {
                   <CardContent>
                     <div className="space-y-2">
                       {projects
-                        .filter(p => p.platform === platform && p.isActive)
+                        .filter(p => p.platform === platform && p.is_active)
                         .slice(0, 3)
                         .map((project) => (
                           <div key={project.id} className="flex items-center justify-between text-sm">
@@ -978,7 +932,7 @@ const ProjectManager = () => {
             <CardContent>
               <div className="space-y-4">
                 {filteredDomains.map((domain) => {
-                  const mappedProject = projects.find(p => p.domainAssociated === domain);
+                  const mappedProject = projects.find(p => p.domain_associated === domain);
                   
                   return (
                     <div key={domain} className="flex items-center justify-between p-4 border rounded-lg">
@@ -1001,13 +955,13 @@ const ProjectManager = () => {
                               <span className="text-gray-500">No mapping</span>
                             </SelectItem>
                             {projects
-                              .filter(p => p.isActive)
+                              .filter(p => p.is_active)
                               .map((project) => (
                                 <SelectItem key={project.id} value={project.id}>
                                   <div className="flex items-center space-x-2">
                                     <span>{project.name}</span>
-                                    <Badge className={`${getTeamMemberColor(project.assignedTo)} border`} variant="outline">
-                                      {project.assignedTo}
+                                    <Badge className={`${getTeamMemberColor(project.assigned_to)} border`} variant="outline">
+                                      {project.assigned_to}
                                     </Badge>
                                   </div>
                                 </SelectItem>
@@ -1016,8 +970,8 @@ const ProjectManager = () => {
                         </Select>
                         {mappedProject && (
                           <div className="flex items-center space-x-2">
-                            <Badge className={`${getTeamMemberColor(mappedProject.assignedTo)} border`} variant="outline">
-                              {mappedProject.assignedTo}
+                            <Badge className={`${getTeamMemberColor(mappedProject.assigned_to)} border`} variant="outline">
+                              {mappedProject.assigned_to}
                             </Badge>
                             <Badge className={`${getPlatformColor(mappedProject.platform)} border`} variant="outline">
                               {mappedProject.platform}

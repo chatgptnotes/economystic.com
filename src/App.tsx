@@ -59,7 +59,28 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/login" element={<SignIn routing="path" path="/login" />} />
+            <Route
+              path="/login"
+              element={
+                <SignIn
+                  appearance={{
+                    elements: {
+                      card: "rounded-2xl shadow-2xl border border-blue-200 bg-white/80",
+                      headerTitle: "text-3xl font-bold text-blue-700",
+                      socialButtonsBlockButton: "rounded-lg bg-blue-600 text-white hover:bg-blue-700",
+                      formButtonPrimary: "bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg",
+                      footer: "text-xs text-gray-400",
+                    },
+                    variables: {
+                      colorPrimary: "#6366f1",
+                      colorText: "#1e293b",
+                      fontFamily: "Inter, sans-serif",
+                      borderRadius: "1rem",
+                    },
+                  }}
+                />
+              }
+            />
             <Route
               path="*"
               element={

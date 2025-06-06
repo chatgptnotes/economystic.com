@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Search } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 interface Project {
   id: string;
@@ -14,11 +14,13 @@ interface Project {
   description: string;
   language: string;
   visibility: 'Public' | 'Private';
-  lastUpdated: string;
-  assignedTo: string;
+  last_updated: string;
+  assigned_to: string;
   platform: 'Cursor' | 'Lovable' | 'V0' | 'Stitch' | 'Windsurf' | 'Clerk' | 'Codex' | 'Vercel' | 'Unknown';
-  domainAssociated?: string;
-  githubUrl: string;
+  domain_associated?: string;
+  github_url: string;
+  is_active: boolean;
+  priority: 'High' | 'Medium' | 'Low';
 }
 
 interface ProjectEditFormProps {
@@ -36,10 +38,12 @@ const ProjectEditForm = ({ project, teamMembers, onSave, onCancel }: ProjectEdit
     description: project.description,
     language: project.language,
     visibility: project.visibility,
-    assignedTo: project.assignedTo,
+    assigned_to: project.assigned_to,
     platform: project.platform,
-    domainAssociated: project.domainAssociated || '',
-    githubUrl: project.githubUrl
+    domain_associated: project.domain_associated || '',
+    github_url: project.github_url,
+    is_active: project.is_active,
+    priority: project.priority
   });
 
   // All available domains
@@ -67,8 +71,7 @@ const ProjectEditForm = ({ project, teamMembers, onSave, onCancel }: ProjectEdit
     const updatedProject: Project = {
       ...project,
       ...formData,
-      domainAssociated: formData.domainAssociated || undefined,
-      lastUpdated: 'just now'
+      domain_associated: formData.domain_associated || undefined
     };
 
     onSave(updatedProject);
@@ -79,44 +82,16 @@ const ProjectEditForm = ({ project, teamMembers, onSave, onCancel }: ProjectEdit
     });
   };
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="name">Project Name</Label>
-          <Input
-            id="name"
-            value={formData.name}
-            onChange={(e) => handleInputChange('name', e.target.value)}
-            required
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="language">Language</Label>
-          <Select value={formData.language} onValueChange={(value) => handleInputChange('language', value)}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="TypeScript">TypeScript</SelectItem>
-              <SelectItem value="JavaScript">JavaScript</SelectItem>
-              <SelectItem value="Python">Python</SelectItem>
-              <SelectItem value="Java">Java</SelectItem>
-              <SelectItem value="PHP">PHP</SelectItem>
-              <SelectItem value="HTML">HTML</SelectItem>
-              <SelectItem value="CSS">CSS</SelectItem>
-              <SelectItem value="Swift">Swift</SelectItem>
-              <SelectItem value="Kotlin">Kotlin</SelectItem>
-              <SelectItem value="Blade">Blade</SelectItem>
-              <SelectItem value="EJS">EJS</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div>
+        <Label htmlFor="name">Project Name</Label>
+        <Input
+          id="name"
+          value={formData.name}
+          onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+          placeholder="Enter project name"
+        />
       </div>
 
       <div>
@@ -124,120 +99,140 @@ const ProjectEditForm = ({ project, teamMembers, onSave, onCancel }: ProjectEdit
         <Textarea
           id="description"
           value={formData.description}
-          onChange={(e) => handleInputChange('description', e.target.value)}
-          rows={3}
+          onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+          placeholder="Enter project description"
         />
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="visibility">Visibility</Label>
-          <Select value={formData.visibility} onValueChange={(value) => handleInputChange('visibility', value)}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Public">Public</SelectItem>
-              <SelectItem value="Private">Private</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div>
-          <Label htmlFor="assignedTo">Assigned To</Label>
-          <Select value={formData.assignedTo} onValueChange={(value) => handleInputChange('assignedTo', value)}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {teamMembers.map(member => (
-                <SelectItem key={member} value={member}>{member}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="platform">Platform</Label>
-          <Select value={formData.platform} onValueChange={(value) => handleInputChange('platform', value)}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Lovable">Lovable</SelectItem>
-              <SelectItem value="Cursor">Cursor</SelectItem>
-              <SelectItem value="V0">V0</SelectItem>
-              <SelectItem value="Stitch">Stitch</SelectItem>
-              <SelectItem value="Windsurf">Windsurf</SelectItem>
-              <SelectItem value="Clerk">Clerk</SelectItem>
-              <SelectItem value="Codex">Codex</SelectItem>
-              <SelectItem value="Vercel">Vercel</SelectItem>
-              <SelectItem value="Unknown">Unknown</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div>
-          <Label htmlFor="domainAssociated">Associated Domain</Label>
-          <div className="space-y-2">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                placeholder="Search domains..."
-                value={domainSearchTerm}
-                onChange={(e) => setDomainSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Select 
-              value={formData.domainAssociated} 
-              onValueChange={(value) => handleInputChange('domainAssociated', value === "none" ? "" : value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a domain">
-                  {formData.domainAssociated || "No domain selected"}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent className="max-h-60">
-                <SelectItem value="none">
-                  <span className="text-gray-500">No domain</span>
-                </SelectItem>
-                {filteredDomains.map((domain) => (
-                  <SelectItem key={domain} value={domain}>
-                    {domain}
-                  </SelectItem>
-                ))}
-                {filteredDomains.length === 0 && domainSearchTerm && (
-                  <div className="px-2 py-1 text-sm text-gray-500">
-                    No domains found matching "{domainSearchTerm}"
-                  </div>
-                )}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
       </div>
 
       <div>
-        <Label htmlFor="githubUrl">GitHub URL</Label>
+        <Label htmlFor="language">Language</Label>
         <Input
-          id="githubUrl"
-          value={formData.githubUrl}
-          onChange={(e) => handleInputChange('githubUrl', e.target.value)}
-          placeholder="https://github.com/username/repo"
-          required
+          id="language"
+          value={formData.language}
+          onChange={(e) => setFormData(prev => ({ ...prev, language: e.target.value }))}
+          placeholder="e.g., TypeScript, JavaScript, Python"
         />
       </div>
 
-      <div className="flex justify-end space-x-2 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button type="submit">
-          Save Changes
-        </Button>
+      <div>
+        <Label htmlFor="github_url">GitHub URL</Label>
+        <Input
+          id="github_url"
+          value={formData.github_url}
+          onChange={(e) => setFormData(prev => ({ ...prev, github_url: e.target.value }))}
+          placeholder="https://github.com/username/repo"
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="visibility">Visibility</Label>
+        <Select value={formData.visibility} onValueChange={(value: 'Public' | 'Private') => setFormData(prev => ({ ...prev, visibility: value }))}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Public">Public</SelectItem>
+            <SelectItem value="Private">Private</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label htmlFor="assigned_to">Assigned To</Label>
+        <Select value={formData.assigned_to} onValueChange={(value) => setFormData(prev => ({ ...prev, assigned_to: value }))}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Unassigned">Unassigned</SelectItem>
+            {teamMembers.map((member) => (
+              <SelectItem key={member} value={member}>{member}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label htmlFor="platform">Platform</Label>
+        <Select value={formData.platform} onValueChange={(value: typeof formData.platform) => setFormData(prev => ({ ...prev, platform: value }))}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Unknown">Unknown</SelectItem>
+            <SelectItem value="Cursor">Cursor</SelectItem>
+            <SelectItem value="Lovable">Lovable</SelectItem>
+            <SelectItem value="V0">V0</SelectItem>
+            <SelectItem value="Stitch">Stitch</SelectItem>
+            <SelectItem value="Windsurf">Windsurf</SelectItem>
+            <SelectItem value="Clerk">Clerk</SelectItem>
+            <SelectItem value="Codex">Codex</SelectItem>
+            <SelectItem value="Vercel">Vercel</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label htmlFor="priority">Priority</Label>
+        <Select value={formData.priority} onValueChange={(value: 'High' | 'Medium' | 'Low') => setFormData(prev => ({ ...prev, priority: value }))}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="High">High</SelectItem>
+            <SelectItem value="Medium">Medium</SelectItem>
+            <SelectItem value="Low">Low</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label htmlFor="domain_associated">Associated Domain</Label>
+        <div className="flex space-x-2">
+          <Input
+            id="domain_associated"
+            value={formData.domain_associated}
+            onChange={(e) => setFormData(prev => ({ ...prev, domain_associated: e.target.value }))}
+            placeholder="e.g., example.com"
+          />
+          <Input
+            type="text"
+            placeholder="Search domains..."
+            value={domainSearchTerm}
+            onChange={(e) => setDomainSearchTerm(e.target.value)}
+            className="w-1/3"
+          />
+        </div>
+        {domainSearchTerm && (
+          <div className="mt-2 p-2 border rounded-md max-h-32 overflow-y-auto">
+            {filteredDomains.map(domain => (
+              <div
+                key={domain}
+                className="cursor-pointer p-1 hover:bg-gray-100 rounded"
+                onClick={() => {
+                  setFormData(prev => ({ ...prev, domain_associated: domain }));
+                  setDomainSearchTerm("");
+                }}
+              >
+                {domain}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Switch
+          id="is_active"
+          checked={formData.is_active}
+          onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
+        />
+        <Label htmlFor="is_active">Active Project</Label>
+      </div>
+
+      <div className="flex justify-end space-x-2">
+        <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
+        <Button type="submit">Update Project</Button>
       </div>
     </form>
   );

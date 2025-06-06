@@ -34,6 +34,7 @@ const Auth = () => {
                     card: "border-0 shadow-none",
                   }
                 }}
+                restrictedToEmailAddresses={["*@hopehospital.com", "*@drmhope.com"]}
               />
             ) : (
               <SignIn 

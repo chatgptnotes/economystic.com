@@ -1,11 +1,7 @@
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { Activity, FileText, Table, Home, Search, Shield } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import { SignedIn, SignedOut, UserButton, SignInButton } from "@clerk/clerk-react";
 
 const Header = () => {
   const location = useLocation();
@@ -31,97 +27,77 @@ const Header = () => {
           </div>
           
           <div className="flex items-center space-x-4">
-            <SignedIn>
-              <nav className="flex items-center space-x-2">
-                <Link to="/dashboard">
-                  <Button 
-                    variant={isActive("/dashboard") ? "default" : "ghost"} 
-                    className={`flex items-center space-x-2 rounded-xl transition-all duration-200 ${
-                      isActive("/dashboard") 
-                        ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg hover:from-blue-600 hover:to-blue-700" 
-                        : "hover:bg-blue-50 hover:text-blue-600"
-                    }`}
-                  >
-                    <Home className="h-4 w-4" />
-                    <span>Dashboard</span>
-                  </Button>
-                </Link>
-                
-                <Link to="/intelligent-search">
-                  <Button 
-                    variant={isActive("/intelligent-search") ? "default" : "ghost"} 
-                    className={`flex items-center space-x-2 rounded-xl transition-all duration-200 ${
-                      isActive("/intelligent-search") 
-                        ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg hover:from-emerald-600 hover:to-emerald-700" 
-                        : "hover:bg-emerald-50 hover:text-emerald-600"
-                    }`}
-                  >
-                    <Search className="h-4 w-4" />
-                    <span>AI Search</span>
-                  </Button>
-                </Link>
-                
-                <Link to="/data-tables">
-                  <Button 
-                    variant={isActive("/data-tables") ? "default" : "ghost"} 
-                    className={`flex items-center space-x-2 rounded-xl transition-all duration-200 ${
-                      isActive("/data-tables") 
-                        ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg hover:from-purple-600 hover:to-purple-700" 
-                        : "hover:bg-purple-50 hover:text-purple-600"
-                    }`}
-                  >
-                    <Table className="h-4 w-4" />
-                    <span>Data Tables</span>
-                  </Button>
-                </Link>
-                
-                <Link to="/reports">
-                  <Button 
-                    variant={isActive("/reports") ? "default" : "ghost"} 
-                    className={`flex items-center space-x-2 rounded-xl transition-all duration-200 ${
-                      isActive("/reports") 
-                        ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg hover:from-orange-600 hover:to-orange-700" 
-                        : "hover:bg-orange-50 hover:text-orange-600"
-                    }`}
-                  >
-                    <FileText className="h-4 w-4" />
-                    <span>Reports</span>
-                  </Button>
-                </Link>
-
-                <Link to="/audit">
-                  <Button 
-                    variant={isActive("/audit") ? "default" : "ghost"} 
-                    className={`flex items-center space-x-2 rounded-xl transition-all duration-200 ${
-                      isActive("/audit") 
-                        ? "bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg hover:from-red-600 hover:to-red-700" 
-                        : "hover:bg-red-50 hover:text-red-600"
-                    }`}
-                  >
-                    <Shield className="h-4 w-4" />
-                    <span>Audit</span>
-                  </Button>
-                </Link>
-              </nav>
-              
-              <div className="ml-4">
-                <UserButton 
-                  appearance={{
-                    elements: {
-                      avatarBox: "h-10 w-10 rounded-xl shadow-lg ring-2 ring-white/20"
-                    }
-                  }}
-                />
-              </div>
-            </SignedIn>
-            
-            <SignedOut>
-              <SignInButton fallbackRedirectUrl="/dashboard">
-                <Button className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl shadow-lg hover:from-blue-600 hover:to-indigo-700 transition-all duration-200">
-                  Sign In
+            <nav className="flex items-center space-x-2">
+              <Link to="/dashboard">
+                <Button 
+                  variant={isActive("/dashboard") ? "default" : "ghost"} 
+                  className={`flex items-center space-x-2 rounded-xl transition-all duration-200 ${
+                    isActive("/dashboard") 
+                      ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg hover:from-blue-600 hover:to-blue-700" 
+                      : "hover:bg-blue-50 hover:text-blue-600"
+                  }`}
+                >
+                  <Home className="h-4 w-4" />
+                  <span>Dashboard</span>
                 </Button>
-              </SignInButton>
-            </SignedOut>
+              </Link>
+              
+              <Link to="/intelligent-search">
+                <Button 
+                  variant={isActive("/intelligent-search") ? "default" : "ghost"} 
+                  className={`flex items-center space-x-2 rounded-xl transition-all duration-200 ${
+                    isActive("/intelligent-search") 
+                      ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg hover:from-emerald-600 hover:to-emerald-700" 
+                      : "hover:bg-emerald-50 hover:text-emerald-600"
+                  }`}
+                >
+                  <Search className="h-4 w-4" />
+                  <span>AI Search</span>
+                </Button>
+              </Link>
+              
+              <Link to="/data-tables">
+                <Button 
+                  variant={isActive("/data-tables") ? "default" : "ghost"} 
+                  className={`flex items-center space-x-2 rounded-xl transition-all duration-200 ${
+                    isActive("/data-tables") 
+                      ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg hover:from-purple-600 hover:to-purple-700" 
+                      : "hover:bg-purple-50 hover:text-purple-600"
+                  }`}
+                >
+                  <Table className="h-4 w-4" />
+                  <span>Data Tables</span>
+                </Button>
+              </Link>
+              
+              <Link to="/reports">
+                <Button 
+                  variant={isActive("/reports") ? "default" : "ghost"} 
+                  className={`flex items-center space-x-2 rounded-xl transition-all duration-200 ${
+                    isActive("/reports") 
+                      ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg hover:from-orange-600 hover:to-orange-700" 
+                      : "hover:bg-orange-50 hover:text-orange-600"
+                  }`}
+                >
+                  <FileText className="h-4 w-4" />
+                  <span>Reports</span>
+                </Button>
+              </Link>
+
+              <Link to="/audit">
+                <Button 
+                  variant={isActive("/audit") ? "default" : "ghost"} 
+                  className={`flex items-center space-x-2 rounded-xl transition-all duration-200 ${
+                    isActive("/audit") 
+                      ? "bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg hover:from-red-600 hover:to-red-700" 
+                      : "hover:bg-red-50 hover:text-red-600"
+                  }`}
+                >
+                  <Shield className="h-4 w-4" />
+                  <span>Audit</span>
+                </Button>
+              </Link>
+            </nav>
           </div>
         </div>
       </div>

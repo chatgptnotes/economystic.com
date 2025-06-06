@@ -4,10 +4,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import ProtectedRoute from "./components/ProtectedRoute";
 import Landing from "./pages/Landing";
 import Index from "./pages/Index";
-import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import TotalCalls from "./pages/TotalCalls";
 import AmbulanceBookings from "./pages/AmbulanceBookings";
@@ -34,23 +32,21 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Landing />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-          <Route path="/intelligent-search" element={<ProtectedRoute><IntelligentSearchPage /></ProtectedRoute>} />
-          <Route path="/reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
-          <Route path="/data-tables" element={<ProtectedRoute><DataTables /></ProtectedRoute>} />
-          <Route path="/audit" element={<ProtectedRoute><AuditPage /></ProtectedRoute>} />
-          <Route path="/total-calls" element={<ProtectedRoute><TotalCalls /></ProtectedRoute>} />
-          <Route path="/ambulance-bookings" element={<ProtectedRoute><AmbulanceBookings /></ProtectedRoute>} />
-          <Route path="/new-patients" element={<ProtectedRoute><NewPatients /></ProtectedRoute>} />
-          <Route path="/appointments-scheduled" element={<ProtectedRoute><AppointmentsScheduled /></ProtectedRoute>} />
-          <Route path="/whatsapp-responses" element={<ProtectedRoute><WhatsAppResponses /></ProtectedRoute>} />
-          <Route path="/follow-up-calls" element={<ProtectedRoute><FollowUpCalls /></ProtectedRoute>} />
-          <Route path="/social-media" element={<ProtectedRoute><SocialMediaManagement /></ProtectedRoute>} />
-          <Route path="/domain-management" element={<ProtectedRoute><DomainManagement /></ProtectedRoute>} />
-          <Route path="/project-management" element={<ProtectedRoute><ProjectManagement /></ProtectedRoute>} />
-          <Route path="/prompt-management" element={<ProtectedRoute><PromptManagement /></ProtectedRoute>} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/dashboard" element={<Index />} />
+          <Route path="/intelligent-search" element={<IntelligentSearchPage />} />
+          <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/data-tables" element={<DataTables />} />
+          <Route path="/audit" element={<AuditPage />} />
+          <Route path="/total-calls" element={<TotalCalls />} />
+          <Route path="/ambulance-bookings" element={<AmbulanceBookings />} />
+          <Route path="/new-patients" element={<NewPatients />} />
+          <Route path="/appointments-scheduled" element={<AppointmentsScheduled />} />
+          <Route path="/whatsapp-responses" element={<WhatsAppResponses />} />
+          <Route path="/follow-up-calls" element={<FollowUpCalls />} />
+          <Route path="/social-media" element={<SocialMediaManagement />} />
+          <Route path="/domain-management" element={<DomainManagement />} />
+          <Route path="/project-management" element={<ProjectManagement />} />
+          <Route path="/prompt-management" element={<PromptManagement />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

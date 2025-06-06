@@ -64,7 +64,7 @@ const Landing = () => {
               </div>
             </div>
             
-            <Link to="/auth">
+            <Link to="/dashboard">
               <Button className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl shadow-lg hover:from-blue-600 hover:to-indigo-700 transition-all duration-200">
                 Get Started
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -87,7 +87,7 @@ const Landing = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/auth">
+            <Link to="/dashboard">
               <Button size="lg" className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl shadow-lg hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 px-8 py-4 text-lg">
                 Start Free Trial
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -170,7 +170,7 @@ const Landing = () => {
           <p className="text-xl mb-8 opacity-90">
             Join the future of business analytics today. No setup fees, no long-term contracts.
           </p>
-          <Link to="/auth">
+          <Link to="/dashboard">
             <Button size="lg" variant="secondary" className="bg-white text-blue-600 hover:bg-gray-100 rounded-xl px-8 py-4 text-lg font-semibold">
               Get Started Now
               <ArrowRight className="ml-2 h-5 w-5" />

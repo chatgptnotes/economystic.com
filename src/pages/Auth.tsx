@@ -24,22 +24,24 @@ const Auth = () => {
               Only @hopehospital.com and @drmhope.com email addresses are allowed
             </p>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="w-full">
+          <CardContent className="p-6">
+            <div className="w-full min-h-[400px]">
               {isSignUp ? (
                 <SignUp 
                   fallbackRedirectUrl="/dashboard"
                   appearance={{
                     elements: {
-                      formButtonPrimary: "bg-blue-600 hover:bg-blue-700 text-white",
-                      card: "shadow-none border-0 bg-transparent",
+                      formButtonPrimary: "bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-md",
+                      card: "shadow-none border-0 bg-transparent p-0",
                       rootBox: "w-full",
-                      formFieldInput: "border border-gray-300 rounded-md px-3 py-2",
-                      formFieldLabel: "text-gray-700 font-medium",
+                      formFieldInput: "w-full border border-gray-300 rounded-md px-3 py-2 text-gray-900 bg-white",
+                      formFieldLabel: "text-gray-700 font-medium text-sm mb-1 block",
                       headerTitle: "hidden",
                       headerSubtitle: "hidden",
-                      socialButtonsBlockButton: "border border-gray-300 hover:bg-gray-50",
-                      footer: "hidden"
+                      socialButtonsBlockButton: "w-full border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-md",
+                      footer: "hidden",
+                      formFieldRow: "mb-4",
+                      form: "space-y-4"
                     },
                     layout: {
                       socialButtonsPlacement: "top"
@@ -51,15 +53,20 @@ const Auth = () => {
                   fallbackRedirectUrl="/dashboard"
                   appearance={{
                     elements: {
-                      formButtonPrimary: "bg-blue-600 hover:bg-blue-700 text-white",
-                      card: "shadow-none border-0 bg-transparent",
+                      formButtonPrimary: "bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-md w-full",
+                      card: "shadow-none border-0 bg-transparent p-0",
                       rootBox: "w-full",
-                      formFieldInput: "border border-gray-300 rounded-md px-3 py-2",
-                      formFieldLabel: "text-gray-700 font-medium",
+                      formFieldInput: "w-full border border-gray-300 rounded-md px-3 py-2 text-gray-900 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                      formFieldLabel: "text-gray-700 font-medium text-sm mb-1 block",
                       headerTitle: "hidden",
                       headerSubtitle: "hidden",
-                      socialButtonsBlockButton: "border border-gray-300 hover:bg-gray-50",
-                      footer: "hidden"
+                      socialButtonsBlockButton: "w-full border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-md mb-4",
+                      footer: "hidden",
+                      formFieldRow: "mb-4",
+                      form: "space-y-4",
+                      dividerLine: "bg-gray-300",
+                      dividerText: "text-gray-500 text-sm",
+                      formFieldAction: "text-blue-600 hover:text-blue-700 text-sm"
                     },
                     layout: {
                       socialButtonsPlacement: "top"

@@ -24,28 +24,50 @@ const Auth = () => {
               Only @hopehospital.com and @drmhope.com email addresses are allowed
             </p>
           </CardHeader>
-          <CardContent>
-            {isSignUp ? (
-              <SignUp 
-                fallbackRedirectUrl="/dashboard"
-                appearance={{
-                  elements: {
-                    formButtonPrimary: "bg-blue-600 hover:bg-blue-700",
-                    card: "border-0 shadow-none",
-                  }
-                }}
-              />
-            ) : (
-              <SignIn 
-                fallbackRedirectUrl="/dashboard"
-                appearance={{
-                  elements: {
-                    formButtonPrimary: "bg-blue-600 hover:bg-blue-700",
-                    card: "border-0 shadow-none",
-                  }
-                }}
-              />
-            )}
+          <CardContent className="space-y-4">
+            <div className="w-full">
+              {isSignUp ? (
+                <SignUp 
+                  fallbackRedirectUrl="/dashboard"
+                  appearance={{
+                    elements: {
+                      formButtonPrimary: "bg-blue-600 hover:bg-blue-700 text-white",
+                      card: "shadow-none border-0 bg-transparent",
+                      rootBox: "w-full",
+                      formFieldInput: "border border-gray-300 rounded-md px-3 py-2",
+                      formFieldLabel: "text-gray-700 font-medium",
+                      headerTitle: "hidden",
+                      headerSubtitle: "hidden",
+                      socialButtonsBlockButton: "border border-gray-300 hover:bg-gray-50",
+                      footer: "hidden"
+                    },
+                    layout: {
+                      socialButtonsPlacement: "top"
+                    }
+                  }}
+                />
+              ) : (
+                <SignIn 
+                  fallbackRedirectUrl="/dashboard"
+                  appearance={{
+                    elements: {
+                      formButtonPrimary: "bg-blue-600 hover:bg-blue-700 text-white",
+                      card: "shadow-none border-0 bg-transparent",
+                      rootBox: "w-full",
+                      formFieldInput: "border border-gray-300 rounded-md px-3 py-2",
+                      formFieldLabel: "text-gray-700 font-medium",
+                      headerTitle: "hidden",
+                      headerSubtitle: "hidden",
+                      socialButtonsBlockButton: "border border-gray-300 hover:bg-gray-50",
+                      footer: "hidden"
+                    },
+                    layout: {
+                      socialButtonsPlacement: "top"
+                    }
+                  }}
+                />
+              )}
+            </div>
             
             <div className="mt-6 text-center">
               <Button

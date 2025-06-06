@@ -1,5 +1,4 @@
 
-import { SignIn, SignUp } from "@clerk/clerk-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,67 +12,27 @@ const Auth = () => {
         <Card>
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-bold text-gray-900">
-              {isSignUp ? "Create Account" : "Welcome Back"}
+              Authentication Temporarily Disabled
             </CardTitle>
             <p className="text-gray-600">
-              {isSignUp 
-                ? "Sign up to access economystic.ai Analytics" 
-                : "Sign in to your account"}
+              Authentication is currently disabled for testing purposes
             </p>
             <p className="text-sm text-blue-600 mt-2">
-              Only @hopehospital.com and @drmhope.com email addresses are allowed
+              Only @hopehospital.com and @drmhope.com email addresses will be allowed when re-enabled
             </p>
           </CardHeader>
           <CardContent className="p-6">
-            <div className="w-full min-h-[400px]">
-              {isSignUp ? (
-                <SignUp 
-                  fallbackRedirectUrl="/dashboard"
-                  appearance={{
-                    elements: {
-                      formButtonPrimary: "bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-md",
-                      card: "shadow-none border-0 bg-transparent p-0",
-                      rootBox: "w-full",
-                      formFieldInput: "w-full border border-gray-300 rounded-md px-3 py-2 text-gray-900 bg-white",
-                      formFieldLabel: "text-gray-700 font-medium text-sm mb-1 block",
-                      headerTitle: "hidden",
-                      headerSubtitle: "hidden",
-                      socialButtonsBlockButton: "w-full border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-md",
-                      footer: "hidden",
-                      formFieldRow: "mb-4",
-                      form: "space-y-4"
-                    },
-                    layout: {
-                      socialButtonsPlacement: "top"
-                    }
-                  }}
-                />
-              ) : (
-                <SignIn 
-                  fallbackRedirectUrl="/dashboard"
-                  appearance={{
-                    elements: {
-                      formButtonPrimary: "bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-md w-full",
-                      card: "shadow-none border-0 bg-transparent p-0",
-                      rootBox: "w-full",
-                      formFieldInput: "w-full border border-gray-300 rounded-md px-3 py-2 text-gray-900 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-                      formFieldLabel: "text-gray-700 font-medium text-sm mb-1 block",
-                      headerTitle: "hidden",
-                      headerSubtitle: "hidden",
-                      socialButtonsBlockButton: "w-full border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-md mb-4",
-                      footer: "hidden",
-                      formFieldRow: "mb-4",
-                      form: "space-y-4",
-                      dividerLine: "bg-gray-300",
-                      dividerText: "text-gray-500 text-sm",
-                      formFieldAction: "text-blue-600 hover:text-blue-700 text-sm"
-                    },
-                    layout: {
-                      socialButtonsPlacement: "top"
-                    }
-                  }}
-                />
-              )}
+            <div className="w-full min-h-[200px] flex items-center justify-center">
+              <div className="text-center space-y-4">
+                <p className="text-gray-500">
+                  Sign in and sign up functionality has been temporarily removed.
+                </p>
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <p className="text-yellow-800 text-sm">
+                    Authentication will be restored when configured properly.
+                  </p>
+                </div>
+              </div>
             </div>
             
             <div className="mt-6 text-center">
@@ -81,6 +40,7 @@ const Auth = () => {
                 variant="ghost"
                 onClick={() => setIsSignUp(!isSignUp)}
                 className="text-blue-600 hover:text-blue-700"
+                disabled
               >
                 {isSignUp 
                   ? "Already have an account? Sign in" 

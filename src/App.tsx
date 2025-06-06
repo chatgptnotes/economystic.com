@@ -32,7 +32,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Landing />} />
-          <Route path="/auth" element={<Navigate to="/" replace />} />
+          <Route path="/auth" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Index />} />
           <Route path="/intelligent-search" element={<IntelligentSearchPage />} />
           <Route path="/reports" element={<ReportsPage />} />

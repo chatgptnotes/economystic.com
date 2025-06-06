@@ -1,10 +1,11 @@
-
 import { Button } from "@/components/ui/button";
 import { Activity, FileText, Table, Home, Search, Shield } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import { UserButton, useUser, SignedIn, SignedOut, SignInButton } from '@clerk/clerk-react';
 
 const Header = () => {
   const location = useLocation();
+  const { user } = useUser();
 
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -98,6 +99,21 @@ const Header = () => {
                 </Button>
               </Link>
             </nav>
+            <div className="flex items-center space-x-2">
+              <SignedIn>
+                {user && (
+                  <span className="text-sm text-gray-700 font-medium">
+                    {user.fullName || user.primaryEmailAddress?.emailAddress}
+                  </span>
+                )}
+                <UserButton afterSignOutUrl="/login" />
+              </SignedIn>
+              <SignedOut>
+                <SignInButton mode="modal">
+                  <Button variant="outline">Sign In</Button>
+                </SignInButton>
+              </SignedOut>
+            </div>
           </div>
         </div>
       </div>

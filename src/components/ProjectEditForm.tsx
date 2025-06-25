@@ -21,6 +21,7 @@ interface Project {
   github_url: string;
   is_active: boolean;
   priority: 'High' | 'Medium' | 'Low';
+  category?: 'Healthcare' | 'E-commerce' | 'Education' | 'Finance' | 'Social Media' | 'Utilities' | 'Entertainment' | 'Business Tools' | 'Other';
 }
 
 interface ProjectEditFormProps {
@@ -43,7 +44,8 @@ const ProjectEditForm = ({ project, teamMembers, onSave, onCancel }: ProjectEdit
     domain_associated: project.domain_associated || '',
     github_url: project.github_url,
     is_active: project.is_active,
-    priority: project.priority
+    priority: project.priority,
+    category: project.category || 'Other'
   });
 
   // All available domains
@@ -182,6 +184,26 @@ const ProjectEditForm = ({ project, teamMembers, onSave, onCancel }: ProjectEdit
             <SelectItem value="High">High</SelectItem>
             <SelectItem value="Medium">Medium</SelectItem>
             <SelectItem value="Low">Low</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label htmlFor="category">Category</Label>
+        <Select value={formData.category} onValueChange={(value: 'Healthcare' | 'E-commerce' | 'Education' | 'Finance' | 'Social Media' | 'Utilities' | 'Entertainment' | 'Business Tools' | 'Other') => setFormData(prev => ({ ...prev, category: value }))}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Healthcare">Healthcare</SelectItem>
+            <SelectItem value="E-commerce">E-commerce</SelectItem>
+            <SelectItem value="Education">Education</SelectItem>
+            <SelectItem value="Finance">Finance</SelectItem>
+            <SelectItem value="Social Media">Social Media</SelectItem>
+            <SelectItem value="Utilities">Utilities</SelectItem>
+            <SelectItem value="Entertainment">Entertainment</SelectItem>
+            <SelectItem value="Business Tools">Business Tools</SelectItem>
+            <SelectItem value="Other">Other</SelectItem>
           </SelectContent>
         </Select>
       </div>

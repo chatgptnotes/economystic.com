@@ -21,6 +21,7 @@ interface Project {
   github_url: string;
   is_active: boolean;
   priority: 'High' | 'Medium' | 'Low';
+  category?: 'Healthcare' | 'E-commerce' | 'Education' | 'Finance' | 'Social Media' | 'Utilities' | 'Entertainment' | 'Business Tools' | 'Other';
 }
 
 interface AddProjectFormProps {
@@ -40,7 +41,8 @@ const AddProjectForm = ({ teamMembers, onSave, onCancel }: AddProjectFormProps) 
     github_url: '',
     is_active: true,
     priority: 'Medium' as 'High' | 'Medium' | 'Low',
-    domain_associated: ''
+    domain_associated: '',
+    category: 'Other' as 'Healthcare' | 'E-commerce' | 'Education' | 'Finance' | 'Social Media' | 'Utilities' | 'Entertainment' | 'Business Tools' | 'Other'
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -187,6 +189,26 @@ const AddProjectForm = ({ teamMembers, onSave, onCancel }: AddProjectFormProps) 
             <SelectItem value="High">High</SelectItem>
             <SelectItem value="Medium">Medium</SelectItem>
             <SelectItem value="Low">Low</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label htmlFor="category">Category</Label>
+        <Select value={formData.category} onValueChange={(value: typeof formData.category) => setFormData(prev => ({ ...prev, category: value }))}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Healthcare">Healthcare</SelectItem>
+            <SelectItem value="E-commerce">E-commerce</SelectItem>
+            <SelectItem value="Education">Education</SelectItem>
+            <SelectItem value="Finance">Finance</SelectItem>
+            <SelectItem value="Social Media">Social Media</SelectItem>
+            <SelectItem value="Utilities">Utilities</SelectItem>
+            <SelectItem value="Entertainment">Entertainment</SelectItem>
+            <SelectItem value="Business Tools">Business Tools</SelectItem>
+            <SelectItem value="Other">Other</SelectItem>
           </SelectContent>
         </Select>
       </div>

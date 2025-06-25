@@ -37,6 +37,7 @@ interface Project {
   github_url: string;
   is_active: boolean;
   priority: 'High' | 'Medium' | 'Low';
+  category?: 'Healthcare' | 'E-commerce' | 'Education' | 'Finance' | 'Social Media' | 'Utilities' | 'Entertainment' | 'Business Tools' | 'Other';
 }
 
 const ProjectManager = () => {
@@ -48,10 +49,12 @@ const ProjectManager = () => {
   const [domainSearchTerm, setDomainSearchTerm] = useState("");
   const [selectedMember, setSelectedMember] = useState("all");
   const [selectedPriority, setSelectedPriority] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [showInactive, setShowInactive] = useState(true);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [groupByCategory, setGroupByCategory] = useState(true);
 
   const teamMembers = ["Bhupendra", "Dinesh", "Prathik", "Pooja", "Poonam", "Monish", "Aman", "Priyanka"];
 
@@ -68,6 +71,58 @@ const ProjectManager = () => {
     'anohra.in', 'adamrit.com', 'yellowfever.in', 'digihealthtwin.in',
     'emergencyseva.in', 'ambufast.in'
   ];
+
+  const projectCategories = [
+    {
+      name: 'Healthcare',
+      description: 'Medical, hospital management, patient care, and health-related applications',
+      color: 'bg-red-100 text-red-800 border-red-200'
+    },
+    {
+      name: 'E-commerce',
+      description: 'Online stores, marketplaces, payment systems, and retail applications',
+      color: 'bg-green-100 text-green-800 border-green-200'
+    },
+    {
+      name: 'Education',
+      description: 'Learning management, educational tools, and academic platforms',
+      color: 'bg-blue-100 text-blue-800 border-blue-200'
+    },
+    {
+      name: 'Finance',
+      description: 'Banking, accounting, financial management, and fintech solutions',
+      color: 'bg-yellow-100 text-yellow-800 border-yellow-200'
+    },
+    {
+      name: 'Social Media',
+      description: 'Social networking, communication, and community platforms',
+      color: 'bg-purple-100 text-purple-800 border-purple-200'
+    },
+    {
+      name: 'Utilities',
+      description: 'Tools, productivity apps, and utility applications',
+      color: 'bg-gray-100 text-gray-800 border-gray-200'
+    },
+    {
+      name: 'Entertainment',
+      description: 'Gaming, media, streaming, and entertainment applications',
+      color: 'bg-pink-100 text-pink-800 border-pink-200'
+    },
+    {
+      name: 'Business Tools',
+      description: 'CRM, project management, analytics, and business applications',
+      color: 'bg-indigo-100 text-indigo-800 border-indigo-200'
+    },
+    {
+      name: 'Other',
+      description: 'Miscellaneous projects that don\'t fit into other categories',
+      color: 'bg-slate-100 text-slate-800 border-slate-200'
+    }
+  ];
+
+  const getCategoryInfo = (categoryName: string) => {
+    return projectCategories.find(cat => cat.name === categoryName) || projectCategories[projectCategories.length - 1];
+  };
 
   // Fetch projects from Supabase
   const { data: projectsData = [], isLoading } = useQuery({
@@ -302,17 +357,31 @@ const ProjectManager = () => {
 
   const filteredProjects = projects.filter(project => {
     const combinedSearchTerm = searchTerm || projectSearchTerm;
-    
-    const matchesSearch = combinedSearchTerm === "" || 
+
+    const matchesSearch = combinedSearchTerm === "" ||
                          project.name.toLowerCase().includes(combinedSearchTerm.toLowerCase()) ||
                          project.description.toLowerCase().includes(combinedSearchTerm.toLowerCase());
-    
+
     const matchesMember = selectedMember === "all" || project.assigned_to === selectedMember;
     const matchesPriority = selectedPriority === "all" || project.priority === selectedPriority;
+    const matchesCategory = selectedCategory === "all" || project.category === selectedCategory;
     const matchesStatus = showInactive || project.is_active;
-    
-    return matchesSearch && matchesMember && matchesPriority && matchesStatus;
+
+    return matchesSearch && matchesMember && matchesPriority && matchesCategory && matchesStatus;
   });
+
+  // Group projects by category
+  const groupedProjects = groupByCategory ?
+    projectCategories.reduce((acc, category) => {
+      const categoryProjects = filteredProjects.filter(project =>
+        (project.category || 'Other') === category.name
+      );
+      if (categoryProjects.length > 0) {
+        acc[category.name] = categoryProjects;
+      }
+      return acc;
+    }, {} as Record<string, Project[]>) :
+    { 'All Projects': filteredProjects };
 
   // Sort projects by priority (High -> Medium -> Low)
   const sortedProjects = [...filteredProjects].sort((a, b) => {
@@ -455,6 +524,27 @@ const ProjectManager = () => {
             <SelectItem value="Low">Low Priority</SelectItem>
           </SelectContent>
         </Select>
+        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="All Categories" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Categories</SelectItem>
+            {projectCategories.map(category => (
+              <SelectItem key={category.name} value={category.name}>{category.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="group-by-category"
+            checked={groupByCategory}
+            onCheckedChange={setGroupByCategory}
+          />
+          <label htmlFor="group-by-category" className="text-sm text-gray-600">
+            Group by category
+          </label>
+        </div>
         <div className="flex items-center space-x-2">
           <Switch
             id="show-inactive"
@@ -555,22 +645,39 @@ const ProjectManager = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Priority</TableHead>
-                    <TableHead>Project Name</TableHead>
-                    <TableHead>Language</TableHead>
-                    <TableHead>Assigned To</TableHead>
-                    <TableHead>Platform</TableHead>
-                    <TableHead>Domain</TableHead>
-                    <TableHead>Last Updated</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {sortedProjects.map((project) => (
+              {groupByCategory ? (
+                <div className="space-y-8">
+                  {Object.entries(groupedProjects).map(([categoryName, categoryProjects]) => {
+                    const categoryInfo = getCategoryInfo(categoryName);
+                    return (
+                      <div key={categoryName} className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <h3 className="text-lg font-semibold text-gray-900">{categoryName}</h3>
+                            <Badge className={`${categoryInfo.color} border`} variant="outline">
+                              {categoryProjects.length} projects
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-gray-500 max-w-md">{categoryInfo.description}</p>
+                        </div>
+
+                        <div className="bg-gray-50 rounded-lg p-4">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Status</TableHead>
+                                <TableHead>Priority</TableHead>
+                                <TableHead>Project Name</TableHead>
+                                <TableHead>Language</TableHead>
+                                <TableHead>Assigned To</TableHead>
+                                <TableHead>Platform</TableHead>
+                                <TableHead>Domain</TableHead>
+                                <TableHead>Last Updated</TableHead>
+                                <TableHead>Actions</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {categoryProjects.map((project) => (
                     <TableRow key={project.id} className={!project.is_active ? "opacity-60" : ""}>
                       <TableCell>
                         <Switch
@@ -790,9 +897,182 @@ const ProjectManager = () => {
                         </div>
                       </TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Priority</TableHead>
+                      <TableHead>Project Name</TableHead>
+                      <TableHead>Language</TableHead>
+                      <TableHead>Assigned To</TableHead>
+                      <TableHead>Platform</TableHead>
+                      <TableHead>Domain</TableHead>
+                      <TableHead>Last Updated</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {sortedProjects.map((project) => (
+                      <TableRow key={project.id} className={!project.is_active ? "opacity-60" : ""}>
+                        <TableCell>
+                          <Switch
+                            checked={project.is_active}
+                            onCheckedChange={(checked) => handleProjectStatusToggle(project.id, checked)}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Select
+                            value={project.priority}
+                            onValueChange={(value: 'High' | 'Medium' | 'Low') => handlePriorityChange(project.id, value)}
+                          >
+                            <SelectTrigger className="w-32">
+                              <SelectValue>
+                                <Badge className={`${getPriorityColor(project.priority)} border`} variant="outline">
+                                  <div className="flex items-center space-x-1">
+                                    {getPriorityIcon(project.priority)}
+                                    <span>{project.priority}</span>
+                                  </div>
+                                </Badge>
+                              </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="High">
+                                <div className="flex items-center space-x-1">
+                                  <AlertCircle className="h-3 w-3 text-red-600" />
+                                  <span>High</span>
+                                </div>
+                              </SelectItem>
+                              <SelectItem value="Medium">
+                                <div className="flex items-center space-x-1">
+                                  <Circle className="h-3 w-3 text-yellow-600" />
+                                  <span>Medium</span>
+                                </div>
+                              </SelectItem>
+                              <SelectItem value="Low">
+                                <div className="flex items-center space-x-1">
+                                  <Minus className="h-3 w-3 text-green-600" />
+                                  <span>Low</span>
+                                </div>
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <div className="flex items-center space-x-2">
+                              <span className="font-medium">{project.name}</span>
+                              <Badge className={`${getVisibilityColor(project.visibility)} border text-xs`} variant="outline">
+                                {project.visibility}
+                              </Badge>
+                              {project.category && (
+                                <Badge className={`${getCategoryInfo(project.category).color} border text-xs`} variant="outline">
+                                  {project.category}
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-sm text-gray-500 mt-1">{project.description}</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={`${getLanguageColor(project.language)} border`} variant="outline">
+                            {project.language}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Select
+                            value={project.assigned_to}
+                            onValueChange={(value) => handleAssignmentChange(project.id, value)}
+                          >
+                            <SelectTrigger className="w-32">
+                              <SelectValue>
+                                <Badge className={`${getAssigneeColor(project.assigned_to)} border`} variant="outline">
+                                  {project.assigned_to}
+                                </Badge>
+                              </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                              {teamMembers.map(member => (
+                                <SelectItem key={member} value={member}>{member}</SelectItem>
+                              ))}
+                              <SelectItem value="Unassigned">Unassigned</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={`${getPlatformColor(project.platform)} border`} variant="outline">
+                            {project.platform}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="max-w-xs">
+                            {project.domain_associated ? (
+                              <a
+                                href={`https://${project.domain_associated}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:text-blue-800 underline text-sm"
+                              >
+                                {project.domain_associated}
+                              </a>
+                            ) : (
+                              <span className="text-gray-400 text-sm">No domain</span>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-sm text-gray-500">
+                            {new Date(project.last_updated).toLocaleDateString()}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setEditingProject(project)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="outline" size="sm" className="text-red-600 hover:text-red-800">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete Project</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to delete "{project.name}"? This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => handleDeleteProject(project.id, project.name)}
+                                    className="bg-red-600 hover:bg-red-700"
+                                  >
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

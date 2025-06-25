@@ -136,7 +136,7 @@ const Landing = () => {
               <Button variant="ghost" className="text-slate-600 hover:text-slate-800">
                 Pricing
               </Button>
-              <Link to="/dashboard">
+              <Link to="/login">
                 <Button className="bg-gradient-to-r from-emerald-500 to-blue-600 text-white rounded-xl shadow-lg hover:from-emerald-600 hover:to-blue-700 transition-all duration-200">
                   Get Started
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -167,7 +167,7 @@ const Landing = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Link to="/dashboard">
+            <Link to="/login">
               <Button size="lg" className="bg-gradient-to-r from-emerald-500 to-blue-600 text-white rounded-xl shadow-lg hover:from-emerald-600 hover:to-blue-700 transition-all duration-200 px-8 py-4 text-lg">
                 Start Free Clone
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -360,7 +360,7 @@ const Landing = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-            <Link to="/dashboard">
+            <Link to="/login">
               <Button size="lg" variant="secondary" className="bg-white text-slate-800 hover:bg-gray-100 rounded-xl px-8 py-4 text-lg font-semibold">
                 Start Free Clone
                 <ArrowRight className="ml-2 h-5 w-5" />

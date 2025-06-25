@@ -27,29 +27,7 @@ const queryClient = new QueryClient();
 
 const clerkPublishableKey = 'pk_test_ZGVlcC1yaGluby0yOC5jbGVyay5hY2NvdW50cy5kZXYk';
 
-function AppRoutes() {
-  return (
-    <Routes>
-      <Route path="/" element={<Landing />} />
-      <Route path="/dashboard" element={<Index />} />
-      <Route path="/intelligent-search" element={<IntelligentSearchPage />} />
-      <Route path="/reports" element={<ReportsPage />} />
-      <Route path="/data-tables" element={<DataTables />} />
-      <Route path="/audit" element={<AuditPage />} />
-      <Route path="/total-calls" element={<TotalCalls />} />
-      <Route path="/ambulance-bookings" element={<AmbulanceBookings />} />
-      <Route path="/new-patients" element={<NewPatients />} />
-      <Route path="/appointments-scheduled" element={<AppointmentsScheduled />} />
-      <Route path="/whatsapp-responses" element={<WhatsAppResponses />} />
-      <Route path="/follow-up-calls" element={<FollowUpCalls />} />
-      <Route path="/social-media" element={<SocialMediaManagement />} />
-      <Route path="/domain-management" element={<DomainManagement />} />
-      <Route path="/project-management" element={<ProjectManagement />} />
-      <Route path="/prompt-management" element={<PromptManagement />} />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
-  );
-}
+
 
 const App = () => (
   <ClerkProvider publishableKey={clerkPublishableKey}>
@@ -59,10 +37,15 @@ const App = () => (
         <Sonner />
         <BrowserRouter basename={import.meta.env.BASE_URL}>
           <Routes>
+            {/* Public landing page - accessible without authentication */}
+            <Route path="/" element={<Landing />} />
+
+            {/* Login page */}
             <Route
               path="/login"
               element={
                 <SignIn
+                  redirectUrl="/dashboard"
                   appearance={{
                     elements: {
                       card: "rounded-2xl shadow-2xl border border-blue-200 bg-white/80",
@@ -81,12 +64,14 @@ const App = () => (
                 />
               }
             />
+
+            {/* Protected routes - require authentication */}
             <Route
-              path="*"
+              path="/dashboard"
               element={
                 <>
                   <SignedIn>
-                    <AppRoutes />
+                    <Index />
                   </SignedIn>
                   <SignedOut>
                     <RedirectToSignIn />
@@ -94,6 +79,191 @@ const App = () => (
                 </>
               }
             />
+            <Route
+              path="/intelligent-search"
+              element={
+                <>
+                  <SignedIn>
+                    <IntelligentSearchPage />
+                  </SignedIn>
+                  <SignedOut>
+                    <RedirectToSignIn />
+                  </SignedOut>
+                </>
+              }
+            />
+            <Route
+              path="/reports"
+              element={
+                <>
+                  <SignedIn>
+                    <ReportsPage />
+                  </SignedIn>
+                  <SignedOut>
+                    <RedirectToSignIn />
+                  </SignedOut>
+                </>
+              }
+            />
+            <Route
+              path="/data-tables"
+              element={
+                <>
+                  <SignedIn>
+                    <DataTables />
+                  </SignedIn>
+                  <SignedOut>
+                    <RedirectToSignIn />
+                  </SignedOut>
+                </>
+              }
+            />
+            <Route
+              path="/audit"
+              element={
+                <>
+                  <SignedIn>
+                    <AuditPage />
+                  </SignedIn>
+                  <SignedOut>
+                    <RedirectToSignIn />
+                  </SignedOut>
+                </>
+              }
+            />
+            <Route
+              path="/total-calls"
+              element={
+                <>
+                  <SignedIn>
+                    <TotalCalls />
+                  </SignedIn>
+                  <SignedOut>
+                    <RedirectToSignIn />
+                  </SignedOut>
+                </>
+              }
+            />
+            <Route
+              path="/ambulance-bookings"
+              element={
+                <>
+                  <SignedIn>
+                    <AmbulanceBookings />
+                  </SignedIn>
+                  <SignedOut>
+                    <RedirectToSignIn />
+                  </SignedOut>
+                </>
+              }
+            />
+            <Route
+              path="/new-patients"
+              element={
+                <>
+                  <SignedIn>
+                    <NewPatients />
+                  </SignedIn>
+                  <SignedOut>
+                    <RedirectToSignIn />
+                  </SignedOut>
+                </>
+              }
+            />
+            <Route
+              path="/appointments-scheduled"
+              element={
+                <>
+                  <SignedIn>
+                    <AppointmentsScheduled />
+                  </SignedIn>
+                  <SignedOut>
+                    <RedirectToSignIn />
+                  </SignedOut>
+                </>
+              }
+            />
+            <Route
+              path="/whatsapp-responses"
+              element={
+                <>
+                  <SignedIn>
+                    <WhatsAppResponses />
+                  </SignedIn>
+                  <SignedOut>
+                    <RedirectToSignIn />
+                  </SignedOut>
+                </>
+              }
+            />
+            <Route
+              path="/follow-up-calls"
+              element={
+                <>
+                  <SignedIn>
+                    <FollowUpCalls />
+                  </SignedIn>
+                  <SignedOut>
+                    <RedirectToSignIn />
+                  </SignedOut>
+                </>
+              }
+            />
+            <Route
+              path="/social-media"
+              element={
+                <>
+                  <SignedIn>
+                    <SocialMediaManagement />
+                  </SignedIn>
+                  <SignedOut>
+                    <RedirectToSignIn />
+                  </SignedOut>
+                </>
+              }
+            />
+            <Route
+              path="/domain-management"
+              element={
+                <>
+                  <SignedIn>
+                    <DomainManagement />
+                  </SignedIn>
+                  <SignedOut>
+                    <RedirectToSignIn />
+                  </SignedOut>
+                </>
+              }
+            />
+            <Route
+              path="/project-management"
+              element={
+                <>
+                  <SignedIn>
+                    <ProjectManagement />
+                  </SignedIn>
+                  <SignedOut>
+                    <RedirectToSignIn />
+                  </SignedOut>
+                </>
+              }
+            />
+            <Route
+              path="/prompt-management"
+              element={
+                <>
+                  <SignedIn>
+                    <PromptManagement />
+                  </SignedIn>
+                  <SignedOut>
+                    <RedirectToSignIn />
+                  </SignedOut>
+                </>
+              }
+            />
+
+            {/* 404 page */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>

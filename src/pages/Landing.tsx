@@ -20,7 +20,10 @@ import {
   RefreshCw,
   Code,
   Server,
-  Cloud
+  Cloud,
+  Phone,
+  PhoneCall,
+  Headphones
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -133,12 +136,29 @@ const Landing = () => {
             </div>
 
             <div className="flex items-center space-x-4">
+              <div className="hidden md:flex items-center space-x-2 text-sm text-slate-600">
+                <Phone className="h-4 w-4 text-emerald-600" />
+                <span className="font-semibold">24x7 Support:</span>
+                <a href="tel:18002330000" className="text-emerald-600 hover:text-emerald-700 font-bold">
+                  1800-233-0000
+                </a>
+              </div>
               <Button variant="ghost" className="text-slate-600 hover:text-slate-800">
                 Features
               </Button>
               <Button variant="ghost" className="text-slate-600 hover:text-slate-800">
                 Pricing
               </Button>
+              <a
+                href="https://bachaobachao.in"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button variant="outline" className="border-2 border-emerald-500 text-emerald-600 hover:bg-emerald-50 rounded-xl">
+                  <PhoneCall className="mr-2 h-4 w-4" />
+                  Get Call Back
+                </Button>
+              </a>
               <Link to="/login">
                 <Button className="bg-gradient-to-r from-emerald-500 to-blue-600 text-white rounded-xl shadow-lg hover:from-emerald-600 hover:to-blue-700 transition-all duration-200">
                   Get Started
@@ -207,7 +227,7 @@ const Landing = () => {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
             <Link to="/login">
               <Button size="lg" className="bg-gradient-to-r from-emerald-500 to-blue-600 text-white rounded-xl shadow-lg hover:from-emerald-600 hover:to-blue-700 transition-all duration-200 px-8 py-4 text-lg">
                 Start Free Clone
@@ -219,15 +239,38 @@ const Landing = () => {
             </Button>
           </div>
 
+          {/* 24x7 Support Highlight */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+            <div className="flex items-center space-x-4 bg-gradient-to-r from-orange-100 to-red-100 px-6 py-3 rounded-2xl border-2 border-orange-200 shadow-lg">
+              <div className="flex items-center space-x-2">
+                <Phone className="h-5 w-5 text-orange-600" />
+                <span className="text-slate-700 font-medium">24x7 Support:</span>
+                <a href="tel:18002330000" className="text-orange-600 hover:text-orange-700 font-bold text-lg">
+                  1800-233-0000
+                </a>
+              </div>
+              <div className="h-6 w-px bg-slate-300"></div>
+              <a
+                href="https://bachaobachao.in"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-2 text-red-600 hover:text-red-700 font-semibold"
+              >
+                <PhoneCall className="h-4 w-4" />
+                <span>Get Call Back</span>
+              </a>
+            </div>
+          </div>
+
           {/* Trust Indicators */}
           <div className="flex flex-wrap justify-center items-center gap-6 text-sm text-slate-500">
             <div className="flex items-center space-x-2">
-              <CheckCircle className="h-4 w-4 text-purple-500" />
-              <span>AI Agent Integrated</span>
+              <CheckCircle className="h-4 w-4 text-orange-500" />
+              <span>24x7 Technical Support</span>
             </div>
             <div className="flex items-center space-x-2">
-              <CheckCircle className="h-4 w-4 text-pink-500" />
-              <span>Intelligent Automation</span>
+              <CheckCircle className="h-4 w-4 text-purple-500" />
+              <span>AI Agent Integrated</span>
             </div>
             <div className="flex items-center space-x-2">
               <CheckCircle className="h-4 w-4 text-emerald-500" />
@@ -573,6 +616,154 @@ const Landing = () => {
           </div>
         </div>
 
+        {/* 24x7 Support Section - Premium Support */}
+        <div className="mb-20">
+          <div className="bg-gradient-to-r from-orange-600 via-red-600 to-pink-600 rounded-3xl p-1 shadow-2xl">
+            <div className="bg-white rounded-3xl p-12">
+              <div className="text-center mb-12">
+                <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-100 to-red-100 text-orange-800 rounded-full text-lg font-bold mb-6 shadow-lg">
+                  <Headphones className="h-6 w-6 mr-3" />
+                  Premium 24x7 Technical Support
+                </div>
+
+                <h2 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-orange-600 via-red-600 to-pink-600 bg-clip-text text-transparent mb-6 leading-tight">
+                  Round-the-Clock Expert
+                  <span className="block">Technical Assistance</span>
+                </h2>
+
+                <p className="text-xl text-slate-600 max-w-4xl mx-auto leading-relaxed">
+                  Get instant help from our accounting and software technical experts 24 hours a day, 7 days a week.
+                  Whether it's software issues, accounting queries, or technical guidance - we're always here to help.
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-12 mb-12">
+                {/* Toll-Free Support */}
+                <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-200 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 group">
+                  <CardContent className="p-8 text-center">
+                    <div className="mb-6">
+                      <div className="p-6 bg-gradient-to-r from-orange-500 to-orange-600 rounded-3xl shadow-lg w-fit mx-auto group-hover:scale-110 transition-transform duration-200">
+                        <Phone className="h-12 w-12 text-white" />
+                      </div>
+                    </div>
+                    <h3 className="text-3xl font-bold text-orange-800 mb-4">Instant Phone Support</h3>
+                    <div className="mb-6">
+                      <div className="text-4xl font-bold text-orange-600 mb-2">1800-233-0000</div>
+                      <div className="text-lg text-slate-600 mb-4">Toll-Free • Available 24x7</div>
+                      <a
+                        href="tel:18002330000"
+                        className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl font-semibold hover:from-orange-600 hover:to-orange-700 transition-all duration-200 shadow-lg"
+                      >
+                        <Phone className="mr-2 h-5 w-5" />
+                        Call Now - Free
+                      </a>
+                    </div>
+                    <ul className="space-y-3 text-slate-700 text-left">
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-orange-500 mt-0.5 flex-shrink-0" />
+                        <span>Immediate technical assistance</span>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-orange-500 mt-0.5 flex-shrink-0" />
+                        <span>Accounting software troubleshooting</span>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-orange-500 mt-0.5 flex-shrink-0" />
+                        <span>Expert guidance & consultation</span>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-orange-500 mt-0.5 flex-shrink-0" />
+                        <span>No waiting time - direct connection</span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+
+                {/* Call Back Service */}
+                <Card className="bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-200 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 group">
+                  <CardContent className="p-8 text-center">
+                    <div className="mb-6">
+                      <div className="p-6 bg-gradient-to-r from-red-500 to-red-600 rounded-3xl shadow-lg w-fit mx-auto group-hover:scale-110 transition-transform duration-200">
+                        <PhoneCall className="h-12 w-12 text-white" />
+                      </div>
+                    </div>
+                    <h3 className="text-3xl font-bold text-red-800 mb-4">Scheduled Call Back</h3>
+                    <div className="mb-6">
+                      <div className="text-2xl font-bold text-red-600 mb-2">We Call You Back</div>
+                      <div className="text-lg text-slate-600 mb-4">Choose your convenient time</div>
+                      <a
+                        href="https://bachaobachao.in"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-semibold hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-lg"
+                      >
+                        <PhoneCall className="mr-2 h-5 w-5" />
+                        Request Call Back
+                      </a>
+                    </div>
+                    <ul className="space-y-3 text-slate-700 text-left">
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+                        <span>Schedule at your convenience</span>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+                        <span>Detailed consultation sessions</span>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+                        <span>Personalized technical guidance</span>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+                        <span>Free service - no charges</span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Support Statistics */}
+              <div className="bg-gradient-to-r from-slate-900 via-orange-800 to-red-800 rounded-2xl p-8 text-white text-center">
+                <div className="mb-6">
+                  <h3 className="text-3xl font-bold mb-4">Premium Support Statistics</h3>
+                  <p className="text-xl opacity-90 max-w-3xl mx-auto">
+                    Our dedicated support team ensures you never face technical challenges alone
+                  </p>
+                </div>
+
+                <div className="grid md:grid-cols-4 gap-6 mb-8">
+                  <div className="text-center">
+                    <div className="text-4xl font-bold text-orange-300 mb-2">24x7</div>
+                    <div className="text-lg font-semibold mb-1">Always Available</div>
+                    <div className="text-sm opacity-80">Round-the-clock support</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-4xl font-bold text-red-300 mb-2">&lt;30s</div>
+                    <div className="text-lg font-semibold mb-1">Response Time</div>
+                    <div className="text-sm opacity-80">Instant connection</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-4xl font-bold text-pink-300 mb-2">100%</div>
+                    <div className="text-lg font-semibold mb-1">Issue Resolution</div>
+                    <div className="text-sm opacity-80">We solve every problem</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-4xl font-bold text-yellow-300 mb-2">Free</div>
+                    <div className="text-lg font-semibold mb-1">No Charges</div>
+                    <div className="text-sm opacity-80">Included in your package</div>
+                  </div>
+                </div>
+
+                <div className="inline-flex items-center px-8 py-4 bg-white/20 backdrop-blur-sm rounded-2xl text-lg font-semibold">
+                  <Headphones className="h-6 w-6 mr-3" />
+                  Expert Technical Support + Accounting Guidance = Complete Peace of Mind
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* CA Services Section - Prominent Feature */}
         <div className="mb-20">
           <div className="bg-gradient-to-r from-emerald-600 via-blue-600 to-purple-600 rounded-3xl p-1 shadow-2xl">
@@ -879,9 +1070,31 @@ const Landing = () => {
               🤖 AI Agent Integration + 👨‍💼 CA chartered accountants + 📋 Professional audit services - all included!
             </span>
           </p>
-          <p className="text-lg mb-8 opacity-80 max-w-3xl mx-auto">
-            No setup fees, no hidden costs for AI features or professional services, flexible licensing, dedicated support included.
+          <p className="text-lg mb-6 opacity-80 max-w-3xl mx-auto">
+            No setup fees, no hidden costs for AI features or professional services, flexible licensing included.
           </p>
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8 max-w-2xl mx-auto">
+            <div className="flex items-center justify-center mb-3">
+              <Headphones className="h-6 w-6 text-orange-300 mr-3" />
+              <span className="text-xl font-bold">24x7 Technical Support Included</span>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <a href="tel:18002330000" className="flex items-center space-x-2 text-orange-200 hover:text-orange-100 font-semibold">
+                <Phone className="h-5 w-5" />
+                <span>Call: 1800-233-0000 (Toll-Free)</span>
+              </a>
+              <div className="hidden sm:block h-4 w-px bg-white/30"></div>
+              <a
+                href="https://bachaobachao.in"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-2 text-red-200 hover:text-red-100 font-semibold"
+              >
+                <PhoneCall className="h-5 w-5" />
+                <span>Request Call Back</span>
+              </a>
+            </div>
+          </div>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
             <Link to="/login">
@@ -896,9 +1109,9 @@ const Landing = () => {
           </div>
 
           <div className="flex flex-wrap justify-center items-center gap-6 text-sm text-white/70">
+            <span>✓ 24x7 technical support - toll-free</span>
             <span>✓ AI agent integration - no extra cost</span>
             <span>✓ CA services included - no extra cost</span>
-            <span>✓ Professional audit support included</span>
             <span>✓ 30-day money-back guarantee</span>
           </div>
         </div>
@@ -918,10 +1131,31 @@ const Landing = () => {
                   <div className="text-sm text-slate-400">Accounting Software Solutions</div>
                 </div>
               </div>
-              <p className="text-slate-400 max-w-md mb-4">
-                Leading provider of accounting software cloning solutions. Build custom financial software
-                that perfectly replicates industry-standard platforms.
+              <p className="text-slate-400 max-w-md mb-6">
+                Leading provider of AI-powered accounting software cloning solutions with 24x7 technical support.
+                Build custom financial software that perfectly replicates industry-standard platforms.
               </p>
+
+              <div className="bg-slate-800 rounded-xl p-4 mb-4">
+                <div className="flex items-center space-x-3 mb-2">
+                  <Phone className="h-5 w-5 text-orange-400" />
+                  <span className="font-semibold text-white">24x7 Technical Support</span>
+                </div>
+                <div className="flex flex-col space-y-2 text-sm">
+                  <a href="tel:18002330000" className="text-orange-400 hover:text-orange-300 font-bold">
+                    📞 1800-233-0000 (Toll-Free)
+                  </a>
+                  <a
+                    href="https://bachaobachao.in"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-red-400 hover:text-red-300 font-semibold"
+                  >
+                    📞 Request Call Back Service
+                  </a>
+                </div>
+              </div>
+
               <div className="flex space-x-4">
                 <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
                   LinkedIn

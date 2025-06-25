@@ -163,11 +163,24 @@ const Landing = () => {
             <span className="block">Cloning Solutions</span>
           </h1>
 
-          <p className="text-xl text-slate-600 max-w-4xl mx-auto mb-8 leading-relaxed">
+          <p className="text-xl text-slate-600 max-w-4xl mx-auto mb-6 leading-relaxed">
             Build custom accounting software that perfectly replicates Tally, QuickBooks, or any financial platform.
             <span className="font-semibold text-emerald-600">100% feature compatibility</span> with
             <span className="font-semibold text-blue-600"> zero learning curve</span> for your users.
           </p>
+
+          <div className="bg-gradient-to-r from-emerald-100 via-blue-100 to-purple-100 rounded-2xl p-6 mb-8 max-w-4xl mx-auto border-2 border-emerald-200 shadow-lg">
+            <div className="flex items-center justify-center mb-3">
+              <Shield className="h-6 w-6 text-emerald-600 mr-2" />
+              <span className="text-lg font-bold text-slate-800">Complete Professional Services Included</span>
+            </div>
+            <p className="text-slate-700 text-center">
+              <span className="font-semibold text-emerald-700">CA Chartered Accountants</span>,
+              <span className="font-semibold text-blue-700"> Professional Audit Services</span>, and
+              <span className="font-semibold text-purple-700"> Expert Advisory</span> - all included in your cloning cost.
+              No separate charges for human intervention!
+            </p>
+          </div>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <Link to="/login">
@@ -182,7 +195,15 @@ const Landing = () => {
           </div>
 
           {/* Trust Indicators */}
-          <div className="flex flex-wrap justify-center items-center gap-8 text-sm text-slate-500">
+          <div className="flex flex-wrap justify-center items-center gap-6 text-sm text-slate-500">
+            <div className="flex items-center space-x-2">
+              <CheckCircle className="h-4 w-4 text-emerald-500" />
+              <span>CA Services Included</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <CheckCircle className="h-4 w-4 text-emerald-500" />
+              <span>Professional Audit Support</span>
+            </div>
             <div className="flex items-center space-x-2">
               <CheckCircle className="h-4 w-4 text-emerald-500" />
               <span>GST & E-Invoice Ready</span>
@@ -194,10 +215,6 @@ const Landing = () => {
             <div className="flex items-center space-x-2">
               <CheckCircle className="h-4 w-4 text-emerald-500" />
               <span>White-Label Ready</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <CheckCircle className="h-4 w-4 text-emerald-500" />
-              <span>API Integration</span>
             </div>
           </div>
         </div>
@@ -354,6 +371,156 @@ const Landing = () => {
           </div>
         </div>
 
+        {/* CA Services Section - Prominent Feature */}
+        <div className="mb-20">
+          <div className="bg-gradient-to-r from-emerald-600 via-blue-600 to-purple-600 rounded-3xl p-1 shadow-2xl">
+            <div className="bg-white rounded-3xl p-12">
+              <div className="text-center mb-12">
+                <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-emerald-100 to-blue-100 text-emerald-800 rounded-full text-lg font-bold mb-6 shadow-lg">
+                  <Users className="h-6 w-6 mr-3" />
+                  Complete Professional Services Included
+                </div>
+
+                <h2 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-emerald-600 via-blue-600 to-purple-600 bg-clip-text text-transparent mb-6 leading-tight">
+                  CA Chartered Accountants
+                  <span className="block">& Expert Advisory Services</span>
+                </h2>
+
+                <p className="text-xl text-slate-600 max-w-4xl mx-auto leading-relaxed">
+                  Beyond just software cloning - get complete professional accounting services with qualified CA chartered accountants,
+                  audit services, tax advisory, and all human intervention services included in your package cost.
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+                {/* CA Services */}
+                <Card className="bg-gradient-to-br from-emerald-50 to-emerald-100 border-2 border-emerald-200 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 group">
+                  <CardContent className="p-8">
+                    <div className="mb-6">
+                      <div className="p-4 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-2xl shadow-lg w-fit group-hover:scale-110 transition-transform duration-200">
+                        <Shield className="h-8 w-8 text-white" />
+                      </div>
+                    </div>
+                    <h3 className="text-2xl font-bold text-emerald-800 mb-4">CA Chartered Accountants</h3>
+                    <ul className="space-y-3 text-slate-700">
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                        <span>Qualified CA professionals on-demand</span>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                        <span>Financial statement preparation</span>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                        <span>Compliance & regulatory guidance</span>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                        <span>Monthly financial reviews</span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+
+                {/* Audit Services */}
+                <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 group">
+                  <CardContent className="p-8">
+                    <div className="mb-6">
+                      <div className="p-4 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl shadow-lg w-fit group-hover:scale-110 transition-transform duration-200">
+                        <FileText className="h-8 w-8 text-white" />
+                      </div>
+                    </div>
+                    <h3 className="text-2xl font-bold text-blue-800 mb-4">Professional Audit Services</h3>
+                    <ul className="space-y-3 text-slate-700">
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
+                        <span>Internal audit & risk assessment</span>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
+                        <span>Statutory audit compliance</span>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
+                        <span>Tax audit & GST audit</span>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
+                        <span>Due diligence support</span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+
+                {/* Advisory Services */}
+                <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 group md:col-span-2 lg:col-span-1">
+                  <CardContent className="p-8">
+                    <div className="mb-6">
+                      <div className="p-4 bg-gradient-to-r from-purple-500 to-purple-600 rounded-2xl shadow-lg w-fit group-hover:scale-110 transition-transform duration-200">
+                        <Brain className="h-8 w-8 text-white" />
+                      </div>
+                    </div>
+                    <h3 className="text-2xl font-bold text-purple-800 mb-4">Expert Advisory</h3>
+                    <ul className="space-y-3 text-slate-700">
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-purple-500 mt-0.5 flex-shrink-0" />
+                        <span>Tax planning & optimization</span>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-purple-500 mt-0.5 flex-shrink-0" />
+                        <span>Business strategy consultation</span>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-purple-500 mt-0.5 flex-shrink-0" />
+                        <span>Financial planning & analysis</span>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-purple-500 mt-0.5 flex-shrink-0" />
+                        <span>Regulatory compliance advice</span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Value Proposition */}
+              <div className="bg-gradient-to-r from-slate-900 via-emerald-800 to-blue-800 rounded-2xl p-8 text-white text-center">
+                <div className="mb-6">
+                  <h3 className="text-3xl font-bold mb-4">All-Inclusive Professional Package</h3>
+                  <p className="text-xl opacity-90 max-w-3xl mx-auto">
+                    Get both cutting-edge software AND professional human expertise - all included in one transparent cost.
+                    No hidden fees, no separate charges for professional services.
+                  </p>
+                </div>
+
+                <div className="grid md:grid-cols-3 gap-8 mb-8">
+                  <div className="text-center">
+                    <div className="text-4xl font-bold text-emerald-300 mb-2">100%</div>
+                    <div className="text-lg font-semibold mb-1">Qualified CAs</div>
+                    <div className="text-sm opacity-80">All our accountants are certified professionals</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-4xl font-bold text-blue-300 mb-2">24/7</div>
+                    <div className="text-lg font-semibold mb-1">Expert Support</div>
+                    <div className="text-sm opacity-80">Human intervention whenever you need it</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-4xl font-bold text-purple-300 mb-2">₹0</div>
+                    <div className="text-lg font-semibold mb-1">Hidden Costs</div>
+                    <div className="text-sm opacity-80">All professional services included upfront</div>
+                  </div>
+                </div>
+
+                <div className="inline-flex items-center px-6 py-3 bg-white/20 backdrop-blur-sm rounded-full text-lg font-semibold">
+                  <Zap className="h-5 w-5 mr-2" />
+                  Software + Professional Services = One Complete Solution
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Technology Stack Section */}
         <div className="mb-20">
           <div className="text-center mb-12">
@@ -504,9 +671,14 @@ const Landing = () => {
         {/* CTA Section */}
         <div className="text-center bg-gradient-to-r from-slate-900 via-emerald-800 to-blue-800 rounded-3xl p-12 text-white">
           <h2 className="text-4xl font-bold mb-4">Ready to Clone Your First Accounting Software?</h2>
-          <p className="text-xl mb-8 opacity-90 max-w-3xl mx-auto">
+          <p className="text-xl mb-6 opacity-90 max-w-3xl mx-auto">
             Start building your custom accounting solution today. Get a fully functional clone in weeks, not months.
-            No setup fees, flexible licensing, dedicated support included.
+            <span className="block mt-2 font-semibold text-emerald-200">
+              Complete with CA chartered accountants, audit services, and professional advisory - all included!
+            </span>
+          </p>
+          <p className="text-lg mb-8 opacity-80 max-w-2xl mx-auto">
+            No setup fees, no hidden costs for professional services, flexible licensing, dedicated support included.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
@@ -522,9 +694,10 @@ const Landing = () => {
           </div>
 
           <div className="flex flex-wrap justify-center items-center gap-6 text-sm text-white/70">
+            <span>✓ CA services included - no extra cost</span>
+            <span>✓ Professional audit support included</span>
             <span>✓ 30-day money-back guarantee</span>
             <span>✓ Free migration support</span>
-            <span>✓ White-label licensing available</span>
           </div>
         </div>
       </section>

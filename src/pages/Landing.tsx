@@ -147,12 +147,16 @@ const Landing = () => {
                   1800-233-0000
                 </a>
               </div>
-              <Button variant="ghost" className="text-slate-600 hover:text-slate-800">
-                Features
-              </Button>
-              <Button variant="ghost" className="text-slate-600 hover:text-slate-800">
-                Pricing
-              </Button>
+              <Link to="/features">
+                <Button variant="ghost" className="text-slate-600 hover:text-slate-800">
+                  Features
+                </Button>
+              </Link>
+              <Link to="/pricing">
+                <Button variant="ghost" className="text-slate-600 hover:text-slate-800">
+                  Pricing
+                </Button>
+              </Link>
               <a
                 href="https://bachaobachao.in"
                 target="_blank"

@@ -17,7 +17,10 @@ import {
   TrendingUp,
   Lock,
   Layers,
-  RefreshCw
+  RefreshCw,
+  Code,
+  Server,
+  Cloud
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -347,6 +350,153 @@ const Landing = () => {
               </div>
               <h3 className="text-xl font-semibold text-slate-800 mb-2">Real-time Sync</h3>
               <p className="text-slate-600">Instant synchronization across all devices and platforms</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Technology Stack Section */}
+        <div className="mb-20">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-4">
+              Powered by Latest Technology Stack
+            </h2>
+            <p className="text-lg text-slate-600 max-w-3xl mx-auto">
+              We use cutting-edge technologies to ensure your accounting software clone is fast, scalable, and future-proof
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            {/* Frontend Technologies */}
+            <Card className="bg-white/70 backdrop-blur-sm border border-white/30 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+              <CardContent className="p-6 text-center">
+                <div className="p-3 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-xl shadow-lg w-fit mx-auto mb-4">
+                  <Code className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-800 mb-3">Frontend</h3>
+                <div className="space-y-2 text-sm text-slate-600">
+                  <div className="flex items-center justify-center space-x-2">
+                    <CheckCircle className="h-3 w-3 text-emerald-500" />
+                    <span>Next.js 14</span>
+                  </div>
+                  <div className="flex items-center justify-center space-x-2">
+                    <CheckCircle className="h-3 w-3 text-emerald-500" />
+                    <span>React 18</span>
+                  </div>
+                  <div className="flex items-center justify-center space-x-2">
+                    <CheckCircle className="h-3 w-3 text-emerald-500" />
+                    <span>TypeScript</span>
+                  </div>
+                  <div className="flex items-center justify-center space-x-2">
+                    <CheckCircle className="h-3 w-3 text-emerald-500" />
+                    <span>Tailwind CSS</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Backend Technologies */}
+            <Card className="bg-white/70 backdrop-blur-sm border border-white/30 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+              <CardContent className="p-6 text-center">
+                <div className="p-3 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl shadow-lg w-fit mx-auto mb-4">
+                  <Server className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-800 mb-3">Backend</h3>
+                <div className="space-y-2 text-sm text-slate-600">
+                  <div className="flex items-center justify-center space-x-2">
+                    <CheckCircle className="h-3 w-3 text-emerald-500" />
+                    <span>Node.js</span>
+                  </div>
+                  <div className="flex items-center justify-center space-x-2">
+                    <CheckCircle className="h-3 w-3 text-emerald-500" />
+                    <span>Express.js</span>
+                  </div>
+                  <div className="flex items-center justify-center space-x-2">
+                    <CheckCircle className="h-3 w-3 text-emerald-500" />
+                    <span>Prisma ORM</span>
+                  </div>
+                  <div className="flex items-center justify-center space-x-2">
+                    <CheckCircle className="h-3 w-3 text-emerald-500" />
+                    <span>GraphQL</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Database & Storage */}
+            <Card className="bg-white/70 backdrop-blur-sm border border-white/30 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+              <CardContent className="p-6 text-center">
+                <div className="p-3 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-xl shadow-lg w-fit mx-auto mb-4">
+                  <Database className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-800 mb-3">Database</h3>
+                <div className="space-y-2 text-sm text-slate-600">
+                  <div className="flex items-center justify-center space-x-2">
+                    <CheckCircle className="h-3 w-3 text-emerald-500" />
+                    <span>Supabase</span>
+                  </div>
+                  <div className="flex items-center justify-center space-x-2">
+                    <CheckCircle className="h-3 w-3 text-emerald-500" />
+                    <span>PostgreSQL</span>
+                  </div>
+                  <div className="flex items-center justify-center space-x-2">
+                    <CheckCircle className="h-3 w-3 text-emerald-500" />
+                    <span>Convex</span>
+                  </div>
+                  <div className="flex items-center justify-center space-x-2">
+                    <CheckCircle className="h-3 w-3 text-emerald-500" />
+                    <span>Redis Cache</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* DevOps & Deployment */}
+            <Card className="bg-white/70 backdrop-blur-sm border border-white/30 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+              <CardContent className="p-6 text-center">
+                <div className="p-3 bg-gradient-to-r from-orange-500 to-red-600 rounded-xl shadow-lg w-fit mx-auto mb-4">
+                  <Cloud className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-800 mb-3">DevOps</h3>
+                <div className="space-y-2 text-sm text-slate-600">
+                  <div className="flex items-center justify-center space-x-2">
+                    <CheckCircle className="h-3 w-3 text-emerald-500" />
+                    <span>Vercel</span>
+                  </div>
+                  <div className="flex items-center justify-center space-x-2">
+                    <CheckCircle className="h-3 w-3 text-emerald-500" />
+                    <span>Docker</span>
+                  </div>
+                  <div className="flex items-center justify-center space-x-2">
+                    <CheckCircle className="h-3 w-3 text-emerald-500" />
+                    <span>GitHub Actions</span>
+                  </div>
+                  <div className="flex items-center justify-center space-x-2">
+                    <CheckCircle className="h-3 w-3 text-emerald-500" />
+                    <span>AWS/Azure</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Technology Benefits */}
+          <div className="bg-gradient-to-r from-slate-50 to-blue-50 rounded-2xl p-8">
+            <div className="grid md:grid-cols-3 gap-8 text-center">
+              <div>
+                <div className="text-3xl font-bold text-emerald-600 mb-2">⚡</div>
+                <h4 className="text-lg font-semibold text-slate-800 mb-2">Lightning Fast</h4>
+                <p className="text-sm text-slate-600">Next.js and modern architecture ensure sub-second load times</p>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-blue-600 mb-2">🔒</div>
+                <h4 className="text-lg font-semibold text-slate-800 mb-2">Enterprise Security</h4>
+                <p className="text-sm text-slate-600">Built-in authentication, encryption, and compliance features</p>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-purple-600 mb-2">📈</div>
+                <h4 className="text-lg font-semibold text-slate-800 mb-2">Infinitely Scalable</h4>
+                <p className="text-sm text-slate-600">Cloud-native architecture that grows with your business</p>
+              </div>
             </div>
           </div>
         </div>

@@ -153,14 +153,20 @@ const Landing = () => {
       {/* Hero Section */}
       <section className="px-6 py-20 max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <div className="inline-flex items-center px-4 py-2 bg-emerald-100 text-emerald-800 rounded-full text-sm font-medium mb-6">
-            <Zap className="h-4 w-4 mr-2" />
-            Clone Any Accounting Software in Days, Not Months
+          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mb-6">
+            <div className="inline-flex items-center px-4 py-2 bg-emerald-100 text-emerald-800 rounded-full text-sm font-medium">
+              <Zap className="h-4 w-4 mr-2" />
+              Clone Any Accounting Software in Days, Not Months
+            </div>
+            <div className="inline-flex items-center px-4 py-2 bg-purple-100 text-purple-800 rounded-full text-sm font-medium animate-pulse">
+              <Brain className="h-4 w-4 mr-2" />
+              AI Agent Integrated & Intelligent
+            </div>
           </div>
 
           <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-emerald-600 via-blue-600 to-purple-600 bg-clip-text text-transparent mb-6 leading-tight">
-            Accounting Software
-            <span className="block">Cloning Solutions</span>
+            AI-Powered Accounting
+            <span className="block">Software Cloning Solutions</span>
           </h1>
 
           <p className="text-xl text-slate-600 max-w-4xl mx-auto mb-6 leading-relaxed">
@@ -169,17 +175,36 @@ const Landing = () => {
             <span className="font-semibold text-blue-600"> zero learning curve</span> for your users.
           </p>
 
-          <div className="bg-gradient-to-r from-emerald-100 via-blue-100 to-purple-100 rounded-2xl p-6 mb-8 max-w-4xl mx-auto border-2 border-emerald-200 shadow-lg">
-            <div className="flex items-center justify-center mb-3">
-              <Shield className="h-6 w-6 text-emerald-600 mr-2" />
-              <span className="text-lg font-bold text-slate-800">Complete Professional Services Included</span>
+          <div className="bg-gradient-to-r from-emerald-100 via-blue-100 to-purple-100 rounded-2xl p-6 mb-8 max-w-5xl mx-auto border-2 border-emerald-200 shadow-lg">
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="text-center">
+                <div className="flex items-center justify-center mb-3">
+                  <Brain className="h-6 w-6 text-purple-600 mr-2" />
+                  <span className="text-lg font-bold text-slate-800">AI Agent Integration</span>
+                </div>
+                <p className="text-slate-700">
+                  <span className="font-semibold text-purple-700">Intelligent Automation</span>,
+                  <span className="font-semibold text-pink-700"> Predictive Analytics</span>, and
+                  <span className="font-semibold text-blue-700"> Natural Language AI</span> - built into every clone.
+                </p>
+              </div>
+              <div className="text-center">
+                <div className="flex items-center justify-center mb-3">
+                  <Shield className="h-6 w-6 text-emerald-600 mr-2" />
+                  <span className="text-lg font-bold text-slate-800">Complete Professional Services</span>
+                </div>
+                <p className="text-slate-700">
+                  <span className="font-semibold text-emerald-700">CA Chartered Accountants</span>,
+                  <span className="font-semibold text-blue-700"> Professional Audit Services</span>, and
+                  <span className="font-semibold text-purple-700"> Expert Advisory</span> - all included.
+                </p>
+              </div>
             </div>
-            <p className="text-slate-700 text-center">
-              <span className="font-semibold text-emerald-700">CA Chartered Accountants</span>,
-              <span className="font-semibold text-blue-700"> Professional Audit Services</span>, and
-              <span className="font-semibold text-purple-700"> Expert Advisory</span> - all included in your cloning cost.
-              No separate charges for human intervention!
-            </p>
+            <div className="text-center mt-4 pt-4 border-t border-slate-300">
+              <p className="text-slate-600 font-medium">
+                🤖 AI Intelligence + 👨‍💼 Human Expertise + 💻 Custom Software = Complete Solution
+              </p>
+            </div>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
@@ -197,24 +222,24 @@ const Landing = () => {
           {/* Trust Indicators */}
           <div className="flex flex-wrap justify-center items-center gap-6 text-sm text-slate-500">
             <div className="flex items-center space-x-2">
+              <CheckCircle className="h-4 w-4 text-purple-500" />
+              <span>AI Agent Integrated</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <CheckCircle className="h-4 w-4 text-pink-500" />
+              <span>Intelligent Automation</span>
+            </div>
+            <div className="flex items-center space-x-2">
               <CheckCircle className="h-4 w-4 text-emerald-500" />
               <span>CA Services Included</span>
             </div>
             <div className="flex items-center space-x-2">
-              <CheckCircle className="h-4 w-4 text-emerald-500" />
+              <CheckCircle className="h-4 w-4 text-blue-500" />
               <span>Professional Audit Support</span>
             </div>
             <div className="flex items-center space-x-2">
               <CheckCircle className="h-4 w-4 text-emerald-500" />
               <span>GST & E-Invoice Ready</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <CheckCircle className="h-4 w-4 text-emerald-500" />
-              <span>Multi-Language Support</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <CheckCircle className="h-4 w-4 text-emerald-500" />
-              <span>White-Label Ready</span>
             </div>
           </div>
         </div>
@@ -367,6 +392,183 @@ const Landing = () => {
               </div>
               <h3 className="text-xl font-semibold text-slate-800 mb-2">Real-time Sync</h3>
               <p className="text-slate-600">Instant synchronization across all devices and platforms</p>
+            </div>
+          </div>
+        </div>
+
+        {/* AI Agent Integration Section - Revolutionary Feature */}
+        <div className="mb-20">
+          <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 rounded-3xl p-1 shadow-2xl">
+            <div className="bg-white rounded-3xl p-12">
+              <div className="text-center mb-12">
+                <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 rounded-full text-lg font-bold mb-6 shadow-lg animate-pulse">
+                  <Brain className="h-6 w-6 mr-3" />
+                  Revolutionary AI Agent Integration
+                </div>
+
+                <h2 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent mb-6 leading-tight">
+                  AI-Powered Accounting
+                  <span className="block">Intelligence Built-In</span>
+                </h2>
+
+                <p className="text-xl text-slate-600 max-w-4xl mx-auto leading-relaxed">
+                  Experience the future of accounting with advanced AI agents that automate complex tasks, provide intelligent insights,
+                  and make smart decisions - transforming your accounting software from a tool into an intelligent business partner.
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+                {/* Intelligent Automation */}
+                <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 group">
+                  <CardContent className="p-8">
+                    <div className="mb-6">
+                      <div className="p-4 bg-gradient-to-r from-purple-500 to-purple-600 rounded-2xl shadow-lg w-fit group-hover:scale-110 transition-transform duration-200">
+                        <Zap className="h-8 w-8 text-white" />
+                      </div>
+                    </div>
+                    <h3 className="text-2xl font-bold text-purple-800 mb-4">Intelligent Automation</h3>
+                    <ul className="space-y-3 text-slate-700">
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-purple-500 mt-0.5 flex-shrink-0" />
+                        <span>Auto-categorize transactions with 99% accuracy</span>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-purple-500 mt-0.5 flex-shrink-0" />
+                        <span>Smart invoice processing & data extraction</span>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-purple-500 mt-0.5 flex-shrink-0" />
+                        <span>Automated reconciliation & matching</span>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-purple-500 mt-0.5 flex-shrink-0" />
+                        <span>Intelligent expense categorization</span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+
+                {/* Predictive Analytics */}
+                <Card className="bg-gradient-to-br from-pink-50 to-pink-100 border-2 border-pink-200 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 group">
+                  <CardContent className="p-8">
+                    <div className="mb-6">
+                      <div className="p-4 bg-gradient-to-r from-pink-500 to-pink-600 rounded-2xl shadow-lg w-fit group-hover:scale-110 transition-transform duration-200">
+                        <TrendingUp className="h-8 w-8 text-white" />
+                      </div>
+                    </div>
+                    <h3 className="text-2xl font-bold text-pink-800 mb-4">Predictive Analytics</h3>
+                    <ul className="space-y-3 text-slate-700">
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-pink-500 mt-0.5 flex-shrink-0" />
+                        <span>Cash flow forecasting & predictions</span>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-pink-500 mt-0.5 flex-shrink-0" />
+                        <span>Risk assessment & fraud detection</span>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-pink-500 mt-0.5 flex-shrink-0" />
+                        <span>Budget variance analysis & alerts</span>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-pink-500 mt-0.5 flex-shrink-0" />
+                        <span>Market trend analysis & insights</span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+
+                {/* Natural Language Processing */}
+                <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 group md:col-span-2 lg:col-span-1">
+                  <CardContent className="p-8">
+                    <div className="mb-6">
+                      <div className="p-4 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl shadow-lg w-fit group-hover:scale-110 transition-transform duration-200">
+                        <Globe className="h-8 w-8 text-white" />
+                      </div>
+                    </div>
+                    <h3 className="text-2xl font-bold text-blue-800 mb-4">Natural Language AI</h3>
+                    <ul className="space-y-3 text-slate-700">
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
+                        <span>Voice commands & conversational queries</span>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
+                        <span>Smart document understanding & processing</span>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
+                        <span>Automated report generation in plain English</span>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
+                        <span>Multi-language support with AI translation</span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* AI Advantages Showcase */}
+              <div className="bg-gradient-to-r from-slate-900 via-purple-800 to-pink-800 rounded-2xl p-8 text-white mb-8">
+                <div className="text-center mb-8">
+                  <h3 className="text-3xl font-bold mb-4">Why AI-Integrated Accounting Changes Everything</h3>
+                  <p className="text-xl opacity-90 max-w-3xl mx-auto">
+                    Transform your accounting from manual data entry to intelligent business insights with AI that works 24/7
+                  </p>
+                </div>
+
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                  <div className="text-center">
+                    <div className="text-4xl font-bold text-purple-300 mb-2">95%</div>
+                    <div className="text-lg font-semibold mb-1">Time Savings</div>
+                    <div className="text-sm opacity-80">Automate repetitive tasks</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-4xl font-bold text-pink-300 mb-2">99.9%</div>
+                    <div className="text-lg font-semibold mb-1">Accuracy Rate</div>
+                    <div className="text-sm opacity-80">AI-powered precision</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-4xl font-bold text-blue-300 mb-2">24/7</div>
+                    <div className="text-lg font-semibold mb-1">AI Assistant</div>
+                    <div className="text-sm opacity-80">Always available support</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-4xl font-bold text-emerald-300 mb-2">Real-time</div>
+                    <div className="text-lg font-semibold mb-1">Insights</div>
+                    <div className="text-sm opacity-80">Instant business intelligence</div>
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-8 text-center">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
+                    <h4 className="text-xl font-bold mb-3">🤖 AI Agent Capabilities</h4>
+                    <ul className="text-left space-y-2 text-sm">
+                      <li>• Smart decision making & recommendations</li>
+                      <li>• Continuous learning from your business patterns</li>
+                      <li>• Proactive alerts & anomaly detection</li>
+                      <li>• Intelligent workflow optimization</li>
+                    </ul>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
+                    <h4 className="text-xl font-bold mb-3">⚡ Business Impact</h4>
+                    <ul className="text-left space-y-2 text-sm">
+                      <li>• Reduce manual errors by 99%</li>
+                      <li>• Cut processing time by 95%</li>
+                      <li>• Improve cash flow visibility</li>
+                      <li>• Enable data-driven decisions</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-center">
+                <div className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-2xl text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200">
+                  <Brain className="h-6 w-6 mr-3" />
+                  AI-Powered Accounting Software + Human Expertise = Unbeatable Combination
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -669,16 +871,16 @@ const Landing = () => {
         </div>
 
         {/* CTA Section */}
-        <div className="text-center bg-gradient-to-r from-slate-900 via-emerald-800 to-blue-800 rounded-3xl p-12 text-white">
-          <h2 className="text-4xl font-bold mb-4">Ready to Clone Your First Accounting Software?</h2>
-          <p className="text-xl mb-6 opacity-90 max-w-3xl mx-auto">
-            Start building your custom accounting solution today. Get a fully functional clone in weeks, not months.
-            <span className="block mt-2 font-semibold text-emerald-200">
-              Complete with CA chartered accountants, audit services, and professional advisory - all included!
+        <div className="text-center bg-gradient-to-r from-slate-900 via-purple-800 to-blue-800 rounded-3xl p-12 text-white">
+          <h2 className="text-4xl font-bold mb-4">Ready to Clone Your First AI-Powered Accounting Software?</h2>
+          <p className="text-xl mb-6 opacity-90 max-w-4xl mx-auto">
+            Start building your intelligent accounting solution today. Get a fully functional AI-integrated clone in weeks, not months.
+            <span className="block mt-2 font-semibold text-purple-200">
+              🤖 AI Agent Integration + 👨‍💼 CA chartered accountants + 📋 Professional audit services - all included!
             </span>
           </p>
-          <p className="text-lg mb-8 opacity-80 max-w-2xl mx-auto">
-            No setup fees, no hidden costs for professional services, flexible licensing, dedicated support included.
+          <p className="text-lg mb-8 opacity-80 max-w-3xl mx-auto">
+            No setup fees, no hidden costs for AI features or professional services, flexible licensing, dedicated support included.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
@@ -694,10 +896,10 @@ const Landing = () => {
           </div>
 
           <div className="flex flex-wrap justify-center items-center gap-6 text-sm text-white/70">
+            <span>✓ AI agent integration - no extra cost</span>
             <span>✓ CA services included - no extra cost</span>
             <span>✓ Professional audit support included</span>
             <span>✓ 30-day money-back guarantee</span>
-            <span>✓ Free migration support</span>
           </div>
         </div>
       </section>

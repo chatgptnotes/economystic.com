@@ -23,7 +23,11 @@ import {
   Cloud,
   Phone,
   PhoneCall,
-  Headphones
+  Headphones,
+  HardDrive,
+  Building,
+  Eye,
+  ShieldCheck
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -195,34 +199,45 @@ const Landing = () => {
             <span className="font-semibold text-blue-600"> zero learning curve</span> for your users.
           </p>
 
-          <div className="bg-gradient-to-r from-emerald-100 via-blue-100 to-purple-100 rounded-2xl p-6 mb-8 max-w-5xl mx-auto border-2 border-emerald-200 shadow-lg">
-            <div className="grid md:grid-cols-2 gap-6">
+          <div className="bg-gradient-to-r from-emerald-100 via-blue-100 to-purple-100 rounded-2xl p-6 mb-8 max-w-6xl mx-auto border-2 border-emerald-200 shadow-lg">
+            <div className="grid md:grid-cols-3 gap-6">
               <div className="text-center">
                 <div className="flex items-center justify-center mb-3">
                   <Brain className="h-6 w-6 text-purple-600 mr-2" />
                   <span className="text-lg font-bold text-slate-800">AI Agent Integration</span>
                 </div>
-                <p className="text-slate-700">
+                <p className="text-slate-700 text-sm">
                   <span className="font-semibold text-purple-700">Intelligent Automation</span>,
                   <span className="font-semibold text-pink-700"> Predictive Analytics</span>, and
-                  <span className="font-semibold text-blue-700"> Natural Language AI</span> - built into every clone.
+                  <span className="font-semibold text-blue-700"> Natural Language AI</span> built-in.
+                </p>
+              </div>
+              <div className="text-center">
+                <div className="flex items-center justify-center mb-3">
+                  <HardDrive className="h-6 w-6 text-indigo-600 mr-2" />
+                  <span className="text-lg font-bold text-slate-800">On-Premises Deployment</span>
+                </div>
+                <p className="text-slate-700 text-sm">
+                  <span className="font-semibold text-indigo-700">Your Servers</span>,
+                  <span className="font-semibold text-slate-700"> Complete Data Control</span>, and
+                  <span className="font-semibold text-gray-700"> Maximum Security</span> - your choice.
                 </p>
               </div>
               <div className="text-center">
                 <div className="flex items-center justify-center mb-3">
                   <Shield className="h-6 w-6 text-emerald-600 mr-2" />
-                  <span className="text-lg font-bold text-slate-800">Complete Professional Services</span>
+                  <span className="text-lg font-bold text-slate-800">Professional Services</span>
                 </div>
-                <p className="text-slate-700">
+                <p className="text-slate-700 text-sm">
                   <span className="font-semibold text-emerald-700">CA Chartered Accountants</span>,
-                  <span className="font-semibold text-blue-700"> Professional Audit Services</span>, and
-                  <span className="font-semibold text-purple-700"> Expert Advisory</span> - all included.
+                  <span className="font-semibold text-blue-700"> Audit Services</span>, and
+                  <span className="font-semibold text-purple-700"> Expert Advisory</span> included.
                 </p>
               </div>
             </div>
             <div className="text-center mt-4 pt-4 border-t border-slate-300">
               <p className="text-slate-600 font-medium">
-                🤖 AI Intelligence + 👨‍💼 Human Expertise + 💻 Custom Software = Complete Solution
+                🤖 AI Intelligence + 🏢 On-Premises Security + 👨‍💼 Human Expertise + 💻 Custom Software = Complete Solution
               </p>
             </div>
           </div>
@@ -265,6 +280,10 @@ const Landing = () => {
           {/* Trust Indicators */}
           <div className="flex flex-wrap justify-center items-center gap-6 text-sm text-slate-500">
             <div className="flex items-center space-x-2">
+              <CheckCircle className="h-4 w-4 text-indigo-500" />
+              <span>On-Premises Deployment</span>
+            </div>
+            <div className="flex items-center space-x-2">
               <CheckCircle className="h-4 w-4 text-orange-500" />
               <span>24x7 Technical Support</span>
             </div>
@@ -275,10 +294,6 @@ const Landing = () => {
             <div className="flex items-center space-x-2">
               <CheckCircle className="h-4 w-4 text-emerald-500" />
               <span>CA Services Included</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <CheckCircle className="h-4 w-4 text-blue-500" />
-              <span>Professional Audit Support</span>
             </div>
             <div className="flex items-center space-x-2">
               <CheckCircle className="h-4 w-4 text-emerald-500" />
@@ -764,6 +779,193 @@ const Landing = () => {
           </div>
         </div>
 
+        {/* On-Premises Deployment Section - Security & Compliance */}
+        <div className="mb-20">
+          <div className="bg-gradient-to-r from-indigo-600 via-slate-700 to-gray-800 rounded-3xl p-1 shadow-2xl">
+            <div className="bg-white rounded-3xl p-12">
+              <div className="text-center mb-12">
+                <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-100 to-slate-100 text-indigo-800 rounded-full text-lg font-bold mb-6 shadow-lg">
+                  <HardDrive className="h-6 w-6 mr-3" />
+                  Complete Data Sovereignty & Security
+                </div>
+
+                <h2 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-indigo-600 via-slate-700 to-gray-800 bg-clip-text text-transparent mb-6 leading-tight">
+                  On-Premises Deployment
+                  <span className="block">Your Data, Your Servers</span>
+                </h2>
+
+                <p className="text-xl text-slate-600 max-w-4xl mx-auto leading-relaxed">
+                  Perfect for Indian enterprises, government organizations, and security-conscious businesses.
+                  Deploy your accounting software on your own servers with complete control over your sensitive financial data.
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+                {/* Local Server Deployment */}
+                <Card className="bg-gradient-to-br from-indigo-50 to-indigo-100 border-2 border-indigo-200 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 group">
+                  <CardContent className="p-8">
+                    <div className="mb-6">
+                      <div className="p-4 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-2xl shadow-lg w-fit group-hover:scale-110 transition-transform duration-200">
+                        <Server className="h-8 w-8 text-white" />
+                      </div>
+                    </div>
+                    <h3 className="text-2xl font-bold text-indigo-800 mb-4">Local Server Installation</h3>
+                    <ul className="space-y-3 text-slate-700">
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-indigo-500 mt-0.5 flex-shrink-0" />
+                        <span>Install on your own physical servers</span>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-indigo-500 mt-0.5 flex-shrink-0" />
+                        <span>Complete control over hardware & infrastructure</span>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-indigo-500 mt-0.5 flex-shrink-0" />
+                        <span>No internet dependency for core operations</span>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-indigo-500 mt-0.5 flex-shrink-0" />
+                        <span>Custom network configuration support</span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+
+                {/* Data Security & Privacy */}
+                <Card className="bg-gradient-to-br from-slate-50 to-slate-100 border-2 border-slate-200 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 group">
+                  <CardContent className="p-8">
+                    <div className="mb-6">
+                      <div className="p-4 bg-gradient-to-r from-slate-600 to-slate-700 rounded-2xl shadow-lg w-fit group-hover:scale-110 transition-transform duration-200">
+                        <ShieldCheck className="h-8 w-8 text-white" />
+                      </div>
+                    </div>
+                    <h3 className="text-2xl font-bold text-slate-800 mb-4">Maximum Data Security</h3>
+                    <ul className="space-y-3 text-slate-700">
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-slate-500 mt-0.5 flex-shrink-0" />
+                        <span>100% data remains within your premises</span>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-slate-500 mt-0.5 flex-shrink-0" />
+                        <span>No third-party cloud access to sensitive data</span>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-slate-500 mt-0.5 flex-shrink-0" />
+                        <span>Advanced encryption & access controls</span>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-slate-500 mt-0.5 flex-shrink-0" />
+                        <span>Audit trails & compliance reporting</span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+
+                {/* Compliance & Regulations */}
+                <Card className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-200 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 group md:col-span-2 lg:col-span-1">
+                  <CardContent className="p-8">
+                    <div className="mb-6">
+                      <div className="p-4 bg-gradient-to-r from-gray-600 to-gray-700 rounded-2xl shadow-lg w-fit group-hover:scale-110 transition-transform duration-200">
+                        <Building className="h-8 w-8 text-white" />
+                      </div>
+                    </div>
+                    <h3 className="text-2xl font-bold text-gray-800 mb-4">Regulatory Compliance</h3>
+                    <ul className="space-y-3 text-slate-700">
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-gray-500 mt-0.5 flex-shrink-0" />
+                        <span>Indian data localization requirements</span>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-gray-500 mt-0.5 flex-shrink-0" />
+                        <span>Government & enterprise security standards</span>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-gray-500 mt-0.5 flex-shrink-0" />
+                        <span>Banking & financial sector compliance</span>
+                      </li>
+                      <li className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-gray-500 mt-0.5 flex-shrink-0" />
+                        <span>Custom compliance configurations</span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Deployment Options Showcase */}
+              <div className="bg-gradient-to-r from-slate-900 via-indigo-800 to-gray-800 rounded-2xl p-8 text-white mb-8">
+                <div className="text-center mb-8">
+                  <h3 className="text-3xl font-bold mb-4">Flexible Deployment Options for Every Need</h3>
+                  <p className="text-xl opacity-90 max-w-3xl mx-auto">
+                    Choose the deployment model that best fits your security requirements and organizational policies
+                  </p>
+                </div>
+
+                <div className="grid md:grid-cols-3 gap-8 mb-8">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-center">
+                    <div className="text-4xl font-bold text-indigo-300 mb-2">🏢</div>
+                    <h4 className="text-xl font-bold mb-3">On-Premises</h4>
+                    <ul className="text-left space-y-2 text-sm">
+                      <li>• Your physical servers</li>
+                      <li>• Complete data control</li>
+                      <li>• Maximum security</li>
+                      <li>• No internet dependency</li>
+                    </ul>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-center">
+                    <div className="text-4xl font-bold text-slate-300 mb-2">🔒</div>
+                    <h4 className="text-xl font-bold mb-3">Private Cloud</h4>
+                    <ul className="text-left space-y-2 text-sm">
+                      <li>• Dedicated cloud infrastructure</li>
+                      <li>• Isolated environment</li>
+                      <li>• Enhanced security</li>
+                      <li>• Scalable resources</li>
+                    </ul>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-center">
+                    <div className="text-4xl font-bold text-gray-300 mb-2">🌐</div>
+                    <h4 className="text-xl font-bold mb-3">Hybrid Model</h4>
+                    <ul className="text-left space-y-2 text-sm">
+                      <li>• Best of both worlds</li>
+                      <li>• Sensitive data on-premises</li>
+                      <li>• Non-critical data in cloud</li>
+                      <li>• Flexible architecture</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-8 text-center">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
+                    <h4 className="text-xl font-bold mb-3">🇮🇳 Perfect for Indian Enterprises</h4>
+                    <ul className="text-left space-y-2 text-sm">
+                      <li>• Meets data localization requirements</li>
+                      <li>• Government sector approved</li>
+                      <li>• Banking & financial compliance</li>
+                      <li>• Local support & maintenance</li>
+                    </ul>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
+                    <h4 className="text-xl font-bold mb-3">🛡️ Enterprise Security Benefits</h4>
+                    <ul className="text-left space-y-2 text-sm">
+                      <li>• Zero external data exposure</li>
+                      <li>• Custom security protocols</li>
+                      <li>• Internal network isolation</li>
+                      <li>• Complete audit control</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-center">
+                <div className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-indigo-600 to-slate-700 text-white rounded-2xl text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200">
+                  <HardDrive className="h-6 w-6 mr-3" />
+                  Your Data Stays Where You Want It - Complete Control & Security
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* CA Services Section - Prominent Feature */}
         <div className="mb-20">
           <div className="bg-gradient-to-r from-emerald-600 via-blue-600 to-purple-600 rounded-3xl p-1 shadow-2xl">
@@ -1067,11 +1269,11 @@ const Landing = () => {
           <p className="text-xl mb-6 opacity-90 max-w-4xl mx-auto">
             Start building your intelligent accounting solution today. Get a fully functional AI-integrated clone in weeks, not months.
             <span className="block mt-2 font-semibold text-purple-200">
-              🤖 AI Agent Integration + 👨‍💼 CA chartered accountants + 📋 Professional audit services - all included!
+              🤖 AI Integration + 🏢 On-Premises Deployment + 👨‍💼 CA Services + 📋 Audit Support - all included!
             </span>
           </p>
           <p className="text-lg mb-6 opacity-80 max-w-3xl mx-auto">
-            No setup fees, no hidden costs for AI features or professional services, flexible licensing included.
+            Deploy on your servers or cloud. No setup fees, no hidden costs for any features. Complete data sovereignty guaranteed.
           </p>
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8 max-w-2xl mx-auto">
             <div className="flex items-center justify-center mb-3">
@@ -1109,10 +1311,10 @@ const Landing = () => {
           </div>
 
           <div className="flex flex-wrap justify-center items-center gap-6 text-sm text-white/70">
+            <span>✓ On-premises deployment available</span>
             <span>✓ 24x7 technical support - toll-free</span>
             <span>✓ AI agent integration - no extra cost</span>
             <span>✓ CA services included - no extra cost</span>
-            <span>✓ 30-day money-back guarantee</span>
           </div>
         </div>
       </section>
@@ -1132,8 +1334,8 @@ const Landing = () => {
                 </div>
               </div>
               <p className="text-slate-400 max-w-md mb-6">
-                Leading provider of AI-powered accounting software cloning solutions with 24x7 technical support.
-                Build custom financial software that perfectly replicates industry-standard platforms.
+                Leading provider of AI-powered accounting software cloning solutions with on-premises deployment options and 24x7 technical support.
+                Build custom financial software with complete data sovereignty and security.
               </p>
 
               <div className="bg-slate-800 rounded-xl p-4 mb-4">

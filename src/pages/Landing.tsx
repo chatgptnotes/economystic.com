@@ -122,17 +122,17 @@ const Landing = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-blue-50 to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-orange-50">
       {/* Header */}
       <header className="bg-white/90 backdrop-blur-md border-b border-white/20 sticky top-0 z-50 shadow-lg">
         <div className="px-6 py-4 max-w-7xl mx-auto">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-gradient-to-r from-emerald-500 to-blue-600 rounded-xl shadow-lg">
+              <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl shadow-lg">
                 <Calculator className="h-8 w-8 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                   economystic.ai
                 </h1>
                 <p className="text-sm text-slate-500 font-medium">Accounting Software Solutions</p>
@@ -141,9 +141,9 @@ const Landing = () => {
 
             <div className="flex items-center space-x-4">
               <div className="hidden md:flex items-center space-x-2 text-sm text-slate-600">
-                <Phone className="h-4 w-4 text-emerald-600" />
+                <Phone className="h-4 w-4 text-orange-600" />
                 <span className="font-semibold">24x7 Support:</span>
-                <a href="tel:18002330000" className="text-emerald-600 hover:text-emerald-700 font-bold">
+                <a href="tel:18002330000" className="text-orange-600 hover:text-orange-700 font-bold">
                   1800-233-0000
                 </a>
               </div>
@@ -162,13 +162,13 @@ const Landing = () => {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <Button variant="outline" className="border-2 border-emerald-500 text-emerald-600 hover:bg-emerald-50 rounded-xl">
+                <Button variant="outline" className="border-2 border-purple-500 text-purple-600 hover:bg-purple-50 rounded-xl">
                   <PhoneCall className="mr-2 h-4 w-4" />
                   Get Call Back
                 </Button>
               </a>
               <Link to="/login">
-                <Button className="bg-gradient-to-r from-emerald-500 to-blue-600 text-white rounded-xl shadow-lg hover:from-emerald-600 hover:to-blue-700 transition-all duration-200">
+                <Button className="bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl shadow-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-200">
                   Get Started
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
@@ -178,11 +178,69 @@ const Landing = () => {
         </div>
       </header>
 
-      {/* Hero Section */}
+      {/* Hero Section with Image */}
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: "url('/images/hero-colors.png')"
+          }}
+        >
+          {/* Overlay for better text readability */}
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-900/40 via-pink-900/30 to-orange-900/40"></div>
+        </div>
+        
+        {/* Hero Content */}
+        <div className="relative z-10 text-center px-6 py-20 max-w-6xl mx-auto">
+          <div className="mb-8">
+            <h1 className="text-6xl md:text-8xl font-bold mb-6 leading-tight">
+              <span className="block text-white drop-shadow-2xl">From Color to Clarity</span>
+              <span className="block bg-gradient-to-r from-pink-200 via-purple-200 to-orange-200 bg-clip-text text-transparent drop-shadow-lg">
+                Decode Your Business Story
+              </span>
+            </h1>
+            
+            <p className="text-2xl md:text-3xl text-white/90 max-w-4xl mx-auto mb-8 leading-relaxed drop-shadow-lg">
+              Transform complex financial data into clear, actionable insights with AI-powered accounting software that speaks your language
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-6 justify-center mb-12">
+            <Link to="/login">
+              <Button size="lg" className="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-2xl shadow-2xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 px-10 py-6 text-xl font-semibold transform hover:scale-105">
+                Start Your Journey
+                <ArrowRight className="ml-3 h-6 w-6" />
+              </Button>
+            </Link>
+            <Button size="lg" variant="outline" className="border-3 border-white/80 text-white hover:bg-white/20 rounded-2xl px-10 py-6 text-xl backdrop-blur-sm">
+              Explore Features
+            </Button>
+          </div>
+
+          {/* Trust Indicators */}
+          <div className="flex flex-wrap justify-center items-center gap-8 text-white/80">
+            <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2">
+              <CheckCircle className="h-5 w-5 text-pink-300" />
+              <span>AI-Powered Analytics</span>
+            </div>
+            <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2">
+              <CheckCircle className="h-5 w-5 text-purple-300" />
+              <span>Real-time Insights</span>
+            </div>
+            <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2">
+              <CheckCircle className="h-5 w-5 text-orange-300" />
+              <span>Visual Data Stories</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Main Content Section */}
       <section className="px-6 py-20 max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mb-6">
-            <div className="inline-flex items-center px-4 py-2 bg-emerald-100 text-emerald-800 rounded-full text-sm font-medium">
+            <div className="inline-flex items-center px-4 py-2 bg-pink-100 text-pink-800 rounded-full text-sm font-medium">
               <Zap className="h-4 w-4 mr-2" />
               Clone Any Accounting Software in Days, Not Months
             </div>
@@ -192,18 +250,18 @@ const Landing = () => {
             </div>
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-emerald-600 via-blue-600 to-purple-600 bg-clip-text text-transparent mb-6 leading-tight">
+          <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 bg-clip-text text-transparent mb-6 leading-tight">
             AI-Powered Accounting
             <span className="block">Software Cloning Solutions</span>
           </h1>
 
           <p className="text-xl text-slate-600 max-w-4xl mx-auto mb-6 leading-relaxed">
             Build custom accounting software that perfectly replicates Tally, QuickBooks, or any financial platform.
-            <span className="font-semibold text-emerald-600">100% feature compatibility</span> with
-            <span className="font-semibold text-blue-600"> zero learning curve</span> for your users.
+            <span className="font-semibold text-purple-600">100% feature compatibility</span> with
+            <span className="font-semibold text-pink-600"> zero learning curve</span> for your users.
           </p>
 
-          <div className="bg-gradient-to-r from-emerald-100 via-blue-100 to-purple-100 rounded-2xl p-6 mb-8 max-w-6xl mx-auto border-2 border-emerald-200 shadow-lg">
+          <div className="bg-gradient-to-r from-pink-100 via-purple-100 to-orange-100 rounded-2xl p-6 mb-8 max-w-6xl mx-auto border-2 border-pink-200 shadow-lg">
             <div className="grid md:grid-cols-3 gap-6">
               <div className="text-center">
                 <div className="flex items-center justify-center mb-3">
@@ -213,28 +271,28 @@ const Landing = () => {
                 <p className="text-slate-700 text-sm">
                   <span className="font-semibold text-purple-700">Intelligent Automation</span>,
                   <span className="font-semibold text-pink-700"> Predictive Analytics</span>, and
-                  <span className="font-semibold text-blue-700"> Natural Language AI</span> built-in.
+                  <span className="font-semibold text-orange-700"> Natural Language AI</span> built-in.
                 </p>
               </div>
               <div className="text-center">
                 <div className="flex items-center justify-center mb-3">
-                  <HardDrive className="h-6 w-6 text-indigo-600 mr-2" />
+                  <HardDrive className="h-6 w-6 text-pink-600 mr-2" />
                   <span className="text-lg font-bold text-slate-800">On-Premises Deployment</span>
                 </div>
                 <p className="text-slate-700 text-sm">
-                  <span className="font-semibold text-indigo-700">Your Servers</span>,
+                  <span className="font-semibold text-pink-700">Your Servers</span>,
                   <span className="font-semibold text-slate-700"> Complete Data Control</span>, and
-                  <span className="font-semibold text-gray-700"> Maximum Security</span> - your choice.
+                  <span className="font-semibold text-purple-700"> Maximum Security</span> - your choice.
                 </p>
               </div>
               <div className="text-center">
                 <div className="flex items-center justify-center mb-3">
-                  <Shield className="h-6 w-6 text-emerald-600 mr-2" />
+                  <Shield className="h-6 w-6 text-orange-600 mr-2" />
                   <span className="text-lg font-bold text-slate-800">Professional Services</span>
                 </div>
                 <p className="text-slate-700 text-sm">
-                  <span className="font-semibold text-emerald-700">CA Chartered Accountants</span>,
-                  <span className="font-semibold text-blue-700"> Audit Services</span>, and
+                  <span className="font-semibold text-orange-700">CA Chartered Accountants</span>,
+                  <span className="font-semibold text-pink-700"> Audit Services</span>, and
                   <span className="font-semibold text-purple-700"> Expert Advisory</span> included.
                 </p>
               </div>
@@ -248,12 +306,12 @@ const Landing = () => {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
             <Link to="/login">
-              <Button size="lg" className="bg-gradient-to-r from-emerald-500 to-blue-600 text-white rounded-xl shadow-lg hover:from-emerald-600 hover:to-blue-700 transition-all duration-200 px-8 py-4 text-lg">
+              <Button size="lg" className="bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl shadow-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-200 px-8 py-4 text-lg">
                 Start Free Clone
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <Button size="lg" variant="outline" className="rounded-xl border-2 border-emerald-200 hover:bg-emerald-50 px-8 py-4 text-lg">
+            <Button size="lg" variant="outline" className="rounded-xl border-2 border-purple-200 hover:bg-purple-50 px-8 py-4 text-lg">
               View Live Demo
             </Button>
           </div>
@@ -322,7 +380,7 @@ const Landing = () => {
               <Card key={index} className="bg-white/70 backdrop-blur-sm border border-white/30 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
                 <CardContent className="p-6">
                   <div className="mb-4">
-                    <div className="p-3 bg-gradient-to-r from-emerald-500 to-blue-600 rounded-xl shadow-lg w-fit">
+                    <div className="p-3 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl shadow-lg w-fit">
                       <category.icon className="h-6 w-6 text-white" />
                     </div>
                   </div>
@@ -330,7 +388,7 @@ const Landing = () => {
                   <ul className="space-y-2">
                     {category.features.map((feature, idx) => (
                       <li key={idx} className="flex items-center text-sm text-slate-600">
-                        <CheckCircle className="h-3 w-3 text-emerald-500 mr-2 flex-shrink-0" />
+                        <CheckCircle className="h-3 w-3 text-purple-500 mr-2 flex-shrink-0" />
                         {feature}
                       </li>
                     ))}
@@ -357,10 +415,10 @@ const Landing = () => {
               <Card key={index} className="bg-white/60 backdrop-blur-sm border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 group">
                 <CardContent className="p-8">
                   <div className="mb-4">
-                    <div className="p-3 bg-gradient-to-r from-emerald-500 to-blue-600 rounded-xl shadow-lg w-fit group-hover:scale-110 transition-transform duration-200">
+                    <div className="p-3 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl shadow-lg w-fit group-hover:scale-110 transition-transform duration-200">
                       <feature.icon className="h-6 w-6 text-white" />
                     </div>
-                    <span className="inline-block mt-2 px-2 py-1 bg-emerald-100 text-emerald-700 text-xs font-medium rounded-full">
+                    <span className="inline-block mt-2 px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">
                       {feature.category}
                     </span>
                   </div>
@@ -373,7 +431,7 @@ const Landing = () => {
         </div>
 
         {/* Value Proposition Section */}
-        <div className="bg-gradient-to-r from-emerald-500 to-blue-600 rounded-3xl p-12 mb-20 text-white">
+        <div className="bg-gradient-to-r from-purple-500 to-pink-600 rounded-3xl p-12 mb-20 text-white">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold mb-4">
               Why Choose Our Accounting Software Cloning Platform?
@@ -400,19 +458,19 @@ const Landing = () => {
               <h3 className="text-2xl font-semibold mb-6">Proven Success Metrics</h3>
               <div className="grid grid-cols-2 gap-6 text-center">
                 <div>
-                  <div className="text-4xl font-bold text-emerald-200">70%</div>
+                  <div className="text-4xl font-bold text-pink-200">70%</div>
                   <div className="text-sm text-white/80">Cost Reduction</div>
                 </div>
                 <div>
-                  <div className="text-4xl font-bold text-emerald-200">15+</div>
+                  <div className="text-4xl font-bold text-purple-200">15+</div>
                   <div className="text-sm text-white/80">Languages</div>
                 </div>
                 <div>
-                  <div className="text-4xl font-bold text-emerald-200">99.9%</div>
+                  <div className="text-4xl font-bold text-orange-200">99.9%</div>
                   <div className="text-sm text-white/80">Uptime SLA</div>
                 </div>
                 <div>
-                  <div className="text-4xl font-bold text-emerald-200">24/7</div>
+                  <div className="text-4xl font-bold text-pink-200">24/7</div>
                   <div className="text-sm text-white/80">Support</div>
                 </div>
               </div>
@@ -433,7 +491,7 @@ const Landing = () => {
 
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="p-4 bg-gradient-to-r from-emerald-500 to-blue-600 rounded-2xl shadow-lg w-fit mx-auto mb-4">
+              <div className="p-4 bg-gradient-to-r from-purple-500 to-pink-600 rounded-2xl shadow-lg w-fit mx-auto mb-4">
                 <Database className="h-8 w-8 text-white" />
               </div>
               <h3 className="text-xl font-semibold text-slate-800 mb-2">Cloud-Native</h3>
@@ -441,7 +499,7 @@ const Landing = () => {
             </div>
 
             <div className="text-center">
-              <div className="p-4 bg-gradient-to-r from-emerald-500 to-blue-600 rounded-2xl shadow-lg w-fit mx-auto mb-4">
+              <div className="p-4 bg-gradient-to-r from-pink-500 to-orange-600 rounded-2xl shadow-lg w-fit mx-auto mb-4">
                 <Lock className="h-8 w-8 text-white" />
               </div>
               <h3 className="text-xl font-semibold text-slate-800 mb-2">Bank-Grade Security</h3>
@@ -449,7 +507,7 @@ const Landing = () => {
             </div>
 
             <div className="text-center">
-              <div className="p-4 bg-gradient-to-r from-emerald-500 to-blue-600 rounded-2xl shadow-lg w-fit mx-auto mb-4">
+              <div className="p-4 bg-gradient-to-r from-orange-500 to-pink-600 rounded-2xl shadow-lg w-fit mx-auto mb-4">
                 <RefreshCw className="h-8 w-8 text-white" />
               </div>
               <h3 className="text-xl font-semibold text-slate-800 mb-2">Real-time Sync</h3>
@@ -1329,7 +1387,7 @@ const Landing = () => {
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div className="md:col-span-2">
               <div className="flex items-center space-x-3 mb-4">
-                <div className="p-2 bg-gradient-to-r from-emerald-500 to-blue-600 rounded-xl">
+                <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl">
                   <Calculator className="h-6 w-6 text-white" />
                 </div>
                 <div>

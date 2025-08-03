@@ -111,13 +111,13 @@ const Features = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-orange-50">
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-md border-b border-white/20 sticky top-0 z-50">
         <div className="px-6 max-w-7xl mx-auto">
           <div className="flex items-center justify-between h-16">
             <Link to="/" className="flex items-center space-x-3">
-              <div className="p-2 bg-gradient-to-r from-emerald-500 to-blue-600 rounded-xl">
+              <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl">
                 <Calculator className="h-6 w-6 text-white" />
               </div>
               <div>
@@ -128,14 +128,14 @@ const Features = () => {
 
             <div className="flex items-center space-x-4">
               <div className="hidden md:flex items-center space-x-2 text-sm text-slate-600">
-                <Phone className="h-4 w-4 text-emerald-600" />
+                <Phone className="h-4 w-4 text-orange-600" />
                 <span className="font-semibold">24x7 Support:</span>
-                <a href="tel:18002330000" className="text-emerald-600 hover:text-emerald-700 font-bold">
+                <a href="tel:18002330000" className="text-orange-600 hover:text-orange-700 font-bold">
                   1800-233-0000
                 </a>
               </div>
               <Link to="/features">
-                <Button variant="ghost" className="text-emerald-600 hover:text-emerald-800 font-semibold">
+                <Button variant="ghost" className="text-purple-600 hover:text-purple-800 font-semibold">
                   Features
                 </Button>
               </Link>
@@ -145,7 +145,7 @@ const Features = () => {
                 </Button>
               </Link>
               <Link to="/login">
-                <Button className="bg-gradient-to-r from-emerald-500 to-blue-600 text-white rounded-xl shadow-lg hover:from-emerald-600 hover:to-blue-700 transition-all duration-200">
+                <Button className="bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl shadow-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-200">
                   Get Started
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
@@ -158,12 +158,12 @@ const Features = () => {
       {/* Hero Section */}
       <section className="py-20">
         <div className="px-6 max-w-7xl mx-auto text-center">
-          <div className="inline-flex items-center px-4 py-2 bg-emerald-100 text-emerald-800 rounded-full text-sm font-medium mb-6">
+          <div className="inline-flex items-center px-4 py-2 bg-pink-100 text-pink-800 rounded-full text-sm font-medium mb-6">
             <Zap className="h-4 w-4 mr-2" />
             Complete Feature Overview
           </div>
           
-          <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-emerald-600 via-blue-600 to-purple-600 bg-clip-text text-transparent mb-6 leading-tight">
+          <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 bg-clip-text text-transparent mb-6 leading-tight">
             Comprehensive Features
             <span className="block">for Modern Accounting</span>
           </h1>
@@ -175,13 +175,13 @@ const Features = () => {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <Link to="/login">
-              <Button size="lg" className="bg-gradient-to-r from-emerald-500 to-blue-600 text-white rounded-xl shadow-lg hover:from-emerald-600 hover:to-blue-700 transition-all duration-200 px-8 py-4 text-lg">
+              <Button size="lg" className="bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl shadow-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-200 px-8 py-4 text-lg">
                 Start Free Trial
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
             <Link to="/pricing">
-              <Button size="lg" variant="outline" className="rounded-xl border-2 border-emerald-200 hover:bg-emerald-50 px-8 py-4 text-lg">
+              <Button size="lg" variant="outline" className="rounded-xl border-2 border-purple-200 hover:bg-purple-50 px-8 py-4 text-lg">
                 View Pricing
               </Button>
             </Link>
@@ -215,7 +215,7 @@ const Features = () => {
                   <div className="space-y-2">
                     {feature.benefits.map((benefit, idx) => (
                       <div key={idx} className="flex items-center space-x-2">
-                        <CheckCircle className="h-4 w-4 text-emerald-500" />
+                        <CheckCircle className="h-4 w-4 text-purple-500" />
                         <span className="text-sm text-slate-600">{benefit}</span>
                       </div>
                     ))}
@@ -231,7 +231,7 @@ const Features = () => {
       <section className="py-16 bg-white/50">
         <div className="px-6 max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-slate-700 bg-clip-text text-transparent mb-4">
+            <h2 className="text-4xl font-bold bg-gradient-to-r from-pink-600 to-orange-700 bg-clip-text text-transparent mb-4">
               Flexible Deployment Options
             </h2>
             <p className="text-lg text-slate-600 max-w-3xl mx-auto">
@@ -244,7 +244,7 @@ const Features = () => {
               <Card key={index} className="bg-white/70 backdrop-blur-sm border border-white/30 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
                 <CardContent className="p-8">
                   <div className="mb-6">
-                    <div className="p-4 bg-gradient-to-r from-indigo-500 to-slate-600 rounded-2xl shadow-lg w-fit">
+                    <div className="p-4 bg-gradient-to-r from-pink-500 to-orange-600 rounded-2xl shadow-lg w-fit">
                       <feature.icon className="h-8 w-8 text-white" />
                     </div>
                   </div>
@@ -253,7 +253,7 @@ const Features = () => {
                   <div className="space-y-2">
                     {feature.benefits.map((benefit, idx) => (
                       <div key={idx} className="flex items-center space-x-2">
-                        <CheckCircle className="h-4 w-4 text-indigo-500" />
+                        <CheckCircle className="h-4 w-4 text-pink-500" />
                         <span className="text-sm text-slate-600">{benefit}</span>
                       </div>
                     ))}
@@ -269,7 +269,7 @@ const Features = () => {
       <section className="py-16">
         <div className="px-6 max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent mb-4">
+            <h2 className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-purple-600 bg-clip-text text-transparent mb-4">
               Professional Services Included
             </h2>
             <p className="text-lg text-slate-600 max-w-3xl mx-auto">
@@ -282,7 +282,7 @@ const Features = () => {
               <Card key={index} className="bg-white/70 backdrop-blur-sm border border-white/30 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
                 <CardContent className="p-8">
                   <div className="mb-6">
-                    <div className="p-4 bg-gradient-to-r from-emerald-500 to-blue-600 rounded-2xl shadow-lg w-fit">
+                    <div className="p-4 bg-gradient-to-r from-orange-500 to-purple-600 rounded-2xl shadow-lg w-fit">
                       <feature.icon className="h-8 w-8 text-white" />
                     </div>
                   </div>
@@ -291,7 +291,7 @@ const Features = () => {
                   <div className="space-y-2">
                     {feature.benefits.map((benefit, idx) => (
                       <div key={idx} className="flex items-center space-x-2">
-                        <CheckCircle className="h-4 w-4 text-emerald-500" />
+                        <CheckCircle className="h-4 w-4 text-purple-500" />
                         <span className="text-sm text-slate-600">{benefit}</span>
                       </div>
                     ))}
@@ -307,7 +307,7 @@ const Features = () => {
       <section className="py-16 bg-white/50">
         <div className="px-6 max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
+            <h2 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
               Technical Excellence
             </h2>
             <p className="text-lg text-slate-600 max-w-3xl mx-auto">
@@ -320,7 +320,7 @@ const Features = () => {
               <Card key={index} className="bg-white/70 backdrop-blur-sm border border-white/30 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
                 <CardContent className="p-8">
                   <div className="mb-6">
-                    <div className="p-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl shadow-lg w-fit">
+                    <div className="p-4 bg-gradient-to-r from-purple-500 to-pink-600 rounded-2xl shadow-lg w-fit">
                       <feature.icon className="h-8 w-8 text-white" />
                     </div>
                   </div>
@@ -329,7 +329,7 @@ const Features = () => {
                   <div className="space-y-2">
                     {feature.benefits.map((benefit, idx) => (
                       <div key={idx} className="flex items-center space-x-2">
-                        <CheckCircle className="h-4 w-4 text-blue-500" />
+                        <CheckCircle className="h-4 w-4 text-purple-500" />
                         <span className="text-sm text-slate-600">{benefit}</span>
                       </div>
                     ))}
@@ -395,7 +395,7 @@ const Features = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-r from-slate-900 via-emerald-800 to-blue-800">
+      <section className="py-16 bg-gradient-to-r from-slate-900 via-purple-800 to-pink-800">
         <div className="px-6 max-w-7xl mx-auto text-center text-white">
           <h2 className="text-4xl font-bold mb-4">Ready to Experience All These Features?</h2>
           <p className="text-xl mb-8 opacity-90 max-w-3xl mx-auto">

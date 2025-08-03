@@ -22,7 +22,7 @@ const Pricing = () => {
       price: "₹99,000",
       period: "one-time",
       description: "Perfect for small businesses and startups",
-      color: "emerald",
+      color: "pink",
       features: [
         "Basic accounting software clone",
         "Standard AI automation features",
@@ -49,7 +49,7 @@ const Pricing = () => {
       price: "₹2,99,000",
       period: "one-time",
       description: "Most popular for growing businesses",
-      color: "blue",
+      color: "purple",
       popular: true,
       features: [
         "Complete accounting software clone",
@@ -78,7 +78,7 @@ const Pricing = () => {
       price: "₹7,99,000",
       period: "one-time",
       description: "For large organizations and enterprises",
-      color: "purple",
+      color: "orange",
       features: [
         "Enterprise-grade software clone",
         "Advanced AI with custom models",
@@ -125,13 +125,13 @@ const Pricing = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-orange-50">
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-md border-b border-white/20 sticky top-0 z-50">
         <div className="px-6 max-w-7xl mx-auto">
           <div className="flex items-center justify-between h-16">
             <Link to="/" className="flex items-center space-x-3">
-              <div className="p-2 bg-gradient-to-r from-emerald-500 to-blue-600 rounded-xl">
+              <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl">
                 <Calculator className="h-6 w-6 text-white" />
               </div>
               <div>
@@ -142,9 +142,9 @@ const Pricing = () => {
 
             <div className="flex items-center space-x-4">
               <div className="hidden md:flex items-center space-x-2 text-sm text-slate-600">
-                <Phone className="h-4 w-4 text-emerald-600" />
+                <Phone className="h-4 w-4 text-orange-600" />
                 <span className="font-semibold">24x7 Support:</span>
-                <a href="tel:18002330000" className="text-emerald-600 hover:text-emerald-700 font-bold">
+                <a href="tel:18002330000" className="text-orange-600 hover:text-orange-700 font-bold">
                   1800-233-0000
                 </a>
               </div>
@@ -154,12 +154,12 @@ const Pricing = () => {
                 </Button>
               </Link>
               <Link to="/pricing">
-                <Button variant="ghost" className="text-blue-600 hover:text-blue-800 font-semibold">
+                <Button variant="ghost" className="text-purple-600 hover:text-purple-800 font-semibold">
                   Pricing
                 </Button>
               </Link>
               <Link to="/login">
-                <Button className="bg-gradient-to-r from-emerald-500 to-blue-600 text-white rounded-xl shadow-lg hover:from-emerald-600 hover:to-blue-700 transition-all duration-200">
+                <Button className="bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl shadow-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-200">
                   Get Started
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
@@ -172,12 +172,12 @@ const Pricing = () => {
       {/* Hero Section */}
       <section className="py-20">
         <div className="px-6 max-w-7xl mx-auto text-center">
-          <div className="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-medium mb-6">
+          <div className="inline-flex items-center px-4 py-2 bg-pink-100 text-pink-800 rounded-full text-sm font-medium mb-6">
             <Star className="h-4 w-4 mr-2" />
             Transparent Pricing, No Hidden Costs
           </div>
           
-          <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-emerald-600 bg-clip-text text-transparent mb-6 leading-tight">
+          <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 bg-clip-text text-transparent mb-6 leading-tight">
             Simple, Transparent
             <span className="block">Pricing Plans</span>
           </h1>
@@ -187,9 +187,9 @@ const Pricing = () => {
             and 24x7 support. No recurring fees, no hidden costs.
           </p>
 
-          <div className="bg-gradient-to-r from-emerald-100 to-blue-100 rounded-2xl p-6 max-w-4xl mx-auto mb-12">
+          <div className="bg-gradient-to-r from-pink-100 to-purple-100 rounded-2xl p-6 max-w-4xl mx-auto mb-12">
             <div className="flex items-center justify-center mb-3">
-              <CheckCircle className="h-6 w-6 text-emerald-600 mr-3" />
+              <CheckCircle className="h-6 w-6 text-purple-600 mr-3" />
               <span className="text-lg font-bold text-slate-800">All Plans Include</span>
             </div>
             <p className="text-slate-700">
@@ -208,17 +208,17 @@ const Pricing = () => {
                 key={index} 
                 className={`relative bg-white/70 backdrop-blur-sm border-2 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 ${
                   plan.popular 
-                    ? 'border-blue-300 ring-4 ring-blue-100' 
-                    : plan.color === 'emerald' 
-                      ? 'border-emerald-200' 
+                    ? 'border-purple-300 ring-4 ring-purple-100' 
+                    : plan.color === 'pink' 
+                      ? 'border-pink-200' 
                       : plan.color === 'purple' 
-                        ? 'border-purple-200' 
-                        : 'border-blue-200'
+                        ? 'border-orange-200' 
+                        : 'border-purple-200'
                 }`}
               >
                 {plan.popular && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg">
+                    <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg">
                       Most Popular
                     </div>
                   </div>
@@ -227,11 +227,11 @@ const Pricing = () => {
                 <CardContent className="p-8">
                   <div className="text-center mb-8">
                     <div className={`p-4 bg-gradient-to-r ${
-                      plan.color === 'emerald' 
-                        ? 'from-emerald-500 to-emerald-600' 
+                      plan.color === 'pink' 
+                        ? 'from-pink-500 to-pink-600' 
                         : plan.color === 'purple' 
-                          ? 'from-purple-500 to-purple-600' 
-                          : 'from-blue-500 to-blue-600'
+                          ? 'from-orange-500 to-orange-600' 
+                          : 'from-purple-500 to-purple-600'
                     } rounded-2xl shadow-lg w-fit mx-auto mb-4`}>
                       <plan.icon className="h-8 w-8 text-white" />
                     </div>
@@ -247,11 +247,11 @@ const Pricing = () => {
                     <Link to="/login">
                       <Button 
                         className={`w-full bg-gradient-to-r ${
-                          plan.color === 'emerald' 
-                            ? 'from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700' 
+                          plan.color === 'pink' 
+                            ? 'from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700' 
                             : plan.color === 'purple' 
-                              ? 'from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700' 
-                              : 'from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700'
+                              ? 'from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700' 
+                              : 'from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700'
                         } text-white rounded-xl shadow-lg transition-all duration-200`}
                       >
                         Get Started
@@ -267,11 +267,11 @@ const Pricing = () => {
                         {plan.features.map((feature, idx) => (
                           <div key={idx} className="flex items-start space-x-2">
                             <CheckCircle className={`h-4 w-4 mt-0.5 flex-shrink-0 ${
-                              plan.color === 'emerald' 
-                                ? 'text-emerald-500' 
+                              plan.color === 'pink' 
+                                ? 'text-pink-500' 
                                 : plan.color === 'purple' 
-                                  ? 'text-purple-500' 
-                                  : 'text-blue-500'
+                                  ? 'text-orange-500' 
+                                  : 'text-purple-500'
                             }`} />
                             <span className="text-sm text-slate-600">{feature}</span>
                           </div>
@@ -317,7 +317,7 @@ const Pricing = () => {
               <Card key={index} className="bg-white/70 backdrop-blur-sm border border-white/30 shadow-lg hover:shadow-xl transition-all duration-300">
                 <CardContent className="p-6 text-center">
                   <h3 className="text-lg font-bold text-slate-800 mb-2">{addon.name}</h3>
-                  <div className="text-2xl font-bold text-blue-600 mb-3">{addon.price}</div>
+                  <div className="text-2xl font-bold text-purple-600 mb-3">{addon.price}</div>
                   <p className="text-sm text-slate-600">{addon.description}</p>
                 </CardContent>
               </Card>
@@ -330,7 +330,7 @@ const Pricing = () => {
       <section className="py-16">
         <div className="px-6 max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent mb-4">
+            <h2 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
               Detailed Feature Comparison
             </h2>
             <p className="text-lg text-slate-600 max-w-3xl mx-auto">
@@ -341,56 +341,56 @@ const Pricing = () => {
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gradient-to-r from-slate-50 to-blue-50">
+                <thead className="bg-gradient-to-r from-pink-50 to-purple-50">
                   <tr>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-slate-800">Features</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-emerald-800">Starter</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-blue-800">Professional</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-purple-800">Enterprise</th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-pink-800">Starter</th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-purple-800">Professional</th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-orange-800">Enterprise</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
                   <tr>
                     <td className="px-6 py-4 text-sm font-medium text-slate-800">AI Agent Integration</td>
-                    <td className="px-6 py-4 text-center"><span className="text-emerald-600">Basic</span></td>
-                    <td className="px-6 py-4 text-center"><span className="text-blue-600">Full</span></td>
-                    <td className="px-6 py-4 text-center"><span className="text-purple-600">Advanced</span></td>
+                    <td className="px-6 py-4 text-center"><span className="text-pink-600">Basic</span></td>
+                    <td className="px-6 py-4 text-center"><span className="text-purple-600">Full</span></td>
+                    <td className="px-6 py-4 text-center"><span className="text-orange-600">Advanced</span></td>
                   </tr>
                   <tr className="bg-slate-50">
                     <td className="px-6 py-4 text-sm font-medium text-slate-800">Deployment Options</td>
-                    <td className="px-6 py-4 text-center"><span className="text-emerald-600">Cloud Only</span></td>
-                    <td className="px-6 py-4 text-center"><span className="text-blue-600">Cloud + On-Premises</span></td>
-                    <td className="px-6 py-4 text-center"><span className="text-purple-600">Full On-Premises</span></td>
+                    <td className="px-6 py-4 text-center"><span className="text-pink-600">Cloud Only</span></td>
+                    <td className="px-6 py-4 text-center"><span className="text-purple-600">Cloud + On-Premises</span></td>
+                    <td className="px-6 py-4 text-center"><span className="text-orange-600">Full On-Premises</span></td>
                   </tr>
                   <tr>
                     <td className="px-6 py-4 text-sm font-medium text-slate-800">CA Services</td>
-                    <td className="px-6 py-4 text-center"><span className="text-emerald-600">5 hrs/month</span></td>
-                    <td className="px-6 py-4 text-center"><span className="text-blue-600">20 hrs/month</span></td>
-                    <td className="px-6 py-4 text-center"><span className="text-purple-600">Unlimited</span></td>
+                    <td className="px-6 py-4 text-center"><span className="text-pink-600">5 hrs/month</span></td>
+                    <td className="px-6 py-4 text-center"><span className="text-purple-600">20 hrs/month</span></td>
+                    <td className="px-6 py-4 text-center"><span className="text-orange-600">Unlimited</span></td>
                   </tr>
                   <tr className="bg-slate-50">
                     <td className="px-6 py-4 text-sm font-medium text-slate-800">Support</td>
-                    <td className="px-6 py-4 text-center"><span className="text-emerald-600">Email</span></td>
-                    <td className="px-6 py-4 text-center"><span className="text-blue-600">24x7 Phone</span></td>
-                    <td className="px-6 py-4 text-center"><span className="text-purple-600">Priority SLA</span></td>
+                    <td className="px-6 py-4 text-center"><span className="text-pink-600">Email</span></td>
+                    <td className="px-6 py-4 text-center"><span className="text-purple-600">24x7 Phone</span></td>
+                    <td className="px-6 py-4 text-center"><span className="text-orange-600">Priority SLA</span></td>
                   </tr>
                   <tr>
                     <td className="px-6 py-4 text-sm font-medium text-slate-800">User Limit</td>
-                    <td className="px-6 py-4 text-center"><span className="text-emerald-600">10 Users</span></td>
-                    <td className="px-6 py-4 text-center"><span className="text-blue-600">50 Users</span></td>
-                    <td className="px-6 py-4 text-center"><span className="text-purple-600">Unlimited</span></td>
+                    <td className="px-6 py-4 text-center"><span className="text-pink-600">10 Users</span></td>
+                    <td className="px-6 py-4 text-center"><span className="text-purple-600">50 Users</span></td>
+                    <td className="px-6 py-4 text-center"><span className="text-orange-600">Unlimited</span></td>
                   </tr>
                   <tr className="bg-slate-50">
                     <td className="px-6 py-4 text-sm font-medium text-slate-800">White-label Licensing</td>
                     <td className="px-6 py-4 text-center"><X className="h-4 w-4 text-slate-400 mx-auto" /></td>
                     <td className="px-6 py-4 text-center"><X className="h-4 w-4 text-slate-400 mx-auto" /></td>
-                    <td className="px-6 py-4 text-center"><CheckCircle className="h-4 w-4 text-purple-600 mx-auto" /></td>
+                    <td className="px-6 py-4 text-center"><CheckCircle className="h-4 w-4 text-orange-600 mx-auto" /></td>
                   </tr>
                   <tr>
                     <td className="px-6 py-4 text-sm font-medium text-slate-800">Source Code Access</td>
                     <td className="px-6 py-4 text-center"><X className="h-4 w-4 text-slate-400 mx-auto" /></td>
                     <td className="px-6 py-4 text-center"><X className="h-4 w-4 text-slate-400 mx-auto" /></td>
-                    <td className="px-6 py-4 text-center"><CheckCircle className="h-4 w-4 text-purple-600 mx-auto" /></td>
+                    <td className="px-6 py-4 text-center"><CheckCircle className="h-4 w-4 text-orange-600 mx-auto" /></td>
                   </tr>
                 </tbody>
               </table>
@@ -447,7 +447,7 @@ const Pricing = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-r from-slate-900 via-blue-800 to-purple-800">
+      <section className="py-16 bg-gradient-to-r from-slate-900 via-purple-800 to-pink-800">
         <div className="px-6 max-w-7xl mx-auto text-center text-white">
           <h2 className="text-4xl font-bold mb-4">Ready to Get Started?</h2>
           <p className="text-xl mb-8 opacity-90 max-w-3xl mx-auto">

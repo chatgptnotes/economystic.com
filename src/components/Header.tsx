@@ -16,11 +16,11 @@ const Header = () => {
       <div className="px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl shadow-lg">
+            <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl shadow-lg">
               <Activity className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-800 to-pink-600 bg-clip-text text-transparent">
                 economystic.ai
               </h1>
               <p className="text-sm text-slate-500 font-medium">Analytics Dashboard</p>
@@ -34,8 +34,8 @@ const Header = () => {
                   variant={isActive("/dashboard") ? "default" : "ghost"} 
                   className={`flex items-center space-x-2 rounded-xl transition-all duration-200 ${
                     isActive("/dashboard") 
-                      ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg hover:from-blue-600 hover:to-blue-700" 
-                      : "hover:bg-blue-50 hover:text-blue-600"
+                      ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg hover:from-purple-600 hover:to-purple-700" 
+                      : "hover:bg-purple-50 hover:text-purple-600"
                   }`}
                 >
                   <Home className="h-4 w-4" />
@@ -48,8 +48,8 @@ const Header = () => {
                   variant={isActive("/intelligent-search") ? "default" : "ghost"} 
                   className={`flex items-center space-x-2 rounded-xl transition-all duration-200 ${
                     isActive("/intelligent-search") 
-                      ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg hover:from-emerald-600 hover:to-emerald-700" 
-                      : "hover:bg-emerald-50 hover:text-emerald-600"
+                      ? "bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-lg hover:from-pink-600 hover:to-pink-700" 
+                      : "hover:bg-pink-50 hover:text-pink-600"
                   }`}
                 >
                   <Search className="h-4 w-4" />
@@ -62,8 +62,8 @@ const Header = () => {
                   variant={isActive("/data-tables") ? "default" : "ghost"} 
                   className={`flex items-center space-x-2 rounded-xl transition-all duration-200 ${
                     isActive("/data-tables") 
-                      ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg hover:from-purple-600 hover:to-purple-700" 
-                      : "hover:bg-purple-50 hover:text-purple-600"
+                      ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg hover:from-orange-600 hover:to-orange-700" 
+                      : "hover:bg-orange-50 hover:text-orange-600"
                   }`}
                 >
                   <Table className="h-4 w-4" />
@@ -90,8 +90,8 @@ const Header = () => {
                   variant={isActive("/audit") ? "default" : "ghost"} 
                   className={`flex items-center space-x-2 rounded-xl transition-all duration-200 ${
                     isActive("/audit") 
-                      ? "bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg hover:from-red-600 hover:to-red-700" 
-                      : "hover:bg-red-50 hover:text-red-600"
+                      ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg hover:from-purple-600 hover:to-purple-700" 
+                      : "hover:bg-purple-50 hover:text-purple-600"
                   }`}
                 >
                   <Shield className="h-4 w-4" />
